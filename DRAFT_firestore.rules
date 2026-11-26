@@ -1,0 +1,808 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Global Safety Net (Default Deny)
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // =========================================================================
+    // Reusable Hardened Global Helpers
+    // =========================================================================
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isVerified() {
+      return isSignedIn() && request.auth.token.email_verified == true;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() >= 1 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function isValidSlug(slug) {
+      return slug is string && slug.size() >= 3 && slug.size() <= 80 && slug.matches('^[a-z0-9\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isOwner(userId) {
+      return isVerified() && request.auth.uid == userId;
+    }
+
+    function isAdmin() {
+      return isVerified() && (
+        request.auth.token.email == 'marcellospropaganda@gmail.com' ||
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid))
+      );
+    }
+
+    function isValidStr(val, minLen, maxLen) {
+      return val is string && val.size() >= minLen && val.size() <= maxLen;
+    }
+
+    function isOptionalStr(data, key, maxLen) {
+      return !(key in data) || (data[key] is string && data[key].size() <= maxLen);
+    }
+
+    function isOptionalBool(data, key) {
+      return !(key in data) || (data[key] is bool);
+    }
+
+    function isOptionalNum(data, key, minVal, maxVal) {
+      return !(key in data) || (data[key] is number && data[key] >= minVal && data[key] <= maxVal);
+    }
+
+    function isBoundedStringList(arr, maxItems) {
+      return arr is list && arr.size() <= maxItems && (arr.size() == 0 || (arr[0] is string && arr[0].size() <= 80));
+    }
+
+    function getWedding(weddingId) {
+      return get(/databases/$(database)/documents/weddings/$(weddingId));
+    }
+
+    function weddingExists(weddingId) {
+      return exists(/databases/$(database)/documents/weddings/$(weddingId));
+    }
+
+    function isWeddingOwner(weddingId) {
+      return isVerified() && weddingExists(weddingId) && getWedding(weddingId).data.ownerId == request.auth.uid;
+    }
+
+    function isPublishedWedding(weddingId) {
+      return weddingExists(weddingId) && getWedding(weddingId).data.status == 'published';
+    }
+
+    // =========================================================================
+    // Validation Blueprints (Anti-Update-Gap Helpers)
+    // =========================================================================
+    function isValidPlatformConfig(data) {
+      return data.keys().hasAll(['vendorCategories', 'expenseCategories', 'defaultPlanPrice', 'updatedAt']) &&
+        data.keys().hasOnly([
+          'vendorCategories', 'expenseCategories', 'defaultPlanPrice',
+          'supportWhatsApp', 'announcementBanner', 'updatedAt'
+        ]) &&
+        isBoundedStringList(data.vendorCategories, 40) &&
+        isBoundedStringList(data.expenseCategories, 40) &&
+        data.defaultPlanPrice is number && data.defaultPlanPrice >= 0 && data.defaultPlanPrice <= 10000 &&
+        isOptionalStr(data, 'supportWhatsApp', 40) &&
+        isOptionalStr(data, 'announcementBanner', 300) &&
+        data.updatedAt is timestamp;
+    }
+
+    function isValidUserProfile(data, userId) {
+      return data.keys().hasAll([
+          'uid', 'email', 'displayName', 'role', 'subscriptionStatus',
+          'planPrice', 'createdAt', 'updatedAt'
+        ]) &&
+        data.keys().hasOnly([
+          'uid', 'email', 'displayName', 'role', 'subscriptionStatus',
+          'planPrice', 'paymentMethod', 'mercadoPagoRef', 'lastPaymentDate',
+          'nextBillingDate', 'totalPaidSubscription', 'supportStatus',
+          'adminNotes', 'leadSource', 'weddingId', 'biometricEnabled',
+          'pinHash', 'darkMode', 'webhookUrl', 'panicButtonLabel',
+          'panicButtonColor', 'panicButtonPosition', 'breathingSeconds',
+          'notifyPayments', 'notifyRsvp', 'notifyDaysBefore',
+          'createdAt', 'updatedAt'
+        ]) &&
+        data.uid == userId &&
+        isValidId(data.uid) &&
+        isValidStr(data.email, 3, 200) &&
+        isValidStr(data.displayName, 1, 120) &&
+        data.role in ['bride', 'admin'] &&
+        data.subscriptionStatus in ['trial', 'active', 'past_due', 'canceled'] &&
+        data.planPrice is number && data.planPrice >= 0 && data.planPrice <= 10000 &&
+        (!( 'paymentMethod' in data ) || data.paymentMethod in ['pix', 'card', 'pending']) &&
+        isOptionalStr(data, 'mercadoPagoRef', 120) &&
+        isOptionalStr(data, 'lastPaymentDate', 30) &&
+        isOptionalStr(data, 'nextBillingDate', 30) &&
+        isOptionalNum(data, 'totalPaidSubscription', 0, 1000000) &&
+        (!( 'supportStatus' in data ) || data.supportStatus in ['new', 'onboarding', 'active_support', 'resolved', 'priority']) &&
+        isOptionalStr(data, 'adminNotes', 600) &&
+        isOptionalStr(data, 'leadSource', 80) &&
+        (!( 'weddingId' in data ) || data.weddingId == '' || isValidId(data.weddingId)) &&
+        isOptionalBool(data, 'biometricEnabled') &&
+        isOptionalStr(data, 'pinHash', 128) &&
+        isOptionalBool(data, 'darkMode') &&
+        isOptionalStr(data, 'webhookUrl', 500) &&
+        isOptionalStr(data, 'panicButtonLabel', 40) &&
+        isOptionalStr(data, 'panicButtonColor', 20) &&
+        (!( 'panicButtonPosition' in data ) || data.panicButtonPosition in ['bottom-right', 'bottom-left']) &&
+        isOptionalNum(data, 'breathingSeconds', 2, 12) &&
+        isOptionalBool(data, 'notifyPayments') &&
+        isOptionalBool(data, 'notifyRsvp') &&
+        isOptionalNum(data, 'notifyDaysBefore', 0, 60) &&
+        data.createdAt is timestamp &&
+        data.updatedAt is timestamp;
+    }
+
+    function isValidWedding(data, weddingId) {
+      return data.keys().hasAll([
+          'id', 'ownerId', 'slug', 'brideName', 'groomName',
+          'weddingDate', 'weddingTime', 'themeKey', 'status',
+          'createdAt', 'updatedAt'
+        ]) &&
+        data.keys().hasOnly([
+          'id', 'ownerId', 'slug', 'brideName', 'groomName',
+          'weddingDate', 'weddingTime', 'venueName', 'venueAddress',
+          'venueMapsUrl', 'dressCode', 'welcomeMessage', 'coupleStory',
+          'coverPhotoUrl', 'couplePhotoUrl', 'coverPhotoPosition', 'couplePhotoPosition',
+          'themeKey', 'customAccentColor', 'pixKey', 'pixBeneficiary',
+          'budgetLimit', 'savingsGoal', 'savingsCurrent',
+          'status', 'createdAt', 'updatedAt'
+        ]) &&
+        data.id == weddingId &&
+        isValidId(data.id) &&
+        isValidId(data.ownerId) &&
+        isValidSlug(data.slug) &&
+        isValidStr(data.brideName, 1, 80) &&
+        isValidStr(data.groomName, 1, 80) &&
+        isValidStr(data.weddingDate, 4, 20) &&
+        isValidStr(data.weddingTime, 2, 10) &&
+        isOptionalStr(data, 'venueName', 160) &&
+        isOptionalStr(data, 'venueAddress', 300) &&
+        isOptionalStr(data, 'venueMapsUrl', 500) &&
+        isOptionalStr(data, 'dressCode', 120) &&
+        isOptionalStr(data, 'welcomeMessage', 600) &&
+        isOptionalStr(data, 'coupleStory', 2500) &&
+        isOptionalStr(data, 'coverPhotoUrl', 180000) &&
+        isOptionalStr(data, 'couplePhotoUrl', 180000) &&
+        (!( 'coverPhotoPosition' in data ) || data.coverPhotoPosition in ['top', 'center', 'bottom']) &&
+        (!( 'couplePhotoPosition' in data ) || data.couplePhotoPosition in ['top', 'center', 'bottom']) &&
+        data.themeKey in ['olive', 'rose', 'serenity', 'champagne', 'lavender', 'emerald'] &&
+        isOptionalStr(data, 'customAccentColor', 20) &&
+        isOptionalStr(data, 'pixKey', 140) &&
+        isOptionalStr(data, 'pixBeneficiary', 120) &&
+        isOptionalNum(data, 'budgetLimit', 0, 100000000) &&
+        isOptionalNum(data, 'savingsGoal', 0, 100000000) &&
+        isOptionalNum(data, 'savingsCurrent', 0, 100000000) &&
+        data.status in ['draft', 'published'] &&
+        data.createdAt is timestamp &&
+        data.updatedAt is timestamp;
+    }
+
+    function isValidSlugMapping(data, slug) {
+      return data.keys().hasAll(['slug', 'weddingId', 'ownerId', 'updatedAt']) &&
+        data.keys().hasOnly(['slug', 'weddingId', 'ownerId', 'updatedAt']) &&
+        data.slug == slug &&
+        isValidSlug(data.slug) &&
+        isValidId(data.weddingId) &&
+        isValidId(data.ownerId) &&
+        data.updatedAt is timestamp;
+    }
+
+    function isValidGuest(data, weddingId) {
+      return data.keys().hasAll([
+          'weddingId', 'ownerId', 'name', 'group', 'adults',
+          'children', 'status', 'source', 'createdAt', 'updatedAt'
+        ]) &&
+        data.keys().hasOnly([
+          'weddingId', 'ownerId', 'name', 'group', 'phone', 'adults',
+          'children', 'status', 'tableId', 'dietaryNotes', 'rsvpMessage',
+          'source', 'createdAt', 'updatedAt'
+        ]) &&
+        data.weddingId == weddingId &&
+        isValidId(data.ownerId) &&
+        isValidStr(data.name, 2, 120) &&
+        isValidStr(data.group, 1, 60) &&
+        isOptionalStr(data, 'phone', 30) &&
+        data.adults is number && data.adults >= 0 && data.adults <= 20 &&
+        data.children is number && data.children >= 0 && data.children <= 20 &&
+        data.status in ['pending', 'confirmed', 'declined'] &&
+        isOptionalStr(data, 'tableId', 128) &&
+        isOptionalStr(data, 'dietaryNotes', 250) &&
+        isOptionalStr(data, 'rsvpMessage', 500) &&
+        data.source in ['bride', 'public_rsvp'] &&
+        data.createdAt is timestamp &&
+        data.updatedAt is timestamp;
+    }
+
+    function isValidTable(data, weddingId) {
+      return data.keys().hasAll(['weddingId', 'ownerId', 'name', 'capacity', 'shape', 'createdAt', 'updatedAt']) &&
+        data.keys().hasOnly(['weddingId', 'ownerId', 'name', 'capacity', 'shape', 'zone', 'createdAt', 'updatedAt']) &&
+        data.weddingId == weddingId &&
+        isValidId(data.ownerId) &&
+        isValidStr(data.name, 1, 80) &&
+        data.capacity is number && data.capacity >= 1 && data.capacity <= 50 &&
+        data.shape in ['round', 'rectangular'] &&
+        isOptionalStr(data, 'zone', 80) &&
+        data.createdAt is timestamp &&
+        data.updatedAt is timestamp;
+    }
+
+    function isValidExpense(data, weddingId) {
+      return data.keys().hasAll([
+          'weddingId', 'ownerId', 'title', 'category', 'amount',
+          'paidAmount', 'dueDate', 'status', 'createdAt', 'updatedAt'
+        ]) &&
+        data.keys().hasOnly([
+          'weddingId', 'ownerId', 'vendorId', 'title', 'category', 'amount',
+          'paidAmount', 'dueDate', 'lastPaymentDate', 'paymentMethod',
+          'status', 'bankSynced', 'notes', 'createdAt', 'updatedAt'
+        ]) &&
+        data.weddingId == weddingId &&
+        isValidId(data.ownerId) &&
+        isOptionalStr(data, 'vendorId', 128) &&
+        isValidStr(data.title, 1, 140) &&
+        isValidStr(data.category, 1, 60) &&
+        data.amount is number && data.amount >= 0 && data.amount <= 50000000 &&
+        data.paidAmount is number && data.paidAmount >= 0 && data.paidAmount <= 50000000 &&
+        isValidStr(data.dueDate, 4, 20) &&
+        isOptionalStr(data, 'lastPaymentDate', 30) &&
+        isOptionalStr(data, 'paymentMethod', 40) &&
+        data.status in ['pending', 'partial', 'paid'] &&
+        isOptionalBool(data, 'bankSynced') &&
+        isOptionalStr(data, 'notes', 300) &&
+        data.createdAt is timestamp &&
+        data.updatedAt is timestamp;
+    }
+
+    function isValidVendor(data, weddingId) {
+      return data.keys().hasAll([
+          'weddingId', 'ownerId', 'name', 'service', 'contractValue',
+          'paymentStatus', 'checklistDone', 'createdAt', 'updatedAt'
+        ]) &&
+        data.keys().hasOnly([
+          'weddingId', 'ownerId', 'name', 'service', 'contact',
+          'contractValue', 'paidAmount', 'lastPaymentDate', 'nextDueDate',
+          'paymentMethod', 'installmentsTotal', 'installmentsPaid',
+          'paymentStatus', 'checklistDone', 'notes',
+          'createdAt', 'updatedAt'
+        ]) &&
+        data.weddingId == weddingId &&
+        isValidId(data.ownerId) &&
+        isValidStr(data.name, 1, 140) &&
+        isValidStr(data['service'], 1, 80) &&
+        isOptionalStr(data, 'contact', 100) &&
+        data.contractValue is number && data.contractValue >= 0 && data.contractValue <= 50000000 &&
+        isOptionalNum(data, 'paidAmount', 0, 50000000) &&
+        isOptionalStr(data, 'lastPaymentDate', 30) &&
+        isOptionalStr(data, 'nextDueDate', 30) &&
+        isOptionalStr(data, 'paymentMethod', 40) &&
+        isOptionalNum(data, 'installmentsTotal', 1, 60) &&
+        isOptionalNum(data, 'installmentsPaid', 0, 60) &&
+        data.paymentStatus in ['pending', 'deposit_paid', 'paid'] &&
+        data.checklistDone is bool &&
+        isOptionalStr(data, 'notes', 300) &&
+        data.createdAt is timestamp &&
+        data.updatedAt is timestamp;
+    }
+
+    function isValidScheduleItem(data, weddingId) {
+      return data.keys().hasAll(['weddingId', 'ownerId', 'time', 'title', 'order', 'createdAt', 'updatedAt']) &&
+        data.keys().hasOnly(['weddingId', 'ownerId', 'time', 'title', 'description', 'location', 'order', 'createdAt', 'updatedAt']) &&
+        data.weddingId == weddingId &&
+        isValidId(data.ownerId) &&
+        isValidStr(data.time, 2, 10) &&
+        isValidStr(data.title, 1, 120) &&
+        isOptionalStr(data, 'description', 300) &&
+        isOptionalStr(data, 'location', 120) &&
+        data.order is number && data.order >= 0 && data.order <= 200 &&
+        data.createdAt is timestamp &&
+        data.updatedAt is timestamp;
+    }
+
+    function isValidPartyMember(data, weddingId) {
+      return data.keys().hasAll(['weddingId', 'ownerId', 'name', 'role', 'order', 'createdAt', 'updatedAt']) &&
+        data.keys().hasOnly(['weddingId', 'ownerId', 'name', 'role', 'description', 'photoUrl', 'order', 'createdAt', 'updatedAt']) &&
+        data.weddingId == weddingId &&
+        isValidId(data.ownerId) &&
+        isValidStr(data.name, 1, 100) &&
+        data.role in ['Madrinha', 'Padrinho', 'Dama de Honra', 'Pajem'] &&
+        isOptionalStr(data, 'description', 300) &&
+        isOptionalStr(data, 'photoUrl', 180000) &&
+        data.order is number && data.order >= 0 && data.order <= 100 &&
+        data.createdAt is timestamp &&
+        data.updatedAt is timestamp;
+    }
+
+    function isValidGiftItem(data, weddingId) {
+      return data.keys().hasAll(['weddingId', 'ownerId', 'title', 'category', 'price', 'purchasedCount', 'active', 'createdAt', 'updatedAt']) &&
+        data.keys().hasOnly(['weddingId', 'ownerId', 'title', 'category', 'price', 'description', 'purchasedCount', 'active', 'createdAt', 'updatedAt']) &&
+        data.weddingId == weddingId &&
+        isValidId(data.ownerId) &&
+        isValidStr(data.title, 1, 120) &&
+        isValidStr(data.category, 1, 60) &&
+        data.price is number && data.price >= 1 && data.price <= 500000 &&
+        isOptionalStr(data, 'description', 300) &&
+        data.purchasedCount is number && data.purchasedCount >= 0 && data.purchasedCount <= 1000 &&
+        data.active is bool &&
+        data.createdAt is timestamp &&
+        data.updatedAt is timestamp;
+    }
+
+    function isValidGiftContribution(data, weddingId) {
+      return data.keys().hasAll(['weddingId', 'ownerId', 'giftId', 'giftTitle', 'guestName', 'amount', 'status', 'createdAt']) &&
+        data.keys().hasOnly(['weddingId', 'ownerId', 'giftId', 'giftTitle', 'guestName', 'amount', 'message', 'status', 'createdAt']) &&
+        data.weddingId == weddingId &&
+        isValidId(data.ownerId) &&
+        isValidId(data.giftId) &&
+        isValidStr(data.giftTitle, 1, 120) &&
+        isValidStr(data.guestName, 2, 120) &&
+        data.amount is number && data.amount >= 1 && data.amount <= 500000 &&
+        isOptionalStr(data, 'message', 500) &&
+        data.status in ['pending_pix', 'confirmed'] &&
+        data.createdAt is timestamp;
+    }
+
+    function isValidSupportMessage(data, weddingId) {
+      return data.keys().hasAll(['weddingId', 'ownerId', 'senderRole', 'senderName', 'text', 'createdAt']) &&
+        data.keys().hasOnly(['weddingId', 'ownerId', 'senderRole', 'senderName', 'text', 'createdAt']) &&
+        data.weddingId == weddingId &&
+        isValidId(data.ownerId) &&
+        data.senderRole in ['bride', 'admin'] &&
+        isValidStr(data.senderName, 1, 100) &&
+        isValidStr(data.text, 1, 1000) &&
+        data.createdAt is timestamp;
+    }
+
+    // =========================================================================
+    // Collection Rules
+    // =========================================================================
+
+    // /admins/{adminId}
+    match /admins/{adminId} {
+      allow get: if isValidId(adminId) && (isOwner(adminId) || isAdmin());
+      allow list: if isAdmin();
+      allow create, update, delete: if isValidId(adminId) && isAdmin();
+    }
+
+    // /platformConfig/{configId} — Global Categories & Admin Settings
+    match /platformConfig/{configId} {
+      allow get: if isValidId(configId) && configId == 'global' && isSignedIn();
+      allow list: if isAdmin();
+      allow create, update: if isAdmin() &&
+        isValidId(configId) &&
+        configId == 'global' &&
+        isValidPlatformConfig(incoming()) &&
+        incoming().updatedAt == request.time;
+      allow delete: if false;
+    }
+
+    // /users/{userId} — Strict PII Isolation
+    match /users/{userId} {
+      allow get: if isValidId(userId) && (isOwner(userId) || isAdmin());
+      allow list: if isAdmin() || (isVerified() && resource.data.uid == request.auth.uid);
+
+      allow create: if isVerified() &&
+        isValidId(userId) &&
+        isValidUserProfile(incoming(), userId) &&
+        incoming().createdAt == request.time &&
+        incoming().updatedAt == request.time &&
+        (
+          isAdmin() ||
+          (isOwner(userId) && incoming().role == 'bride')
+        );
+
+      allow update: if isVerified() &&
+        isValidId(userId) &&
+        isValidUserProfile(incoming(), userId) &&
+        incoming().uid == existing().uid &&
+        incoming().createdAt == existing().createdAt &&
+        incoming().updatedAt == request.time &&
+        (
+          isAdmin() ||
+          (
+            isOwner(userId) &&
+            incoming().role == existing().role &&
+            incoming().diff(existing()).affectedKeys().hasOnly([
+              'displayName', 'subscriptionStatus', 'paymentMethod', 'mercadoPagoRef',
+              'lastPaymentDate', 'nextBillingDate', 'totalPaidSubscription',
+              'weddingId', 'biometricEnabled', 'pinHash', 'darkMode', 'webhookUrl',
+              'panicButtonLabel', 'panicButtonColor', 'panicButtonPosition',
+              'breathingSeconds', 'notifyPayments', 'notifyRsvp', 'notifyDaysBefore',
+              'updatedAt'
+            ])
+          )
+        );
+
+      allow delete: if isValidId(userId) && isAdmin();
+    }
+
+    // /slugs/{slug}
+    match /slugs/{slug} {
+      allow get: if isValidSlug(slug);
+      allow list: if false;
+
+      allow create: if isVerified() &&
+        isValidSlug(slug) &&
+        isValidSlugMapping(incoming(), slug) &&
+        incoming().updatedAt == request.time &&
+        (isAdmin() || incoming().ownerId == request.auth.uid);
+
+      allow update: if isVerified() &&
+        isValidSlug(slug) &&
+        isValidSlugMapping(incoming(), slug) &&
+        incoming().ownerId == existing().ownerId &&
+        incoming().updatedAt == request.time &&
+        (
+          isAdmin() ||
+          (
+            existing().ownerId == request.auth.uid &&
+            incoming().diff(existing()).affectedKeys().hasOnly(['weddingId', 'updatedAt'])
+          )
+        );
+
+      allow delete: if isVerified() && isValidSlug(slug) && (existing().ownerId == request.auth.uid || isAdmin());
+    }
+
+    // /weddings/{weddingId}
+    match /weddings/{weddingId} {
+      allow get: if isValidId(weddingId) && (
+        existing().status == 'published' ||
+        (isVerified() && existing().ownerId == request.auth.uid) ||
+        isAdmin()
+      );
+
+      allow list: if isAdmin() || (isVerified() && resource.data.ownerId == request.auth.uid);
+
+      allow create: if isVerified() &&
+        isValidId(weddingId) &&
+        isValidWedding(incoming(), weddingId) &&
+        incoming().createdAt == request.time &&
+        incoming().updatedAt == request.time &&
+        (isAdmin() || incoming().ownerId == request.auth.uid);
+
+      allow update: if isVerified() &&
+        isValidId(weddingId) &&
+        isValidWedding(incoming(), weddingId) &&
+        incoming().id == existing().id &&
+        incoming().ownerId == existing().ownerId &&
+        incoming().createdAt == existing().createdAt &&
+        incoming().updatedAt == request.time &&
+        (
+          isAdmin() ||
+          (
+            existing().ownerId == request.auth.uid &&
+            incoming().diff(existing()).affectedKeys().hasOnly([
+              'slug', 'brideName', 'groomName', 'weddingDate', 'weddingTime',
+              'venueName', 'venueAddress', 'venueMapsUrl', 'dressCode',
+              'welcomeMessage', 'coupleStory', 'coverPhotoUrl', 'couplePhotoUrl',
+              'coverPhotoPosition', 'couplePhotoPosition', 'themeKey', 'customAccentColor',
+              'pixKey', 'pixBeneficiary', 'budgetLimit',
+              'savingsGoal', 'savingsCurrent', 'status', 'updatedAt'
+            ])
+          )
+        );
+
+      allow delete: if isVerified() && isValidId(weddingId) && (existing().ownerId == request.auth.uid || isAdmin());
+
+      // Subcollection: guests
+      match /guests/{guestId} {
+        allow get: if isValidId(weddingId) && isValidId(guestId) && (isAdmin() || (isVerified() && existing().ownerId == request.auth.uid));
+        allow list: if isAdmin() || (isVerified() && resource.data.ownerId == request.auth.uid);
+
+        allow create: if isValidId(weddingId) &&
+          isValidId(guestId) &&
+          isValidGuest(incoming(), weddingId) &&
+          incoming().createdAt == request.time &&
+          incoming().updatedAt == request.time &&
+          (
+            (isAdmin() && weddingExists(weddingId)) ||
+            (isWeddingOwner(weddingId) && incoming().ownerId == request.auth.uid) ||
+            (
+              isPublishedWedding(weddingId) &&
+              incoming().ownerId == getWedding(weddingId).data.ownerId &&
+              incoming().source == 'public_rsvp' &&
+              incoming().status in ['confirmed', 'declined'] &&
+              (!('tableId' in incoming()) || incoming().tableId == '')
+            )
+          );
+
+        allow update: if isVerified() &&
+          isValidId(weddingId) &&
+          isValidId(guestId) &&
+          isValidGuest(incoming(), weddingId) &&
+          incoming().weddingId == existing().weddingId &&
+          incoming().ownerId == existing().ownerId &&
+          incoming().createdAt == existing().createdAt &&
+          incoming().updatedAt == request.time &&
+          (
+            isAdmin() ||
+            (
+              isWeddingOwner(weddingId) &&
+              existing().ownerId == request.auth.uid &&
+              incoming().diff(existing()).affectedKeys().hasOnly([
+                'name', 'group', 'phone', 'adults', 'children', 'status',
+                'tableId', 'dietaryNotes', 'rsvpMessage', 'updatedAt'
+              ])
+            )
+          );
+
+        allow delete: if isVerified() && isValidId(weddingId) && isValidId(guestId) && (isAdmin() || (isWeddingOwner(weddingId) && existing().ownerId == request.auth.uid));
+      }
+
+      // Subcollection: tables
+      match /tables/{tableId} {
+        allow get: if isValidId(weddingId) && isValidId(tableId) && (isAdmin() || (isVerified() && existing().ownerId == request.auth.uid));
+        allow list: if isAdmin() || (isVerified() && resource.data.ownerId == request.auth.uid);
+
+        allow create: if isVerified() &&
+          isValidId(weddingId) &&
+          isValidId(tableId) &&
+          isValidTable(incoming(), weddingId) &&
+          incoming().createdAt == request.time &&
+          incoming().updatedAt == request.time &&
+          (isAdmin() || (isWeddingOwner(weddingId) && incoming().ownerId == request.auth.uid));
+
+        allow update: if isVerified() &&
+          isValidId(weddingId) &&
+          isValidId(tableId) &&
+          isValidTable(incoming(), weddingId) &&
+          incoming().weddingId == existing().weddingId &&
+          incoming().ownerId == existing().ownerId &&
+          incoming().createdAt == existing().createdAt &&
+          incoming().updatedAt == request.time &&
+          (
+            isAdmin() ||
+            (
+              isWeddingOwner(weddingId) &&
+              existing().ownerId == request.auth.uid &&
+              incoming().diff(existing()).affectedKeys().hasOnly(['name', 'capacity', 'shape', 'zone', 'updatedAt'])
+            )
+          );
+
+        allow delete: if isVerified() && isValidId(weddingId) && isValidId(tableId) && (isAdmin() || (isWeddingOwner(weddingId) && existing().ownerId == request.auth.uid));
+      }
+
+      // Subcollection: expenses (linked optionally to vendors)
+      match /expenses/{expenseId} {
+        allow get: if isValidId(weddingId) && isValidId(expenseId) && (isAdmin() || (isVerified() && existing().ownerId == request.auth.uid));
+        allow list: if isAdmin() || (isVerified() && resource.data.ownerId == request.auth.uid);
+
+        allow create: if isVerified() &&
+          isValidId(weddingId) &&
+          isValidId(expenseId) &&
+          isValidExpense(incoming(), weddingId) &&
+          incoming().createdAt == request.time &&
+          incoming().updatedAt == request.time &&
+          (isAdmin() || (isWeddingOwner(weddingId) && incoming().ownerId == request.auth.uid));
+
+        allow update: if isVerified() &&
+          isValidId(weddingId) &&
+          isValidId(expenseId) &&
+          isValidExpense(incoming(), weddingId) &&
+          incoming().weddingId == existing().weddingId &&
+          incoming().ownerId == existing().ownerId &&
+          incoming().createdAt == existing().createdAt &&
+          incoming().updatedAt == request.time &&
+          (
+            isAdmin() ||
+            (
+              isWeddingOwner(weddingId) &&
+              existing().ownerId == request.auth.uid &&
+              incoming().diff(existing()).affectedKeys().hasOnly([
+                'vendorId', 'title', 'category', 'amount', 'paidAmount', 'dueDate',
+                'lastPaymentDate', 'paymentMethod', 'status', 'bankSynced', 'notes', 'updatedAt'
+              ])
+            )
+          );
+
+        allow delete: if isVerified() && isValidId(weddingId) && isValidId(expenseId) && (isAdmin() || (isWeddingOwner(weddingId) && existing().ownerId == request.auth.uid));
+      }
+
+      // Subcollection: vendors (detailed financial tracking & abatement)
+      match /vendors/{vendorId} {
+        allow get: if isValidId(weddingId) && isValidId(vendorId) && (isAdmin() || (isVerified() && existing().ownerId == request.auth.uid));
+        allow list: if isAdmin() || (isVerified() && resource.data.ownerId == request.auth.uid);
+
+        allow create: if isVerified() &&
+          isValidId(weddingId) &&
+          isValidId(vendorId) &&
+          isValidVendor(incoming(), weddingId) &&
+          incoming().createdAt == request.time &&
+          incoming().updatedAt == request.time &&
+          (isAdmin() || (isWeddingOwner(weddingId) && incoming().ownerId == request.auth.uid));
+
+        allow update: if isVerified() &&
+          isValidId(weddingId) &&
+          isValidId(vendorId) &&
+          isValidVendor(incoming(), weddingId) &&
+          incoming().weddingId == existing().weddingId &&
+          incoming().ownerId == existing().ownerId &&
+          incoming().createdAt == existing().createdAt &&
+          incoming().updatedAt == request.time &&
+          (
+            isAdmin() ||
+            (
+              isWeddingOwner(weddingId) &&
+              existing().ownerId == request.auth.uid &&
+              incoming().diff(existing()).affectedKeys().hasOnly([
+                'name', 'service', 'contact', 'contractValue', 'paidAmount',
+                'lastPaymentDate', 'nextDueDate', 'paymentMethod',
+                'installmentsTotal', 'installmentsPaid',
+                'paymentStatus', 'checklistDone', 'notes', 'updatedAt'
+              ])
+            )
+          );
+
+        allow delete: if isVerified() && isValidId(weddingId) && isValidId(vendorId) && (isAdmin() || (isWeddingOwner(weddingId) && existing().ownerId == request.auth.uid));
+      }
+
+      // Subcollection: schedule
+      match /schedule/{itemId} {
+        allow get: if isValidId(weddingId) && isValidId(itemId) && (isPublishedWedding(weddingId) || isAdmin() || (isVerified() && existing().ownerId == request.auth.uid));
+        allow list: if resource.data.weddingId == weddingId;
+
+        allow create: if isVerified() &&
+          isValidId(weddingId) &&
+          isValidId(itemId) &&
+          isValidScheduleItem(incoming(), weddingId) &&
+          incoming().createdAt == request.time &&
+          incoming().updatedAt == request.time &&
+          (isAdmin() || (isWeddingOwner(weddingId) && incoming().ownerId == request.auth.uid));
+
+        allow update: if isVerified() &&
+          isValidId(weddingId) &&
+          isValidId(itemId) &&
+          isValidScheduleItem(incoming(), weddingId) &&
+          incoming().weddingId == existing().weddingId &&
+          incoming().ownerId == existing().ownerId &&
+          incoming().createdAt == existing().createdAt &&
+          incoming().updatedAt == request.time &&
+          (
+            isAdmin() ||
+            (
+              isWeddingOwner(weddingId) &&
+              existing().ownerId == request.auth.uid &&
+              incoming().diff(existing()).affectedKeys().hasOnly(['time', 'title', 'description', 'location', 'order', 'updatedAt'])
+            )
+          );
+
+        allow delete: if isVerified() && isValidId(weddingId) && isValidId(itemId) && (isAdmin() || (isWeddingOwner(weddingId) && existing().ownerId == request.auth.uid));
+      }
+
+      // Subcollection: party
+      match /party/{memberId} {
+        allow get: if isValidId(weddingId) && isValidId(memberId) && (isPublishedWedding(weddingId) || isAdmin() || (isVerified() && existing().ownerId == request.auth.uid));
+        allow list: if resource.data.weddingId == weddingId;
+
+        allow create: if isVerified() &&
+          isValidId(weddingId) &&
+          isValidId(memberId) &&
+          isValidPartyMember(incoming(), weddingId) &&
+          incoming().createdAt == request.time &&
+          incoming().updatedAt == request.time &&
+          (isAdmin() || (isWeddingOwner(weddingId) && incoming().ownerId == request.auth.uid));
+
+        allow update: if isVerified() &&
+          isValidId(weddingId) &&
+          isValidId(memberId) &&
+          isValidPartyMember(incoming(), weddingId) &&
+          incoming().weddingId == existing().weddingId &&
+          incoming().ownerId == existing().ownerId &&
+          incoming().createdAt == existing().createdAt &&
+          incoming().updatedAt == request.time &&
+          (
+            isAdmin() ||
+            (
+              isWeddingOwner(weddingId) &&
+              existing().ownerId == request.auth.uid &&
+              incoming().diff(existing()).affectedKeys().hasOnly(['name', 'role', 'description', 'photoUrl', 'order', 'updatedAt'])
+            )
+          );
+
+        allow delete: if isVerified() && isValidId(weddingId) && isValidId(memberId) && (isAdmin() || (isWeddingOwner(weddingId) && existing().ownerId == request.auth.uid));
+      }
+
+      // Subcollection: gifts
+      match /gifts/{giftId} {
+        allow get: if isValidId(weddingId) && isValidId(giftId) && (isPublishedWedding(weddingId) || isAdmin() || (isVerified() && existing().ownerId == request.auth.uid));
+        allow list: if resource.data.weddingId == weddingId;
+
+        allow create: if isVerified() &&
+          isValidId(weddingId) &&
+          isValidId(giftId) &&
+          isValidGiftItem(incoming(), weddingId) &&
+          incoming().createdAt == request.time &&
+          incoming().updatedAt == request.time &&
+          (isAdmin() || (isWeddingOwner(weddingId) && incoming().ownerId == request.auth.uid));
+
+        allow update: if isVerified() &&
+          isValidId(weddingId) &&
+          isValidId(giftId) &&
+          isValidGiftItem(incoming(), weddingId) &&
+          incoming().weddingId == existing().weddingId &&
+          incoming().ownerId == existing().ownerId &&
+          incoming().createdAt == existing().createdAt &&
+          incoming().updatedAt == request.time &&
+          (
+            isAdmin() ||
+            (
+              isWeddingOwner(weddingId) &&
+              existing().ownerId == request.auth.uid &&
+              incoming().diff(existing()).affectedKeys().hasOnly(['title', 'category', 'price', 'description', 'purchasedCount', 'active', 'updatedAt'])
+            )
+          );
+
+        allow delete: if isVerified() && isValidId(weddingId) && isValidId(giftId) && (isAdmin() || (isWeddingOwner(weddingId) && existing().ownerId == request.auth.uid));
+      }
+
+      // Subcollection: giftContributions
+      match /giftContributions/{contributionId} {
+        allow get: if isValidId(weddingId) && isValidId(contributionId) && (isAdmin() || (isVerified() && existing().ownerId == request.auth.uid));
+        allow list: if isAdmin() || (isVerified() && resource.data.ownerId == request.auth.uid);
+
+        allow create: if isValidId(weddingId) &&
+          isValidId(contributionId) &&
+          isValidGiftContribution(incoming(), weddingId) &&
+          incoming().createdAt == request.time &&
+          (
+            isAdmin() ||
+            (isWeddingOwner(weddingId) && incoming().ownerId == request.auth.uid) ||
+            (
+              isPublishedWedding(weddingId) &&
+              incoming().ownerId == getWedding(weddingId).data.ownerId &&
+              incoming().status == 'pending_pix'
+            )
+          );
+
+        allow update: if isVerified() &&
+          isValidId(weddingId) &&
+          isValidId(contributionId) &&
+          isValidGiftContribution(incoming(), weddingId) &&
+          incoming().weddingId == existing().weddingId &&
+          incoming().ownerId == existing().ownerId &&
+          incoming().giftId == existing().giftId &&
+          incoming().createdAt == existing().createdAt &&
+          (
+            isAdmin() ||
+            (
+              isWeddingOwner(weddingId) &&
+              existing().ownerId == request.auth.uid &&
+              existing().status != 'confirmed' &&
+              incoming().diff(existing()).affectedKeys().hasOnly(['status'])
+            )
+          );
+
+        allow delete: if isVerified() && isValidId(weddingId) && isValidId(contributionId) && (isAdmin() || (isWeddingOwner(weddingId) && existing().ownerId == request.auth.uid));
+      }
+
+      // Subcollection: supportMessages
+      match /supportMessages/{messageId} {
+        allow get: if isValidId(weddingId) && isValidId(messageId) && (isAdmin() || (isVerified() && existing().ownerId == request.auth.uid));
+        allow list: if isAdmin() || (isVerified() && resource.data.ownerId == request.auth.uid);
+
+        allow create: if isVerified() &&
+          isValidId(weddingId) &&
+          isValidId(messageId) &&
+          isValidSupportMessage(incoming(), weddingId) &&
+          incoming().createdAt == request.time &&
+          (
+            (isAdmin() && weddingExists(weddingId) && incoming().senderRole == 'admin') ||
+            (isWeddingOwner(weddingId) && incoming().ownerId == request.auth.uid && incoming().senderRole == 'bride')
+          );
+
+        allow update: if false;
+        allow delete: if isVerified() && isValidId(weddingId) && isValidId(messageId) && isAdmin();
+      }
+    }
+  }
+}

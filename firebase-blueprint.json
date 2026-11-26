@@ -1,0 +1,339 @@
+{
+  "entities": {
+    "Admin": {
+      "title": "Admin",
+      "description": "Platform administrator record keyed by Firebase Auth UID.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "email": { "type": "string", "format": "email", "maxLength": 200 },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "email", "createdAt"]
+    },
+    "PlatformConfig": {
+      "title": "PlatformConfig",
+      "description": "Global platform configuration managed remotely by the platform owner (categories, plan price, announcements).",
+      "type": "object",
+      "properties": {
+        "vendorCategories": { "type": "array" },
+        "expenseCategories": { "type": "array" },
+        "defaultPlanPrice": { "type": "number" },
+        "supportWhatsApp": { "type": "string", "maxLength": 40 },
+        "announcementBanner": { "type": "string", "maxLength": 300 },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["vendorCategories", "expenseCategories", "defaultPlanPrice", "updatedAt"]
+    },
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "Private bride or admin account profile, subscription payments, support CRM status, and personalized app settings.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "email": { "type": "string", "format": "email", "maxLength": 200 },
+        "displayName": { "type": "string", "maxLength": 120 },
+        "role": { "type": "string", "enum": ["bride", "admin"] },
+        "subscriptionStatus": { "type": "string", "enum": ["trial", "active", "past_due", "canceled"] },
+        "planPrice": { "type": "number" },
+        "paymentMethod": { "type": "string", "enum": ["pix", "card", "pending"] },
+        "mercadoPagoRef": { "type": "string", "maxLength": 120 },
+        "lastPaymentDate": { "type": "string", "maxLength": 30 },
+        "nextBillingDate": { "type": "string", "maxLength": 30 },
+        "totalPaidSubscription": { "type": "number" },
+        "supportStatus": { "type": "string", "enum": ["new", "onboarding", "active_support", "resolved", "priority"] },
+        "adminNotes": { "type": "string", "maxLength": 600 },
+        "leadSource": { "type": "string", "maxLength": 80 },
+        "weddingId": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "biometricEnabled": { "type": "boolean" },
+        "pinHash": { "type": "string", "maxLength": 128 },
+        "darkMode": { "type": "boolean" },
+        "webhookUrl": { "type": "string", "maxLength": 500 },
+        "panicButtonLabel": { "type": "string", "maxLength": 40 },
+        "panicButtonColor": { "type": "string", "maxLength": 20 },
+        "panicButtonPosition": { "type": "string", "enum": ["bottom-right", "bottom-left"] },
+        "breathingSeconds": { "type": "number" },
+        "notifyPayments": { "type": "boolean" },
+        "notifyRsvp": { "type": "boolean" },
+        "notifyDaysBefore": { "type": "number" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "email", "displayName", "role", "subscriptionStatus", "planPrice", "createdAt", "updatedAt"]
+    },
+    "Wedding": {
+      "title": "Wedding",
+      "description": "Wedding event configuration powering both the Bride Dashboard and the public Guest Site.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "ownerId": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "slug": { "type": "string", "minLength": 3, "maxLength": 80, "pattern": "^[a-z0-9\\-]+$" },
+        "brideName": { "type": "string", "minLength": 1, "maxLength": 80 },
+        "groomName": { "type": "string", "minLength": 1, "maxLength": 80 },
+        "weddingDate": { "type": "string", "maxLength": 20 },
+        "weddingTime": { "type": "string", "maxLength": 10 },
+        "venueName": { "type": "string", "maxLength": 160 },
+        "venueAddress": { "type": "string", "maxLength": 300 },
+        "venueMapsUrl": { "type": "string", "maxLength": 500 },
+        "dressCode": { "type": "string", "maxLength": 120 },
+        "welcomeMessage": { "type": "string", "maxLength": 600 },
+        "coupleStory": { "type": "string", "maxLength": 2500 },
+        "coverPhotoUrl": { "type": "string", "maxLength": 180000 },
+        "couplePhotoUrl": { "type": "string", "maxLength": 180000 },
+        "coverPhotoPosition": { "type": "string", "enum": ["top", "center", "bottom"] },
+        "couplePhotoPosition": { "type": "string", "enum": ["top", "center", "bottom"] },
+        "themeKey": { "type": "string", "enum": ["olive", "rose", "serenity", "champagne", "lavender", "emerald"] },
+        "customAccentColor": { "type": "string", "maxLength": 20 },
+        "pixKey": { "type": "string", "maxLength": 140 },
+        "pixBeneficiary": { "type": "string", "maxLength": 120 },
+        "budgetLimit": { "type": "number" },
+        "savingsGoal": { "type": "number" },
+        "savingsCurrent": { "type": "number" },
+        "status": { "type": "string", "enum": ["draft", "published"] },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "ownerId", "slug", "brideName", "groomName", "weddingDate", "weddingTime", "themeKey", "status", "createdAt", "updatedAt"]
+    },
+    "SlugMapping": {
+      "title": "SlugMapping",
+      "description": "Public slug-to-weddingId lookup table to resolve guest site URLs without collection listing.",
+      "type": "object",
+      "properties": {
+        "slug": { "type": "string", "minLength": 3, "maxLength": 80, "pattern": "^[a-z0-9\\-]+$" },
+        "weddingId": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "ownerId": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["slug", "weddingId", "ownerId", "updatedAt"]
+    },
+    "Guest": {
+      "title": "Guest",
+      "description": "Wedding guest entry and RSVP confirmation record.",
+      "type": "object",
+      "properties": {
+        "weddingId": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "ownerId": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "name": { "type": "string", "minLength": 2, "maxLength": 120 },
+        "group": { "type": "string", "maxLength": 60 },
+        "phone": { "type": "string", "maxLength": 30 },
+        "adults": { "type": "number" },
+        "children": { "type": "number" },
+        "status": { "type": "string", "enum": ["pending", "confirmed", "declined"] },
+        "tableId": { "type": "string", "maxLength": 128 },
+        "dietaryNotes": { "type": "string", "maxLength": 250 },
+        "rsvpMessage": { "type": "string", "maxLength": 500 },
+        "source": { "type": "string", "enum": ["bride", "public_rsvp"] },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["weddingId", "ownerId", "name", "group", "adults", "children", "status", "source", "createdAt", "updatedAt"]
+    },
+    "SeatingTable": {
+      "title": "SeatingTable",
+      "description": "Reception dining table configuration for drag-and-drop seating assignments.",
+      "type": "object",
+      "properties": {
+        "weddingId": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "ownerId": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "name": { "type": "string", "minLength": 1, "maxLength": 80 },
+        "capacity": { "type": "number" },
+        "shape": { "type": "string", "enum": ["round", "rectangular"] },
+        "zone": { "type": "string", "maxLength": 80 },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["weddingId", "ownerId", "name", "capacity", "shape", "createdAt", "updatedAt"]
+    },
+    "Expense": {
+      "title": "Expense",
+      "description": "Wedding budget expense line item connected optionally to a vendor service with abatement and payment tracking.",
+      "type": "object",
+      "properties": {
+        "weddingId": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "ownerId": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "vendorId": { "type": "string", "maxLength": 128 },
+        "title": { "type": "string", "minLength": 1, "maxLength": 140 },
+        "category": { "type": "string", "maxLength": 60 },
+        "amount": { "type": "number" },
+        "paidAmount": { "type": "number" },
+        "dueDate": { "type": "string", "maxLength": 20 },
+        "lastPaymentDate": { "type": "string", "maxLength": 30 },
+        "paymentMethod": { "type": "string", "maxLength": 40 },
+        "status": { "type": "string", "enum": ["pending", "partial", "paid"] },
+        "bankSynced": { "type": "boolean" },
+        "notes": { "type": "string", "maxLength": 300 },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["weddingId", "ownerId", "title", "category", "amount", "paidAmount", "dueDate", "status", "createdAt", "updatedAt"]
+    },
+    "Vendor": {
+      "title": "Vendor",
+      "description": "Wedding vendor contract with detailed financial tracking (total, paid, pending, last payment date, installments) connected to payments.",
+      "type": "object",
+      "properties": {
+        "weddingId": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "ownerId": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "name": { "type": "string", "minLength": 1, "maxLength": 140 },
+        "service": { "type": "string", "maxLength": 80 },
+        "contact": { "type": "string", "maxLength": 100 },
+        "contractValue": { "type": "number" },
+        "paidAmount": { "type": "number" },
+        "lastPaymentDate": { "type": "string", "maxLength": 30 },
+        "nextDueDate": { "type": "string", "maxLength": 30 },
+        "paymentMethod": { "type": "string", "maxLength": 40 },
+        "installmentsTotal": { "type": "number" },
+        "installmentsPaid": { "type": "number" },
+        "paymentStatus": { "type": "string", "enum": ["pending", "deposit_paid", "paid"] },
+        "checklistDone": { "type": "boolean" },
+        "notes": { "type": "string", "maxLength": 300 },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["weddingId", "ownerId", "name", "service", "contractValue", "paymentStatus", "checklistDone", "createdAt", "updatedAt"]
+    },
+    "ScheduleItem": {
+      "title": "ScheduleItem",
+      "description": "Wedding day timeline item shown in both dashboard and public guest site.",
+      "type": "object",
+      "properties": {
+        "weddingId": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "ownerId": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "time": { "type": "string", "maxLength": 10 },
+        "title": { "type": "string", "minLength": 1, "maxLength": 120 },
+        "description": { "type": "string", "maxLength": 300 },
+        "location": { "type": "string", "maxLength": 120 },
+        "order": { "type": "number" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["weddingId", "ownerId", "time", "title", "order", "createdAt", "updatedAt"]
+    },
+    "PartyMember": {
+      "title": "PartyMember",
+      "description": "Bridesmaid, groomsman, flower girl, or ring bearer entry.",
+      "type": "object",
+      "properties": {
+        "weddingId": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "ownerId": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "name": { "type": "string", "minLength": 1, "maxLength": 100 },
+        "role": { "type": "string", "enum": ["Madrinha", "Padrinho", "Dama de Honra", "Pajem"] },
+        "description": { "type": "string", "maxLength": 300 },
+        "photoUrl": { "type": "string", "maxLength": 180000 },
+        "order": { "type": "number" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["weddingId", "ownerId", "name", "role", "order", "createdAt", "updatedAt"]
+    },
+    "GiftItem": {
+      "title": "GiftItem",
+      "description": "Symbolic Pix wedding gift registry item.",
+      "type": "object",
+      "properties": {
+        "weddingId": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "ownerId": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "title": { "type": "string", "minLength": 1, "maxLength": 120 },
+        "category": { "type": "string", "maxLength": 60 },
+        "price": { "type": "number" },
+        "description": { "type": "string", "maxLength": 300 },
+        "purchasedCount": { "type": "number" },
+        "active": { "type": "boolean" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["weddingId", "ownerId", "title", "category", "price", "purchasedCount", "active", "createdAt", "updatedAt"]
+    },
+    "GiftContribution": {
+      "title": "GiftContribution",
+      "description": "Guest Pix gift contribution submitted via the public wedding site.",
+      "type": "object",
+      "properties": {
+        "weddingId": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "ownerId": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "giftId": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "giftTitle": { "type": "string", "maxLength": 120 },
+        "guestName": { "type": "string", "minLength": 2, "maxLength": 120 },
+        "amount": { "type": "number" },
+        "message": { "type": "string", "maxLength": 500 },
+        "status": { "type": "string", "enum": ["pending_pix", "confirmed"] },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["weddingId", "ownerId", "giftId", "giftTitle", "guestName", "amount", "status", "createdAt"]
+    },
+    "SupportMessage": {
+      "title": "SupportMessage",
+      "description": "Real-time customer support chat message between a bride and platform admin.",
+      "type": "object",
+      "properties": {
+        "weddingId": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "ownerId": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "senderRole": { "type": "string", "enum": ["bride", "admin"] },
+        "senderName": { "type": "string", "minLength": 1, "maxLength": 100 },
+        "text": { "type": "string", "minLength": 1, "maxLength": 1000 },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["weddingId", "ownerId", "senderRole", "senderName", "text", "createdAt"]
+    }
+  },
+  "firestore": {
+    "/admins/{adminId}": {
+      "schema": { "$ref": "#/entities/Admin" },
+      "description": "Platform administrator accounts."
+    },
+    "/platformConfig/{configId}": {
+      "schema": { "$ref": "#/entities/PlatformConfig" },
+      "description": "Global platform configuration including remote categories managed by Admin."
+    },
+    "/users/{userId}": {
+      "schema": { "$ref": "#/entities/UserProfile" },
+      "description": "Private bride and admin profiles including subscription payments, support CRM, and personalization settings."
+    },
+    "/slugs/{slug}": {
+      "schema": { "$ref": "#/entities/SlugMapping" },
+      "description": "Public slug-to-weddingId resolution documents."
+    },
+    "/weddings/{weddingId}": {
+      "schema": { "$ref": "#/entities/Wedding" },
+      "description": "Primary wedding configuration documents."
+    },
+    "/weddings/{weddingId}/guests/{guestId}": {
+      "schema": { "$ref": "#/entities/Guest" },
+      "description": "Wedding guest list and RSVP records."
+    },
+    "/weddings/{weddingId}/tables/{tableId}": {
+      "schema": { "$ref": "#/entities/SeatingTable" },
+      "description": "Interactive reception table map entries."
+    },
+    "/weddings/{weddingId}/expenses/{expenseId}": {
+      "schema": { "$ref": "#/entities/Expense" },
+      "description": "Budget and financial expense entries linked to vendors."
+    },
+    "/weddings/{weddingId}/vendors/{vendorId}": {
+      "schema": { "$ref": "#/entities/Vendor" },
+      "description": "Vendors and contracts with detailed payment abatement tracking."
+    },
+    "/weddings/{weddingId}/schedule/{itemId}": {
+      "schema": { "$ref": "#/entities/ScheduleItem" },
+      "description": "Ceremony and reception day timeline."
+    },
+    "/weddings/{weddingId}/party/{memberId}": {
+      "schema": { "$ref": "#/entities/PartyMember" },
+      "description": "Bridal party members (padrinhos, madrinhas, damas e pajens)."
+    },
+    "/weddings/{weddingId}/gifts/{giftId}": {
+      "schema": { "$ref": "#/entities/GiftItem" },
+      "description": "Smart Pix gift registry catalog."
+    },
+    "/weddings/{weddingId}/giftContributions/{contributionId}": {
+      "schema": { "$ref": "#/entities/GiftContribution" },
+      "description": "Guest Pix gift contributions."
+    },
+    "/weddings/{weddingId}/supportMessages/{messageId}": {
+      "schema": { "$ref": "#/entities/SupportMessage" },
+      "description": "Real-time customer support chat messages."
+    }
+  }
+}

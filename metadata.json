@@ -1,0 +1,6 @@
+{
+  "name": "Casamento Pleno",
+  "description": "Plataforma completa de organização de casamentos com foco na saúde mental da noiva, site dos convidados em tempo real, gestão financeira e banco Firebase.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

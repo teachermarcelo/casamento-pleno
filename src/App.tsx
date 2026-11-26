@@ -1,0 +1,338 @@
+import { useEffect, useState } from 'react';
+import { onAuthStateChanged, type User } from 'firebase/auth';
+import { doc, onSnapshot } from 'firebase/firestore';
+import { auth, db, handleFirestoreError, OperationType, signInWithGoogle, signOutUser } from './lib/firebase';
+import { ensureUserProfile, loadPublicWeddingBySlug, updateUserProfile } from './lib/weddingService';
+import {
+  DEMO_GIFTS,
+  DEMO_PARTY,
+  DEMO_SCHEDULE,
+  DEMO_WEDDING,
+  WEDDING_THEMES,
+  type GiftItem,
+  type PartyMember,
+  type ScheduleItem,
+  type UserProfile,
+  type Wedding,
+} from './types/wedding';
+import { ErrorBoundary } from './components/ErrorBoundary';
+import { LandingPage } from './components/LandingPage';
+import { OnboardingFlow } from './components/OnboardingFlow';
+import { BrideDashboard } from './components/BrideDashboard';
+import { AdminDashboard } from './components/AdminDashboard';
+import { GuestWeddingSite } from './components/GuestWeddingSite';
+import { OfflineIndicator } from './components/PWAInstallButton';
+
+interface GuestSitePreview {
+  wedding: Wedding;
+  schedule: ScheduleItem[];
+  party: PartyMember[];
+  gifts: GiftItem[];
+  isDemo?: boolean;
+}
+
+function AppContent() {
+  const [authReady, setAuthReady] = useState(false);
+  const [firebaseUser, setFirebaseUser] = useState<User | null>(null);
+  const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [wedding, setWedding] = useState<Wedding | null>(null);
+  const [loadingWedding, setLoadingWedding] = useState(false);
+  const [signingIn, setSigningIn] = useState(false);
+
+  const [viewMode, setViewMode] = useState<'bride' | 'admin'>('bride');
+  const [guestSite, setGuestSite] = useState<GuestSitePreview | null>(null);
+  const [loadingPublicSlug, setLoadingPublicSlug] = useState(false);
+  const [darkMode, setDarkMode] = useState<boolean>(() => {
+    try {
+      return window.localStorage.getItem('cp_dark_mode') === 'true';
+    } catch {
+      return false;
+    }
+  });
+
+  // Sync dark mode class on <html>
+  useEffect(() => {
+    document.documentElement.classList.toggle('dark', darkMode);
+    try {
+      window.localStorage.setItem('cp_dark_mode', String(darkMode));
+    } catch {
+      // Ignore storage errors in private mode
+    }
+  }, [darkMode]);
+
+  // Apply active wedding palette dynamically via CSS variables
+  useEffect(() => {
+    const activeWedding = guestSite?.wedding || wedding;
+    const activeThemeKey = activeWedding?.themeKey || 'olive';
+    const palette = WEDDING_THEMES[activeThemeKey] || WEDDING_THEMES.olive;
+    const effectivePrimary = activeWedding?.customAccentColor || palette.primary;
+    document.documentElement.style.setProperty('--brand-primary', effectivePrimary);
+    document.documentElement.style.setProperty('--brand-primary-hover', effectivePrimary);
+    document.documentElement.style.setProperty('--brand-soft', darkMode ? palette.softDark : palette.softLight);
+    document.documentElement.style.setProperty('--brand-ink', palette.ink);
+  }, [wedding?.themeKey, wedding?.customAccentColor, guestSite?.wedding.themeKey, guestSite?.wedding.customAccentColor, darkMode]);
+
+  // Detect public ?convite=<slug> route on load
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const slug = params.get('convite');
+    if (!slug) return;
+    if (slug === 'clara-e-henrique') {
+      setGuestSite({
+        wedding: DEMO_WEDDING,
+        schedule: DEMO_SCHEDULE,
+        party: DEMO_PARTY,
+        gifts: DEMO_GIFTS,
+        isDemo: true,
+      });
+      return;
+    }
+
+    setLoadingPublicSlug(true);
+    loadPublicWeddingBySlug(slug)
+      .then((res) => {
+        if (res) {
+          setGuestSite({ ...res, isDemo: false });
+        }
+      })
+      .finally(() => setLoadingPublicSlug(false));
+  }, []);
+
+  // Auth listener
+  useEffect(() => {
+    const unsub = onAuthStateChanged(auth, async (user) => {
+      setFirebaseUser(user);
+      if (!user) {
+        setProfile(null);
+        setWedding(null);
+        setAuthReady(true);
+        return;
+      }
+      try {
+        const ensured = await ensureUserProfile(user);
+        setProfile(ensured);
+        if (typeof ensured.darkMode === 'boolean') {
+          setDarkMode(ensured.darkMode);
+        }
+      } finally {
+        setAuthReady(true);
+      }
+    });
+    return () => unsub();
+  }, []);
+
+  // Real-time listener for UserProfile
+  useEffect(() => {
+    if (!firebaseUser) return;
+    const path = `users/${firebaseUser.uid}`;
+    const unsub = onSnapshot(
+      doc(db, 'users', firebaseUser.uid),
+      (snap) => {
+        if (snap.exists()) {
+          setProfile(snap.data() as UserProfile);
+        }
+      },
+      (err) => handleFirestoreError(err, OperationType.GET, path)
+    );
+    return () => unsub();
+  }, [firebaseUser]);
+
+  // Real-time listener for user's Wedding
+  useEffect(() => {
+    if (!firebaseUser || !profile?.weddingId) {
+      setWedding(null);
+      return;
+    }
+    setLoadingWedding(true);
+    const path = `weddings/${profile.weddingId}`;
+    const unsub = onSnapshot(
+      doc(db, 'weddings', profile.weddingId),
+      (snap) => {
+        if (snap.exists()) {
+          setWedding(snap.data() as Wedding);
+        } else {
+          setWedding(null);
+        }
+        setLoadingWedding(false);
+      },
+      (err) => {
+        setLoadingWedding(false);
+        handleFirestoreError(err, OperationType.GET, path);
+      }
+    );
+    return () => unsub();
+  }, [firebaseUser, profile?.weddingId]);
+
+  const handleSignIn = async () => {
+    setSigningIn(true);
+    try {
+      await signInWithGoogle();
+    } catch (err) {
+      console.error('Google Sign-In cancelled or failed:', err);
+    } finally {
+      setSigningIn(false);
+    }
+  };
+
+  const handleSignOut = async () => {
+    await signOutUser();
+    setViewMode('bride');
+    setGuestSite(null);
+  };
+
+  const handleToggleDarkMode = () => {
+    const next = !darkMode;
+    setDarkMode(next);
+    if (firebaseUser && profile) {
+      updateUserProfile(firebaseUser.uid, { darkMode: next }).catch(() => {});
+    }
+  };
+
+  const handleExitGuestSite = () => {
+    setGuestSite(null);
+    const url = new URL(window.location.href);
+    if (url.searchParams.has('convite')) {
+      url.searchParams.delete('convite');
+      window.history.replaceState({}, '', url.toString());
+    }
+  };
+
+  // 1. Public or Previewed Guest Wedding Site
+  if (loadingPublicSlug) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#FAF9F6] dark:bg-[#0F1115]">
+        <p className="font-editorial text-2xl text-stone-600 dark:text-stone-400">
+          Carregando convite...
+        </p>
+      </div>
+    );
+  }
+
+  if (guestSite) {
+    return (
+      <>
+        <GuestWeddingSite
+          wedding={guestSite.wedding}
+          schedule={guestSite.schedule}
+          party={guestSite.party}
+          gifts={guestSite.gifts}
+          isDemo={guestSite.isDemo}
+          onExit={handleExitGuestSite}
+        />
+        <OfflineIndicator />
+      </>
+    );
+  }
+
+  // 2. Loading Auth Session
+  if (!authReady) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#F8F7F4] dark:bg-[#0F1115]">
+        <div className="text-center">
+          <p className="font-editorial text-3xl font-semibold text-stone-900 dark:text-stone-100">
+            Casamento Pleno
+          </p>
+          <p className="mt-2 text-xs text-stone-500">Conectando ao Firebase...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // 3. Unauthenticated Landing Page
+  if (!firebaseUser || !profile) {
+    return (
+      <>
+        <LandingPage
+          onSignIn={handleSignIn}
+          signingIn={signingIn}
+          darkMode={darkMode}
+          onToggleDarkMode={handleToggleDarkMode}
+          onOpenDemoSite={() =>
+            setGuestSite({
+              wedding: DEMO_WEDDING,
+              schedule: DEMO_SCHEDULE,
+              party: DEMO_PARTY,
+              gifts: DEMO_GIFTS,
+              isDemo: true,
+            })
+          }
+        />
+        <OfflineIndicator />
+      </>
+    );
+  }
+
+  // 4. Platform Owner Admin Console
+  if (profile.role === 'admin' && viewMode === 'admin') {
+    return (
+      <>
+        <AdminDashboard
+          profile={profile}
+          onBackToBride={() => setViewMode('bride')}
+          onSignOut={handleSignOut}
+        />
+        <OfflineIndicator />
+      </>
+    );
+  }
+
+  // 5. Onboarding (Mercado Pago Checkout + Wedding Setup)
+  if (!loadingWedding && !wedding) {
+    return (
+      <>
+        {profile.role === 'admin' && (
+          <div className="bg-stone-900 text-stone-100 px-6 py-2.5 flex items-center justify-between text-xs">
+            <span>Conta Proprietária (Admin) detectada: {profile.email}</span>
+            <button
+              type="button"
+              onClick={() => setViewMode('admin')}
+              className="font-semibold underline cursor-pointer"
+            >
+              Ir direto para o Painel Administrativo
+            </button>
+          </div>
+        )}
+        <OnboardingFlow
+          profile={profile}
+          onComplete={(created) => setWedding(created)}
+          onSignOut={handleSignOut}
+        />
+        <OfflineIndicator />
+      </>
+    );
+  }
+
+  if (loadingWedding || !wedding) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#F8F7F4] dark:bg-[#0F1115]">
+        <p className="font-editorial text-2xl text-stone-600 dark:text-stone-400">
+          Preparando seu painel...
+        </p>
+      </div>
+    );
+  }
+
+  // 6. Authenticated Bride Dashboard
+  return (
+    <>
+      <BrideDashboard
+        profile={profile}
+        wedding={wedding}
+        darkMode={darkMode}
+        onToggleDarkMode={handleToggleDarkMode}
+        onPreviewGuestSite={(data) => setGuestSite({ ...data, isDemo: false })}
+        onOpenAdmin={profile.role === 'admin' ? () => setViewMode('admin') : undefined}
+        onSignOut={handleSignOut}
+      />
+      <OfflineIndicator />
+    </>
+  );
+}
+
+export default function App() {
+  return (
+    <ErrorBoundary>
+      <AppContent />
+    </ErrorBoundary>
+  );
+}
