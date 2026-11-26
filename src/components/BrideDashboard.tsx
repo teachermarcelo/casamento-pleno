@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import {
+  BarChart3,
   Briefcase,
   Calendar,
   Camera,
@@ -52,6 +53,7 @@ import {
 } from '../lib/utils';
 import { GuestsModule, TablesModule } from './dashboard/GuestsAndTablesModule';
 import { FinanceModule } from './dashboard/FinanceModule';
+import { AnalyticsModule } from './dashboard/AnalyticsModule';
 import { CeremonyAndGiftsModule, VendorsModule } from './dashboard/CeremonyVendorsGiftsModule';
 import { SettingsAndSupportModule } from './dashboard/SettingsAndSupportModule';
 import { PanicButtonModal } from './PanicButtonModal';
@@ -73,7 +75,7 @@ interface BrideDashboardProps {
   onSignOut: () => void;
 }
 
-type NavTab = 'overview' | 'guests' | 'tables' | 'finance' | 'vendors' | 'ceremony' | 'settings';
+type NavTab = 'overview' | 'analytics' | 'guests' | 'tables' | 'finance' | 'vendors' | 'ceremony' | 'settings';
 
 export const BrideDashboard: React.FC<BrideDashboardProps> = ({
   profile,
@@ -173,6 +175,7 @@ export const BrideDashboard: React.FC<BrideDashboardProps> = ({
 
   const navItems: { id: NavTab; label: string; icon: React.ReactNode }[] = [
     { id: 'overview', label: 'Visão Geral', icon: <LayoutDashboard className="w-4 h-4" /> },
+    { id: 'analytics', label: 'Analytics', icon: <BarChart3 className="w-4 h-4" /> },
     { id: 'guests', label: 'Convidados & RSVP', icon: <Users className="w-4 h-4" /> },
     { id: 'tables', label: 'Mapa de Mesas', icon: <LayoutGrid className="w-4 h-4" /> },
     { id: 'finance', label: 'Pagamentos & Orçamento', icon: <Wallet className="w-4 h-4" /> },
@@ -551,6 +554,13 @@ export const BrideDashboard: React.FC<BrideDashboardProps> = ({
                   <div className="mt-5 flex flex-wrap gap-2">
                     <button
                       type="button"
+                      onClick={() => setTab('analytics')}
+                      className="rounded-xl border border-stone-300 dark:border-stone-700 px-3.5 py-2 text-xs font-medium hover:bg-stone-50 dark:hover:bg-stone-800 cursor-pointer"
+                    >
+                      Ver Gráficos Analytics
+                    </button>
+                    <button
+                      type="button"
                       onClick={() => setTab('vendors')}
                       className="rounded-xl border border-stone-300 dark:border-stone-700 px-3.5 py-2 text-xs font-medium hover:bg-stone-50 dark:hover:bg-stone-800 cursor-pointer"
                     >
@@ -577,6 +587,16 @@ export const BrideDashboard: React.FC<BrideDashboardProps> = ({
             </div>
           )}
 
+          {tab === 'analytics' && (
+            <AnalyticsModule
+              wedding={wedding}
+              expenses={expenses}
+              vendors={vendors}
+              guests={guests}
+              contributions={contributions}
+              accentColor={effectiveAccent}
+            />
+          )}
           {tab === 'guests' && <GuestsModule wedding={wedding} guests={guests} accentColor={effectiveAccent} />}
           {tab === 'tables' && <TablesModule wedding={wedding} guests={guests} tables={tables} accentColor={effectiveAccent} />}
           {tab === 'finance' && (
