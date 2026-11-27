@@ -248,7 +248,7 @@ export const BrideDashboard: React.FC<BrideDashboardProps> = ({
   ];
 
   return (
-    <div className="min-h-screen bg-[#FDF8F2] dark:bg-[#0D1310] text-[#1D2620] dark:text-[#F4EFE6] flex">
+    <div className="min-h-screen overflow-x-clip bg-[#FDF8F2] dark:bg-[#0D1310] text-[#1D2620] dark:text-[#F4EFE6] flex">
       {/* Desktop Deep Forest Green & Gold Sidebar */}
       <aside className="hidden lg:flex w-68 shrink-0 flex-col bg-[#173526] text-[#FBF7F0] border-r border-[#DFBE7A]/20">
         <div className="px-6 py-5 border-b border-[#DFBE7A]/20 flex items-center gap-3">
@@ -334,16 +334,21 @@ export const BrideDashboard: React.FC<BrideDashboardProps> = ({
         <div className="fixed inset-0 z-50 lg:hidden flex">
           <div className="fixed inset-0 bg-black/55" onClick={() => setMobileMenuOpen(false)} />
           <div className="relative w-72 max-w-[84vw] bg-[#173526] text-[#FBF7F0] h-full flex flex-col p-4 z-10">
-            <div className="flex items-center justify-between pb-4 border-b border-[#DFBE7A]/25">
-              <div className="flex items-center gap-2.5">
-                <BrandHeartsMark className="w-7 h-6" />
-                <span className="font-editorial text-2xl font-semibold text-white">Casamento Pleno</span>
+            <div className="flex items-center justify-between pb-4 border-b border-[#DFBE7A]/25 shrink-0">
+              <div className="flex items-center gap-2.5 min-w-0">
+                <BrandHeartsMark className="w-7 h-6 shrink-0" />
+                <span className="font-editorial text-2xl font-semibold text-white truncate">Casamento Pleno</span>
               </div>
-              <button type="button" onClick={() => setMobileMenuOpen(false)} className="p-1.5 text-[#DFBE7A]">
+              <button
+                type="button"
+                onClick={() => setMobileMenuOpen(false)}
+                className="h-10 w-10 flex items-center justify-center rounded-full text-[#DFBE7A] hover:bg-white/10 shrink-0"
+                aria-label="Fechar menu"
+              >
                 <X className="w-5 h-5" />
               </button>
             </div>
-            <nav className="flex-1 py-4 space-y-1">
+            <nav className="flex-1 py-4 space-y-1 overflow-y-auto">
               {navItems.map((item) => {
                 const active = tab === item.id;
                 return (
@@ -354,17 +359,17 @@ export const BrideDashboard: React.FC<BrideDashboardProps> = ({
                       setTab(item.id);
                       setMobileMenuOpen(false);
                     }}
-                    className={`w-full flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm font-medium ${
+                    className={`w-full min-h-[44px] flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm font-medium ${
                       active ? 'bg-[#FDF8F2] text-[#173526] font-semibold' : 'text-[#E7E1D5]'
                     }`}
                   >
                     <span className={active ? 'text-[#B68B3C]' : 'text-[#DFBE7A]'}>{item.icon}</span>
-                    <span>{item.label}</span>
+                    <span className="truncate">{item.label}</span>
                   </button>
                 );
               })}
             </nav>
-            <div className="pt-4 border-t border-[#DFBE7A]/25 space-y-2">
+            <div className="pt-4 border-t border-[#DFBE7A]/25 space-y-2 shrink-0 pb-[env(safe-area-inset-bottom)]">
               {onOpenAdmin && (
                 <button
                   type="button"
@@ -372,9 +377,9 @@ export const BrideDashboard: React.FC<BrideDashboardProps> = ({
                     setMobileMenuOpen(false);
                     onOpenAdmin();
                   }}
-                  className="w-full flex items-center gap-2 rounded-full border border-[#DFBE7A]/65 px-3.5 py-2 text-xs font-semibold text-[#FBF2DC]"
+                  className="w-full min-h-[42px] flex items-center gap-2 rounded-full border border-[#DFBE7A]/65 px-3.5 py-2 text-xs font-semibold text-[#FBF2DC]"
                 >
-                  <Shield className="w-4 h-4" />
+                  <Shield className="w-4 h-4 shrink-0" />
                   <span>Painel Admin (Criador)</span>
                 </button>
               )}
@@ -385,9 +390,9 @@ export const BrideDashboard: React.FC<BrideDashboardProps> = ({
                     setMobileMenuOpen(false);
                     onPreviewLanding();
                   }}
-                  className="w-full flex items-center gap-2 rounded-full border border-white/25 px-3.5 py-2 text-xs font-medium text-[#E7E1D5]"
+                  className="w-full min-h-[42px] flex items-center gap-2 rounded-full border border-white/25 px-3.5 py-2 text-xs font-medium text-[#E7E1D5]"
                 >
-                  <Globe className="w-4 h-4 text-[#DFBE7A]" />
+                  <Globe className="w-4 h-4 text-[#DFBE7A] shrink-0" />
                   <span>Ver Página Inicial</span>
                 </button>
               )}
@@ -395,7 +400,7 @@ export const BrideDashboard: React.FC<BrideDashboardProps> = ({
                 <button
                   type="button"
                   onClick={onToggleDarkMode}
-                  className="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-xs text-[#DFBE7A]"
+                  className="min-h-[40px] inline-flex items-center gap-1.5 px-2.5 py-1.5 text-xs text-[#DFBE7A]"
                 >
                   {darkMode ? <Sun className="w-3.5 h-3.5" /> : <Moon className="w-3.5 h-3.5" />}
                   <span>{darkMode ? 'Claro' : 'Escuro'}</span>
@@ -403,7 +408,7 @@ export const BrideDashboard: React.FC<BrideDashboardProps> = ({
                 <button
                   type="button"
                   onClick={onSignOut}
-                  className="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-xs text-red-300"
+                  className="min-h-[40px] inline-flex items-center gap-1.5 px-2.5 py-1.5 text-xs text-red-300"
                 >
                   <LogOut className="w-3.5 h-3.5" />
                   <span>Sair</span>
@@ -417,20 +422,20 @@ export const BrideDashboard: React.FC<BrideDashboardProps> = ({
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col min-w-0">
         {/* Deep Forest Green & Gold Header Bar */}
-        <header className="sticky top-0 z-20 bg-[#173526] text-[#FBF7F0] border-b border-[#DFBE7A]/25 px-3 sm:px-8 py-2.5 sm:py-3 flex items-center justify-between gap-2 shadow-xs">
+        <header className="sticky top-0 z-20 bg-[#173526] text-[#FBF7F0] border-b border-[#DFBE7A]/25 px-3 sm:px-8 py-2 sm:py-3 flex items-center justify-between gap-2 shadow-xs">
           <div className="flex items-center gap-2 sm:gap-3 min-w-0">
             <button
               type="button"
               onClick={() => setMobileMenuOpen(true)}
-              className="lg:hidden p-2 rounded-full border border-[#DFBE7A]/45 text-[#DFBE7A] hover:bg-white/10 cursor-pointer shrink-0"
+              className="lg:hidden h-10 w-10 flex items-center justify-center rounded-full border border-[#DFBE7A]/45 text-[#DFBE7A] hover:bg-white/10 cursor-pointer shrink-0"
               aria-label="Abrir menu"
             >
               <Menu className="w-4 h-4" />
             </button>
             <div className="flex items-center gap-2 min-w-0">
               <BrandHeartsMark className="w-6 h-5 sm:w-7 sm:h-6 lg:hidden shrink-0" />
-              <div className="flex items-center gap-2 text-sm truncate">
-                <span className="font-editorial text-xl font-semibold text-white hidden sm:inline">
+              <div className="flex items-center gap-2 text-sm min-w-0">
+                <span className="font-editorial text-xl font-semibold text-white hidden sm:inline truncate">
                   {wedding.brideName} & {wedding.groomName}
                 </span>
                 <span className="text-[#DFBE7A]/60 hidden sm:inline">/</span>
@@ -446,10 +451,10 @@ export const BrideDashboard: React.FC<BrideDashboardProps> = ({
               <button
                 type="button"
                 onClick={onOpenAdmin}
-                className="inline-flex items-center gap-1 rounded-full bg-[#DFBE7A] text-[#173526] hover:bg-[#EBD198] px-2.5 sm:px-3.5 py-1.5 text-[11px] sm:text-xs font-semibold transition-colors whitespace-nowrap cursor-pointer"
+                className="min-h-[38px] inline-flex items-center gap-1 rounded-full bg-[#DFBE7A] text-[#173526] hover:bg-[#EBD198] px-2.5 sm:px-3.5 py-1.5 text-[11px] sm:text-xs font-semibold transition-colors whitespace-nowrap cursor-pointer"
               >
                 <Shield className="w-3.5 h-3.5 shrink-0" />
-                <span className="hidden xs:inline sm:inline">Admin</span>
+                <span>Admin</span>
               </button>
             )}
             {onPreviewLanding && (
@@ -468,7 +473,7 @@ export const BrideDashboard: React.FC<BrideDashboardProps> = ({
             <button
               type="button"
               onClick={() => onPreviewGuestSite({ wedding, schedule, party, gifts })}
-              className="inline-flex items-center gap-1.5 rounded-full border border-[#DFBE7A]/80 bg-[#1F4532] hover:bg-[#DFBE7A] text-[#FBF2DC] hover:text-[#173526] px-2.5 sm:px-4 py-1.5 text-[11px] sm:text-xs font-semibold transition-all whitespace-nowrap cursor-pointer"
+              className="min-h-[38px] inline-flex items-center gap-1.5 rounded-full border border-[#DFBE7A]/80 bg-[#1F4532] hover:bg-[#DFBE7A] text-[#FBF2DC] hover:text-[#173526] px-3 sm:px-4 py-1.5 text-[11px] sm:text-xs font-semibold transition-all whitespace-nowrap cursor-pointer"
             >
               <ExternalLink className="w-3.5 h-3.5 shrink-0" />
               <span className="hidden sm:inline">Site dos Convidados</span>
@@ -487,41 +492,41 @@ export const BrideDashboard: React.FC<BrideDashboardProps> = ({
           )}
 
           {tab === 'overview' && (
-            <div className="space-y-6">
+            <div className="space-y-5 sm:space-y-6">
               {/* Luxury Editorial Split Hero Banner matching Reference Aesthetic */}
-              <div className="relative rounded-3xl overflow-hidden border border-[#E5D8BF] dark:border-[#2A3730] bg-[#FDF8F2] dark:bg-[#141B17] shadow-md shadow-black/5">
+              <div className="relative rounded-2xl sm:rounded-3xl overflow-hidden border border-[#E5D8BF] dark:border-[#2A3730] bg-[#FDF8F2] dark:bg-[#141B17] shadow-md shadow-black/5">
                 <div className="grid grid-cols-1 md:grid-cols-12 items-stretch">
                   {/* Left Cream Luxury Copy */}
-                  <div className="md:col-span-6 relative z-20 p-6 sm:p-8 flex flex-col justify-between">
+                  <div className="md:col-span-6 relative z-20 p-4 sm:p-8 flex flex-col justify-between">
                     <div>
-                      <div className="flex items-center gap-2.5 text-[11px] font-semibold tracking-[0.16em] uppercase text-[#56635A] dark:text-[#CFC6B4]">
-                        <span className="h-px w-6 bg-[#C89F52]" />
+                      <div className="flex items-center gap-2 text-[11px] font-semibold tracking-[0.16em] uppercase text-[#56635A] dark:text-[#CFC6B4]">
+                        <span className="h-px w-5 sm:w-6 bg-[#C89F52] shrink-0" />
                         <span className="truncate">
                           {formatDateBR(wedding.weddingDate)} · {wedding.weddingTime}
                         </span>
                       </div>
 
-                      <h1 className="mt-3 font-editorial text-4xl sm:text-5xl font-semibold tracking-tight text-[#1A241E] dark:text-[#FAF6EE] leading-[1.05]">
+                      <h1 className="mt-2.5 sm:mt-3 font-editorial text-3xl sm:text-5xl font-semibold tracking-tight text-[#1A241E] dark:text-[#FAF6EE] leading-[1.06] break-words">
                         {wedding.brideName} & {wedding.groomName}
                       </h1>
 
-                      <p className="mt-2 font-editorial italic text-2xl sm:text-3xl text-[#A87F32] dark:text-[#DFBE7A] flex items-center gap-2">
+                      <p className="mt-1.5 sm:mt-2 font-editorial italic text-xl sm:text-3xl text-[#A87F32] dark:text-[#DFBE7A] flex items-center gap-1.5 sm:gap-2">
                         <span>Faltam {daysUntilWedding} dias para o sim.</span>
-                        <Heart className="w-5 h-5 text-[#C89F52] shrink-0" />
+                        <Heart className="w-4 h-4 sm:w-5 sm:h-5 text-[#C89F52] shrink-0" />
                       </p>
 
                       {wedding.venueName && (
-                        <p className="mt-2 text-xs text-[#5A655C] dark:text-[#B4AFA5]">
+                        <p className="mt-1.5 sm:mt-2 text-xs text-[#5A655C] dark:text-[#B4AFA5]">
                           {wedding.venueName}
                         </p>
                       )}
                     </div>
 
-                    <div className="mt-6 flex flex-wrap items-center gap-2">
+                    <div className="mt-5 sm:mt-6 flex flex-wrap items-center gap-2">
                       <button
                         type="button"
                         onClick={() => setTab('settings')}
-                        className="inline-flex items-center gap-1.5 rounded-full bg-[#173526] hover:bg-[#10261B] text-white px-4 py-2 text-xs font-semibold transition-colors cursor-pointer"
+                        className="min-h-[40px] inline-flex items-center gap-1.5 rounded-full bg-[#173526] hover:bg-[#10261B] text-white px-4 py-2 text-xs font-semibold transition-colors cursor-pointer"
                       >
                         <Camera className="w-3.5 h-3.5 text-[#DFBE7A]" />
                         <span>Ajustar fotos e cores</span>
@@ -529,7 +534,7 @@ export const BrideDashboard: React.FC<BrideDashboardProps> = ({
                       <button
                         type="button"
                         onClick={() => exportWeddingReportPDF({ wedding, guests, expenses })}
-                        className="inline-flex items-center gap-1.5 rounded-full border border-[#173526]/40 dark:border-[#DFBE7A]/40 bg-white/80 dark:bg-white/5 px-3.5 py-2 text-xs font-medium hover:bg-[#173526]/5 cursor-pointer"
+                        className="min-h-[40px] inline-flex items-center gap-1.5 rounded-full border border-[#173526]/40 dark:border-[#DFBE7A]/40 bg-white/80 dark:bg-white/5 px-3.5 py-2 text-xs font-medium hover:bg-[#173526]/5 cursor-pointer"
                       >
                         <FileText className="w-3.5 h-3.5 text-[#B68B3C]" />
                         <span>PDF</span>
@@ -543,7 +548,7 @@ export const BrideDashboard: React.FC<BrideDashboardProps> = ({
                             [[`${wedding.brideName} & ${wedding.groomName}`, wedding.weddingDate, overviewStats.confirmedPeople, overviewStats.committed, overviewStats.paid, overviewStats.pending, overviewStats.giftsReceived]]
                           )
                         }
-                        className="inline-flex items-center gap-1.5 rounded-full border border-[#173526]/40 dark:border-[#DFBE7A]/40 bg-white/80 dark:bg-white/5 px-3.5 py-2 text-xs font-medium hover:bg-[#173526]/5 cursor-pointer"
+                        className="min-h-[40px] inline-flex items-center gap-1.5 rounded-full border border-[#173526]/40 dark:border-[#DFBE7A]/40 bg-white/80 dark:bg-white/5 px-3.5 py-2 text-xs font-medium hover:bg-[#173526]/5 cursor-pointer"
                       >
                         <FileSpreadsheet className="w-3.5 h-3.5 text-[#B68B3C]" />
                         <span>CSV</span>
@@ -551,7 +556,7 @@ export const BrideDashboard: React.FC<BrideDashboardProps> = ({
                       <button
                         type="button"
                         onClick={() => buildWeddingDayICS(wedding, schedule)}
-                        className="inline-flex items-center gap-1.5 rounded-full border border-[#173526]/40 dark:border-[#DFBE7A]/40 bg-white/80 dark:bg-white/5 px-3.5 py-2 text-xs font-medium hover:bg-[#173526]/5 cursor-pointer"
+                        className="min-h-[40px] inline-flex items-center gap-1.5 rounded-full border border-[#173526]/40 dark:border-[#DFBE7A]/40 bg-white/80 dark:bg-white/5 px-3.5 py-2 text-xs font-medium hover:bg-[#173526]/5 cursor-pointer"
                       >
                         <Calendar className="w-3.5 h-3.5 text-[#B68B3C]" />
                         <span>.ICS</span>
@@ -560,7 +565,7 @@ export const BrideDashboard: React.FC<BrideDashboardProps> = ({
                   </div>
 
                   {/* Right Bleed Photo with Curved Golden Ribbon Arch */}
-                  <div className="md:col-span-6 relative min-h-[220px] sm:min-h-[260px] overflow-hidden">
+                  <div className="md:col-span-6 relative min-h-[190px] sm:min-h-[260px] overflow-hidden">
                     <SafeImage
                       src={wedding.coverPhotoUrl || GENERATED_ASSETS.heroCouple}
                       alt={`Capa de ${wedding.brideName} e ${wedding.groomName}`}
@@ -589,22 +594,22 @@ export const BrideDashboard: React.FC<BrideDashboardProps> = ({
               </div>
 
               {/* Luxury 6-Pillar Quick Access Dock (matching reference bottom bar) */}
-              <div className="rounded-2xl bg-white dark:bg-[#141B17] border border-[#E5D8BF] dark:border-[#2A3730] shadow-xs px-3 py-4">
-                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-y-4 lg:gap-y-0 lg:divide-x divide-[#EDE3D0] dark:divide-[#26322B]">
+              <div className="rounded-2xl bg-white dark:bg-[#141B17] border border-[#E5D8BF] dark:border-[#2A3730] shadow-xs px-2.5 sm:px-3 py-3.5 sm:py-4">
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-y-3.5 sm:gap-y-4 lg:gap-y-0 lg:divide-x divide-[#EDE3D0] dark:divide-[#26322B]">
                   {quickDockItems.map((item) => (
                     <button
                       key={item.tab}
                       type="button"
                       onClick={() => setTab(item.tab)}
-                      className="flex flex-col items-center text-center px-2.5 group cursor-pointer"
+                      className="flex flex-col items-center justify-center text-center px-2 py-1 group cursor-pointer"
                     >
                       <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#F6EEDF] dark:bg-[#1D2922] group-hover:scale-105 transition-transform">
                         {item.icon}
                       </div>
-                      <span className="mt-2 text-xs font-semibold text-[#1D2620] dark:text-[#F4EFE6]">
+                      <span className="mt-1.5 sm:mt-2 text-xs font-semibold text-[#1D2620] dark:text-[#F4EFE6]">
                         {item.label}
                       </span>
-                      <span className="text-[11px] text-stone-500 dark:text-stone-400 font-mono tabular-nums">
+                      <span className="text-[11px] text-stone-500 dark:text-stone-400 font-mono tabular-nums truncate max-w-full">
                         {item.sub}
                       </span>
                     </button>
@@ -613,57 +618,57 @@ export const BrideDashboard: React.FC<BrideDashboardProps> = ({
               </div>
 
               {/* Detailed Color-Coded Financial & Guest KPI Strip */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                <div className="rounded-2xl border border-[#E5D8BF] dark:border-[#2A3730] bg-white dark:bg-[#141B17] p-5">
-                  <p className="text-xs font-medium text-stone-500">Valor Total Contratado</p>
-                  <p className="mt-2 font-mono text-2xl font-semibold tabular-nums text-[#1A241E] dark:text-stone-100">
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+                <div className="rounded-2xl border border-[#E5D8BF] dark:border-[#2A3730] bg-white dark:bg-[#141B17] p-3.5 sm:p-5 min-w-0">
+                  <p className="text-[11px] sm:text-xs font-medium text-stone-500 truncate">Valor Total Contratado</p>
+                  <p className="mt-1.5 sm:mt-2 font-mono text-base sm:text-2xl font-semibold tabular-nums text-[#1A241E] dark:text-stone-100 truncate">
                     {formatBRL(overviewStats.committed)}
                   </p>
-                  <p className="mt-1.5 text-xs text-stone-500 tabular-nums">
+                  <p className="mt-1 sm:mt-1.5 text-[11px] sm:text-xs text-stone-500 tabular-nums leading-snug">
                     {overviewStats.budgetPct}% do limite ({formatBRL(overviewStats.budget)})
                   </p>
                 </div>
 
-                <div className="rounded-2xl border border-emerald-200/90 dark:border-emerald-900/60 bg-emerald-50/75 dark:bg-emerald-950/25 p-5">
-                  <p className="text-xs font-medium text-emerald-800 dark:text-emerald-300">Valor Pago</p>
-                  <p className="mt-2 font-mono text-2xl font-semibold tabular-nums text-emerald-700 dark:text-emerald-400">
+                <div className="rounded-2xl border border-emerald-200/90 dark:border-emerald-900/60 bg-emerald-50/75 dark:bg-emerald-950/25 p-3.5 sm:p-5 min-w-0">
+                  <p className="text-[11px] sm:text-xs font-medium text-emerald-800 dark:text-emerald-300 truncate">Valor Pago</p>
+                  <p className="mt-1.5 sm:mt-2 font-mono text-base sm:text-2xl font-semibold tabular-nums text-emerald-700 dark:text-emerald-400 truncate">
                     {formatBRL(overviewStats.paid)}
                   </p>
-                  <p className="mt-1.5 text-xs text-emerald-800/80 dark:text-emerald-300/80 tabular-nums">
+                  <p className="mt-1 sm:mt-1.5 text-[11px] sm:text-xs text-emerald-800/80 dark:text-emerald-300/80 tabular-nums leading-snug">
                     {overviewStats.paidPct}% quitado até hoje
                   </p>
                 </div>
 
-                <div className="rounded-2xl border border-amber-200/90 dark:border-amber-900/60 bg-amber-50/75 dark:bg-amber-950/25 p-5">
-                  <p className="text-xs font-medium text-amber-900 dark:text-amber-300">Valor Pendente</p>
-                  <p className="mt-2 font-mono text-2xl font-semibold tabular-nums text-amber-700 dark:text-amber-400">
+                <div className="rounded-2xl border border-amber-200/90 dark:border-amber-900/60 bg-amber-50/75 dark:bg-amber-950/25 p-3.5 sm:p-5 min-w-0">
+                  <p className="text-[11px] sm:text-xs font-medium text-amber-900 dark:text-amber-300 truncate">Valor Pendente</p>
+                  <p className="mt-1.5 sm:mt-2 font-mono text-base sm:text-2xl font-semibold tabular-nums text-amber-700 dark:text-amber-400 truncate">
                     {formatBRL(overviewStats.pending)}
                   </p>
-                  <p className="mt-1.5 text-xs text-amber-900/80 dark:text-amber-300/80">
+                  <p className="mt-1 sm:mt-1.5 text-[11px] sm:text-xs text-amber-900/80 dark:text-amber-300/80 leading-snug">
                     {overviewStats.openCount > 0
                       ? `${overviewStats.openCount} em aberto · próx. ${formatDateBR(overviewStats.nextDue)}`
                       : 'Todos os serviços quitados'}
                   </p>
                 </div>
 
-                <div className="rounded-2xl border border-[#E5D8BF] dark:border-[#2A3730] bg-white dark:bg-[#141B17] p-5">
-                  <p className="text-xs font-medium text-stone-500">Confirmados & Presentes Pix</p>
-                  <p className="mt-2 font-mono text-2xl font-semibold tabular-nums text-[#173526] dark:text-[#DFBE7A]">
+                <div className="rounded-2xl border border-[#E5D8BF] dark:border-[#2A3730] bg-white dark:bg-[#141B17] p-3.5 sm:p-5 min-w-0">
+                  <p className="text-[11px] sm:text-xs font-medium text-stone-500 truncate">Confirmados & Pix</p>
+                  <p className="mt-1.5 sm:mt-2 font-mono text-base sm:text-2xl font-semibold tabular-nums text-[#173526] dark:text-[#DFBE7A] truncate">
                     {overviewStats.confirmedPeople} / {overviewStats.totalPeople}
                   </p>
-                  <p className="mt-1.5 text-xs text-stone-500 tabular-nums">
-                    Pix recebidos: {formatBRL(overviewStats.giftsReceived)}
+                  <p className="mt-1 sm:mt-1.5 text-[11px] sm:text-xs text-stone-500 tabular-nums leading-snug truncate">
+                    Pix: {formatBRL(overviewStats.giftsReceived)}
                   </p>
                 </div>
               </div>
 
               {/* Financial Progress Bar Strip */}
-              <div className="rounded-2xl border border-[#E5D8BF] dark:border-[#2A3730] bg-white dark:bg-[#141B17] p-5 space-y-2.5">
+              <div className="rounded-2xl border border-[#E5D8BF] dark:border-[#2A3730] bg-white dark:bg-[#141B17] p-4 sm:p-5 space-y-2.5">
                 <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
                   <span className="font-semibold text-[#1A241E] dark:text-stone-200">
                     Saúde Financeira do Casamento
                   </span>
-                  <div className="flex items-center gap-4 text-stone-600 dark:text-stone-400 font-mono tabular-nums">
+                  <div className="flex items-center gap-3 sm:gap-4 text-stone-600 dark:text-stone-400 font-mono tabular-nums">
                     <span className="text-emerald-700 dark:text-emerald-400">
                       Pago: {overviewStats.paidPct}%
                     </span>
@@ -681,12 +686,12 @@ export const BrideDashboard: React.FC<BrideDashboardProps> = ({
               </div>
 
               {/* Analytics + Quick Modules */}
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                <div className="lg:col-span-5 rounded-2xl border border-[#E5D8BF] dark:border-[#2A3730] bg-white dark:bg-[#141B17] p-5">
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-6">
+                <div className="lg:col-span-5 rounded-2xl border border-[#E5D8BF] dark:border-[#2A3730] bg-white dark:bg-[#141B17] p-4 sm:p-5">
                   <p className="text-xs font-medium text-stone-500 mb-2">Engajamento RSVP em Tempo Real</p>
                   <div className="h-48 w-full">
                     {rsvpPieData.length === 0 ? (
-                      <div className="h-full flex items-center justify-center text-xs text-stone-400">
+                      <div className="h-full flex items-center justify-center text-xs text-stone-400 text-center px-4">
                         Adicione convidados para ver o gráfico de confirmações.
                       </div>
                     ) : (
@@ -702,7 +707,7 @@ export const BrideDashboard: React.FC<BrideDashboardProps> = ({
                       </ResponsiveContainer>
                     )}
                   </div>
-                  <div className="mt-2 flex items-center justify-center gap-4 text-xs text-stone-600 dark:text-stone-400">
+                  <div className="mt-2 flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-xs text-stone-600 dark:text-stone-400">
                     <span className="text-emerald-700 dark:text-emerald-400 font-medium">
                       Confirmados: {guests.filter((g) => g.status === 'confirmed').length}
                     </span>
@@ -715,7 +720,7 @@ export const BrideDashboard: React.FC<BrideDashboardProps> = ({
                   </div>
                 </div>
 
-                <div className="lg:col-span-7 rounded-2xl border border-[#E5D8BF] dark:border-[#2A3730] bg-white dark:bg-[#141B17] p-5 flex flex-col justify-between">
+                <div className="lg:col-span-7 rounded-2xl border border-[#E5D8BF] dark:border-[#2A3730] bg-white dark:bg-[#141B17] p-4 sm:p-5 flex flex-col justify-between">
                   <div>
                     <p className="text-xs font-medium text-[#A87F32] dark:text-[#DFBE7A]">
                       Progresso dos Preparativos
@@ -723,24 +728,24 @@ export const BrideDashboard: React.FC<BrideDashboardProps> = ({
                     <h2 className="mt-1 font-editorial text-2xl font-semibold">
                       Próximos passos com tranquilidade
                     </h2>
-                    <div className="mt-4 space-y-3 text-sm">
-                      <div className="flex items-center justify-between py-2 border-b border-[#F2E9DA] dark:border-stone-800">
-                        <span>Fornecedores confirmados no checklist</span>
-                        <span className="font-mono text-xs tabular-nums">
+                    <div className="mt-4 space-y-2.5 sm:space-y-3 text-sm">
+                      <div className="flex items-center justify-between gap-3 py-2 border-b border-[#F2E9DA] dark:border-stone-800">
+                        <span className="min-w-0">Fornecedores confirmados no checklist</span>
+                        <span className="font-mono text-xs tabular-nums shrink-0">
                           {overviewStats.vendorsDone} / {vendors.length}
                         </span>
                       </div>
-                      <div className="flex items-center justify-between py-2 border-b border-[#F2E9DA] dark:border-stone-800">
-                        <span>Mesas configuradas na recepção</span>
-                        <span className="font-mono text-xs tabular-nums">{tables.length} mesas</span>
+                      <div className="flex items-center justify-between gap-3 py-2 border-b border-[#F2E9DA] dark:border-stone-800">
+                        <span className="min-w-0">Mesas configuradas na recepção</span>
+                        <span className="font-mono text-xs tabular-nums shrink-0">{tables.length} mesas</span>
                       </div>
-                      <div className="flex items-center justify-between py-2 border-b border-[#F2E9DA] dark:border-stone-800">
-                        <span>Padrinhos e madrinhas publicados no site</span>
-                        <span className="font-mono text-xs tabular-nums">{party.length} pessoas</span>
+                      <div className="flex items-center justify-between gap-3 py-2 border-b border-[#F2E9DA] dark:border-stone-800">
+                        <span className="min-w-0">Padrinhos e madrinhas publicados no site</span>
+                        <span className="font-mono text-xs tabular-nums shrink-0">{party.length} pessoas</span>
                       </div>
-                      <div className="flex items-center justify-between py-2">
-                        <span>Cotas de presentes Pix ativas</span>
-                        <span className="font-mono text-xs tabular-nums">{gifts.length} opções</span>
+                      <div className="flex items-center justify-between gap-3 py-2">
+                        <span className="min-w-0">Cotas de presentes Pix ativas</span>
+                        <span className="font-mono text-xs tabular-nums shrink-0">{gifts.length} opções</span>
                       </div>
                     </div>
                   </div>
@@ -749,14 +754,14 @@ export const BrideDashboard: React.FC<BrideDashboardProps> = ({
                     <button
                       type="button"
                       onClick={() => setTab('analytics')}
-                      className="rounded-full border border-[#173526]/40 dark:border-[#DFBE7A]/40 px-4 py-2 text-xs font-medium hover:bg-[#173526]/5 cursor-pointer"
+                      className="min-h-[40px] rounded-full border border-[#173526]/40 dark:border-[#DFBE7A]/40 px-4 py-2 text-xs font-medium hover:bg-[#173526]/5 cursor-pointer"
                     >
                       Ver Gráficos Analytics
                     </button>
                     <button
                       type="button"
                       onClick={() => setTab('vendors')}
-                      className="rounded-full border border-[#173526]/40 dark:border-[#DFBE7A]/40 px-4 py-2 text-xs font-medium hover:bg-[#173526]/5 cursor-pointer"
+                      className="min-h-[40px] rounded-full border border-[#173526]/40 dark:border-[#DFBE7A]/40 px-4 py-2 text-xs font-medium hover:bg-[#173526]/5 cursor-pointer"
                     >
                       Gerenciar Fornecedores
                     </button>
@@ -764,7 +769,7 @@ export const BrideDashboard: React.FC<BrideDashboardProps> = ({
                       type="button"
                       onClick={() => setTab('finance')}
                       style={{ backgroundColor: effectiveAccent }}
-                      className="rounded-full px-4 py-2 text-xs font-semibold text-white hover:brightness-110 cursor-pointer"
+                      className="min-h-[40px] rounded-full px-4 py-2 text-xs font-semibold text-white hover:brightness-110 cursor-pointer"
                     >
                       Abater Pagamentos
                     </button>
@@ -847,7 +852,7 @@ export const BrideDashboard: React.FC<BrideDashboardProps> = ({
                 key={item.id}
                 type="button"
                 onClick={() => setTab(item.id)}
-                className={`flex flex-col items-center justify-center gap-0.5 rounded-xl py-1.5 text-[10px] font-medium transition-colors cursor-pointer ${
+                className={`min-h-[44px] flex flex-col items-center justify-center gap-0.5 rounded-xl py-1 text-[10px] font-medium transition-colors cursor-pointer ${
                   active ? 'bg-[#FDF8F2] text-[#173526] font-semibold' : 'text-[#E7E1D5]/80'
                 }`}
               >
@@ -859,7 +864,7 @@ export const BrideDashboard: React.FC<BrideDashboardProps> = ({
           <button
             type="button"
             onClick={() => setMobileMenuOpen(true)}
-            className={`flex flex-col items-center justify-center gap-0.5 rounded-xl py-1.5 text-[10px] font-medium transition-colors cursor-pointer ${
+            className={`min-h-[44px] flex flex-col items-center justify-center gap-0.5 rounded-xl py-1 text-[10px] font-medium transition-colors cursor-pointer ${
               tab === 'analytics' || tab === 'tables' || tab === 'vendors' || tab === 'settings'
                 ? 'bg-[#FDF8F2] text-[#173526] font-semibold'
                 : 'text-[#E7E1D5]/80'

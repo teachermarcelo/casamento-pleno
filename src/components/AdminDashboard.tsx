@@ -371,34 +371,35 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   };
 
   return (
-    <div className="min-h-screen bg-[#FAF7F2] dark:bg-[#0F1115] text-stone-900 dark:text-stone-100">
-      <header className="sticky top-0 z-20 border-b border-stone-200 dark:border-stone-800 bg-white/95 dark:bg-[#14171D]/95 backdrop-blur-md px-6 py-4">
-        <div className="mx-auto max-w-7xl flex flex-wrap items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <Shield className="w-5 h-5 text-emerald-700 dark:text-emerald-400" />
-            <div>
-              <span className="font-editorial text-2xl font-semibold block leading-none">
+    <div className="min-h-screen overflow-x-clip bg-[#FAF7F2] dark:bg-[#0F1115] text-stone-900 dark:text-stone-100">
+      <header className="sticky top-0 z-20 border-b border-stone-200 dark:border-stone-800 bg-white/95 dark:bg-[#14171D]/95 backdrop-blur-md px-4 sm:px-6 py-3 sm:py-4">
+        <div className="mx-auto max-w-7xl flex flex-wrap items-center justify-between gap-3">
+          <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
+            <Shield className="w-5 h-5 text-emerald-700 dark:text-emerald-400 shrink-0" />
+            <div className="min-w-0">
+              <span className="font-editorial text-lg sm:text-2xl font-semibold block leading-tight truncate">
                 Casamento Pleno — Console do Criador
               </span>
-              <span className="text-[11px] text-stone-500">
-                Assinaturas, CRM de Leads, Categorias Remotas & Suporte
+              <span className="text-[11px] text-stone-500 block truncate">
+                Assinaturas, CRM de Leads, Categorias & Suporte
               </span>
             </div>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
             <button
               type="button"
               onClick={onBackToBride}
-              className="inline-flex items-center gap-1.5 rounded-xl border border-stone-300 dark:border-stone-700 px-3.5 py-2 text-xs font-medium hover:bg-stone-50 dark:hover:bg-stone-800 cursor-pointer"
+              className="inline-flex min-h-[38px] items-center gap-1.5 rounded-xl border border-stone-300 dark:border-stone-700 px-3 sm:px-3.5 py-2 text-xs font-medium hover:bg-stone-50 dark:hover:bg-stone-800 cursor-pointer"
             >
-              <ArrowLeft className="w-3.5 h-3.5" />
-              <span>Meu Painel de Casamento</span>
+              <ArrowLeft className="w-3.5 h-3.5 shrink-0" />
+              <span className="sm:hidden">Meu Painel</span>
+              <span className="hidden sm:inline">Meu Painel de Casamento</span>
             </button>
             <button
               type="button"
               onClick={onSignOut}
-              className="text-xs font-medium text-stone-500 hover:text-stone-900 dark:hover:text-stone-100 cursor-pointer"
+              className="min-h-[38px] px-2 text-xs font-medium text-stone-500 hover:text-stone-900 dark:hover:text-stone-100 cursor-pointer"
             >
               Sair
             </button>
@@ -406,66 +407,66 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
         </div>
       </header>
 
-      <main className="mx-auto max-w-7xl px-6 py-8 space-y-7">
+      <main className="mx-auto max-w-7xl px-4 sm:px-6 py-5 sm:py-8 space-y-5 sm:space-y-7">
         {/* Top Color-Coded Metrics Strip */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-          <div className="rounded-2xl border border-emerald-200/80 dark:border-emerald-900/60 bg-emerald-50/75 dark:bg-emerald-950/25 p-5">
-            <p className="text-xs font-medium text-emerald-800 dark:text-emerald-300">Receita Mensal (MRR)</p>
-            <p className="mt-2 font-mono text-2xl font-semibold tabular-nums text-emerald-700 dark:text-emerald-400">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4">
+          <div className="rounded-2xl border border-emerald-200/80 dark:border-emerald-900/60 bg-emerald-50/75 dark:bg-emerald-950/25 p-3.5 sm:p-5 min-w-0">
+            <p className="text-[11px] sm:text-xs font-medium text-emerald-800 dark:text-emerald-300 truncate">Receita Mensal (MRR)</p>
+            <p className="mt-1.5 sm:mt-2 font-mono text-lg sm:text-2xl font-semibold tabular-nums text-emerald-700 dark:text-emerald-400 truncate">
               {formatBRL(metrics.mrr)}
             </p>
-            <p className="mt-1 text-xs text-emerald-800/80 dark:text-emerald-300/80">
+            <p className="mt-1 text-[11px] sm:text-xs text-emerald-800/80 dark:text-emerald-300/80 truncate">
               {metrics.active} ativa(s) · {formatBRL(platformConfig.defaultPlanPrice)}/mês
             </p>
           </div>
 
-          <div className="rounded-2xl border border-stone-200 dark:border-stone-800 bg-white dark:bg-[#171A21] p-5">
-            <p className="text-xs font-medium text-stone-500">Total Arrecadado</p>
-            <p className="mt-2 font-mono text-2xl font-semibold tabular-nums text-stone-900 dark:text-stone-100">
+          <div className="rounded-2xl border border-stone-200 dark:border-stone-800 bg-white dark:bg-[#171A21] p-3.5 sm:p-5 min-w-0">
+            <p className="text-[11px] sm:text-xs font-medium text-stone-500 truncate">Total Arrecadado</p>
+            <p className="mt-1.5 sm:mt-2 font-mono text-lg sm:text-2xl font-semibold tabular-nums text-stone-900 dark:text-stone-100 truncate">
               {formatBRL(metrics.totalCollected)}
             </p>
-            <p className="mt-1 text-xs text-stone-500">Pagamentos registrados</p>
+            <p className="mt-1 text-[11px] sm:text-xs text-stone-500 truncate">Pagamentos registrados</p>
           </div>
 
-          <div className="rounded-2xl border border-stone-200 dark:border-stone-800 bg-white dark:bg-[#171A21] p-5">
-            <p className="text-xs font-medium text-stone-500">Leads / Assinantes</p>
-            <p className="mt-2 font-mono text-3xl font-semibold tabular-nums">{metrics.total}</p>
-            <p className="mt-1 text-xs text-stone-500">{weddings.length} painel(is) ativos</p>
+          <div className="rounded-2xl border border-stone-200 dark:border-stone-800 bg-white dark:bg-[#171A21] p-3.5 sm:p-5 min-w-0">
+            <p className="text-[11px] sm:text-xs font-medium text-stone-500 truncate">Leads / Assinantes</p>
+            <p className="mt-1.5 sm:mt-2 font-mono text-2xl sm:text-3xl font-semibold tabular-nums">{metrics.total}</p>
+            <p className="mt-1 text-[11px] sm:text-xs text-stone-500 truncate">{weddings.length} painel(is) ativos</p>
           </div>
 
-          <div className="rounded-2xl border border-amber-200/80 dark:border-amber-900/60 bg-amber-50/75 dark:bg-amber-950/25 p-5">
-            <p className="text-xs font-medium text-amber-900 dark:text-amber-300">Em Teste / Pendentes</p>
-            <p className="mt-2 font-mono text-3xl font-semibold tabular-nums text-amber-700 dark:text-amber-400">
+          <div className="rounded-2xl border border-amber-200/80 dark:border-amber-900/60 bg-amber-50/75 dark:bg-amber-950/25 p-3.5 sm:p-5 min-w-0">
+            <p className="text-[11px] sm:text-xs font-medium text-amber-900 dark:text-amber-300 truncate">Em Teste / Pendentes</p>
+            <p className="mt-1.5 sm:mt-2 font-mono text-2xl sm:text-3xl font-semibold tabular-nums text-amber-700 dark:text-amber-400">
               {metrics.trial + metrics.pastDue}
             </p>
-            <p className="mt-1 text-xs text-amber-900/80 dark:text-amber-300/80">
+            <p className="mt-1 text-[11px] sm:text-xs text-amber-900/80 dark:text-amber-300/80 truncate">
               {metrics.trial} teste · {metrics.pastDue} inadimpl.
             </p>
           </div>
 
-          <div className="rounded-2xl border border-stone-200 dark:border-stone-800 bg-white dark:bg-[#171A21] p-5">
-            <p className="text-xs font-medium text-stone-500">Suporte em Aberto</p>
-            <p className="mt-2 font-mono text-3xl font-semibold tabular-nums text-stone-900 dark:text-stone-100">
+          <div className="col-span-2 sm:col-span-1 rounded-2xl border border-stone-200 dark:border-stone-800 bg-white dark:bg-[#171A21] p-3.5 sm:p-5 min-w-0">
+            <p className="text-[11px] sm:text-xs font-medium text-stone-500 truncate">Suporte em Aberto</p>
+            <p className="mt-1.5 sm:mt-2 font-mono text-2xl sm:text-3xl font-semibold tabular-nums text-stone-900 dark:text-stone-100">
               {metrics.priorityLeads}
             </p>
-            <p className="mt-1 text-xs text-stone-500">{metrics.canceled} cancelada(s)</p>
+            <p className="mt-1 text-[11px] sm:text-xs text-stone-500 truncate">{metrics.canceled} cancelada(s)</p>
           </div>
         </div>
 
         {/* Section Tabs */}
-        <div className="inline-flex flex-wrap items-center gap-1 rounded-2xl bg-stone-200/70 dark:bg-stone-800/80 p-1.5">
+        <div className="flex items-center gap-1 overflow-x-auto no-scrollbar max-w-full rounded-2xl bg-stone-200/70 dark:bg-stone-800/80 p-1.5">
           {(
             [
-              ['crm', 'Assinaturas, Pagamentos & Leads (CRM)', <Users key="u" className="w-4 h-4" />],
-              ['categories', 'Categorias & Config Remota', <Settings2 key="c" className="w-4 h-4" />],
-              ['support', 'Suporte em Tempo Real & Infra', <MessageSquare key="s" className="w-4 h-4" />],
+              ['crm', 'Assinaturas, Pagamentos & Leads (CRM)', <Users key="u" className="w-4 h-4 shrink-0" />],
+              ['categories', 'Categorias & Config Remota', <Settings2 key="c" className="w-4 h-4 shrink-0" />],
+              ['support', 'Suporte em Tempo Real & Infra', <MessageSquare key="s" className="w-4 h-4 shrink-0" />],
             ] as const
           ).map(([id, label, icon]) => (
             <button
               key={id}
               type="button"
               onClick={() => setActiveTab(id)}
-              className={`inline-flex items-center gap-2 px-4 py-2 text-xs font-semibold rounded-xl transition-colors cursor-pointer ${
+              className={`shrink-0 whitespace-nowrap min-h-[40px] inline-flex items-center gap-2 px-3.5 sm:px-4 py-2 text-xs font-semibold rounded-xl transition-colors cursor-pointer ${
                 activeTab === id
                   ? 'bg-white dark:bg-[#1C2029] text-stone-900 dark:text-stone-100 shadow-xs'
                   : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200'
@@ -518,7 +519,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
             )}
 
             <div className="rounded-2xl border border-stone-200 dark:border-stone-800 bg-white dark:bg-[#171A21] overflow-hidden">
-              <div className="p-5 border-b border-stone-200 dark:border-stone-800 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+              <div className="p-4 sm:p-5 border-b border-stone-200 dark:border-stone-800 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
                 <div>
                   <h2 className="font-editorial text-2xl font-semibold">
                     Assinaturas, Pagamentos & Suporte aos Leads
@@ -528,20 +529,20 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                   </p>
                 </div>
 
-                <div className="flex flex-wrap items-center gap-2.5">
-                  <div className="relative">
+                <div className="flex flex-wrap items-center gap-2 sm:gap-2.5">
+                  <div className="relative w-full sm:w-52">
                     <Search className="w-3.5 h-3.5 text-stone-400 absolute left-3 top-1/2 -translate-y-1/2" />
                     <input
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
                       placeholder="Buscar cliente ou nota..."
-                      className="rounded-xl border border-stone-300 dark:border-stone-700 bg-transparent pl-8 pr-3 py-1.5 text-xs w-52"
+                      className="w-full min-h-[38px] rounded-xl border border-stone-300 dark:border-stone-700 bg-transparent pl-8 pr-3 py-1.5 text-xs"
                     />
                   </div>
                   <button
                     type="button"
                     onClick={() => setShowAddLead((prev) => !prev)}
-                    className="inline-flex items-center gap-1.5 rounded-xl bg-[#173526] text-white px-3 py-1.5 text-xs font-semibold hover:bg-[#10261B] cursor-pointer"
+                    className="min-h-[38px] inline-flex items-center gap-1.5 rounded-xl bg-[#173526] text-white px-3.5 py-1.5 text-xs font-semibold hover:bg-[#10261B] cursor-pointer"
                   >
                     <UserPlus className="w-3.5 h-3.5 text-[#DFBE7A]" />
                     <span>Inserir Lead</span>
@@ -549,7 +550,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                   <button
                     type="button"
                     onClick={handleExportSubscribers}
-                    className="inline-flex items-center gap-1.5 rounded-xl border border-stone-300 dark:border-stone-700 px-3 py-1.5 text-xs font-medium hover:bg-stone-50 dark:hover:bg-stone-800 cursor-pointer"
+                    className="min-h-[38px] inline-flex items-center gap-1.5 rounded-xl border border-stone-300 dark:border-stone-700 px-3.5 py-1.5 text-xs font-medium hover:bg-stone-50 dark:hover:bg-stone-800 cursor-pointer"
                   >
                     <Download className="w-3.5 h-3.5" />
                     <span>Exportar CSV</span>
@@ -570,7 +571,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                       value={newLeadEmail}
                       onChange={(e) => setNewLeadEmail(e.target.value)}
                       placeholder="Ex.: cliente@gmail.com"
-                      className="w-full rounded-lg border border-stone-300 dark:border-stone-700 bg-white dark:bg-[#171A21] px-3 py-1.5 text-xs"
+                      className="w-full min-h-[40px] rounded-lg border border-stone-300 dark:border-stone-700 bg-white dark:bg-[#171A21] px-3 py-1.5 text-xs"
                     />
                   </div>
                   <div className="flex-1 min-w-[180px]">
@@ -579,20 +580,20 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                       value={newLeadName}
                       onChange={(e) => setNewLeadName(e.target.value)}
                       placeholder="Ex.: João & Camila"
-                      className="w-full rounded-lg border border-stone-300 dark:border-stone-700 bg-white dark:bg-[#171A21] px-3 py-1.5 text-xs"
+                      className="w-full min-h-[40px] rounded-lg border border-stone-300 dark:border-stone-700 bg-white dark:bg-[#171A21] px-3 py-1.5 text-xs"
                     />
                   </div>
                   <button
                     type="submit"
                     disabled={creatingLead}
-                    className="rounded-lg bg-emerald-700 hover:bg-emerald-800 text-white px-4 py-1.5 text-xs font-semibold cursor-pointer disabled:opacity-60"
+                    className="min-h-[40px] rounded-lg bg-emerald-700 hover:bg-emerald-800 text-white px-4 py-1.5 text-xs font-semibold cursor-pointer disabled:opacity-60"
                   >
                     {creatingLead ? 'Salvando...' : 'Criar Lead'}
                   </button>
                 </form>
               )}
 
-            <div className="px-5 py-3 border-b border-stone-100 dark:border-stone-800/80 flex flex-wrap gap-1.5">
+            <div className="px-4 sm:px-5 py-3 border-b border-stone-100 dark:border-stone-800/80 flex items-center gap-1.5 overflow-x-auto no-scrollbar max-w-full">
               {(
                 [
                   ['all', `Todos (${users.length})`],
@@ -606,7 +607,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                   key={k}
                   type="button"
                   onClick={() => setLeadFilter(k)}
-                  className={`px-3 py-1 text-xs font-medium rounded-lg cursor-pointer ${
+                  className={`shrink-0 whitespace-nowrap min-h-[34px] px-3 py-1 text-xs font-medium rounded-lg cursor-pointer ${
                     leadFilter === k
                       ? 'bg-stone-900 text-white dark:bg-stone-100 dark:text-stone-900'
                       : 'text-stone-600 dark:text-stone-400 hover:bg-stone-100 dark:hover:bg-stone-800'
@@ -617,7 +618,137 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
               ))}
             </div>
 
-            <div className="overflow-x-auto">
+            {/* Mobile CRM Lead Cards */}
+            <div className="md:hidden divide-y divide-stone-100 dark:divide-stone-800/80">
+              {filteredUsers.map((u) => {
+                const wed = weddings.find((w) => w.ownerId === u.uid);
+                const draft = notesDraft[u.uid] ?? u.adminNotes ?? '';
+                return (
+                  <div key={u.uid} className="p-4 space-y-3">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="min-w-0">
+                        <p className="font-semibold text-sm text-stone-900 dark:text-stone-100 truncate">
+                          {u.displayName}
+                        </p>
+                        <p className="text-xs text-stone-500 break-all">{u.email}</p>
+                        {wed ? (
+                          <a
+                            href={getGuestSiteUrl(wed.slug)}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="mt-1 inline-flex items-center gap-1 text-xs font-medium text-emerald-700 dark:text-emerald-400 hover:underline"
+                          >
+                            <span>{wed.brideName} & {wed.groomName}</span>
+                            <ExternalLink className="w-3 h-3 shrink-0" />
+                          </a>
+                        ) : (
+                          <span className="mt-1 block text-[11px] text-stone-400">Setup pendente</span>
+                        )}
+                      </div>
+                      <span className="font-mono text-xs font-semibold tabular-nums text-emerald-700 dark:text-emerald-400 shrink-0">
+                        {formatBRL(u.planPrice || SUBSCRIPTION_PRICE)}/mês
+                      </span>
+                    </div>
+
+                    <div className="grid grid-cols-3 gap-2 rounded-xl bg-stone-50 dark:bg-stone-900/50 p-2.5 text-[11px] font-mono tabular-nums">
+                      <div>
+                        <p className="text-stone-500 font-sans">Últ. pgto</p>
+                        <p className="font-medium mt-0.5">{formatDateBR(u.lastPaymentDate)}</p>
+                      </div>
+                      <div>
+                        <p className="text-stone-500 font-sans">Próx. venc</p>
+                        <p className="font-medium mt-0.5">{formatDateBR(u.nextBillingDate)}</p>
+                      </div>
+                      <div>
+                        <p className="text-stone-500 font-sans">Total pago</p>
+                        <p className="font-semibold text-emerald-700 dark:text-emerald-400 mt-0.5">
+                          {formatBRL(u.totalPaidSubscription || 0)}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-2">
+                      <select
+                        value={u.subscriptionStatus}
+                        onChange={(e) =>
+                          updateUserProfile(u.uid, {
+                            subscriptionStatus: e.target.value as UserProfile['subscriptionStatus'],
+                          })
+                        }
+                        aria-label="Status da assinatura"
+                        className="w-full min-h-[40px] rounded-lg border border-stone-200 dark:border-stone-700 bg-white dark:bg-[#171A21] px-2.5 py-1.5 text-xs font-medium"
+                      >
+                        <option value="active">Ativa</option>
+                        <option value="trial">Em Teste</option>
+                        <option value="past_due">Inadimplente</option>
+                        <option value="canceled">Cancelada</option>
+                      </select>
+
+                      <select
+                        value={u.supportStatus || 'new'}
+                        onChange={(e) =>
+                          updateUserProfile(u.uid, {
+                            supportStatus: e.target.value as SupportStatus,
+                          })
+                        }
+                        aria-label="Status de suporte"
+                        className="w-full min-h-[40px] rounded-lg border border-stone-200 dark:border-stone-700 bg-white dark:bg-[#171A21] px-2.5 py-1.5 text-xs font-medium"
+                      >
+                        {SUPPORT_STATUS_OPTIONS.map((opt) => (
+                          <option key={opt.value} value={opt.value}>
+                            {opt.label}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div className="flex gap-1.5">
+                      <input
+                        maxLength={600}
+                        value={draft}
+                        onChange={(e) =>
+                          setNotesDraft((prev) => ({ ...prev, [u.uid]: e.target.value }))
+                        }
+                        placeholder="Anotação de atendimento..."
+                        className="flex-1 min-w-0 min-h-[40px] rounded-lg border border-stone-200 dark:border-stone-700 bg-transparent px-2.5 py-1.5 text-xs"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => handleSaveNotes(u)}
+                        className="min-h-[40px] rounded-lg border border-stone-300 dark:border-stone-700 px-3 py-1.5 text-xs font-medium hover:bg-stone-100 dark:hover:bg-stone-800 cursor-pointer shrink-0"
+                      >
+                        {savedUserId === u.uid ? (
+                          <Check className="w-3.5 h-3.5 text-emerald-600" />
+                        ) : (
+                          'Salvar'
+                        )}
+                      </button>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-2 pt-0.5">
+                      <button
+                        type="button"
+                        onClick={() => onSimulateClient(u, !wed)}
+                        className="min-h-[40px] inline-flex items-center justify-center gap-1.5 rounded-lg bg-[#173526] hover:bg-[#10261B] text-[#FBF2DC] border border-[#DFBE7A]/50 px-3 py-2 text-xs font-semibold cursor-pointer"
+                      >
+                        <Eye className="w-3.5 h-3.5 text-[#DFBE7A] shrink-0" />
+                        <span>{wed ? 'Ver Cliente' : 'Simular'}</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleRecordSubscriptionPayment(u)}
+                        className="min-h-[40px] inline-flex items-center justify-center gap-1.5 rounded-lg bg-emerald-700 hover:bg-emerald-800 px-3 py-2 text-xs font-semibold text-white cursor-pointer"
+                      >
+                        <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
+                        <span>Registrar Pgto</span>
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            <div className="hidden md:block overflow-x-auto">
               <table className="w-full text-left text-sm">
                 <thead>
                   <tr className="border-b border-stone-200 dark:border-stone-800 text-xs text-stone-500">
@@ -992,26 +1123,26 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
               )}
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <div className="rounded-2xl border border-stone-200 dark:border-stone-800 bg-white dark:bg-[#171A21] p-6 space-y-3">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+              <div className="rounded-2xl border border-stone-200 dark:border-stone-800 bg-white dark:bg-[#171A21] p-4 sm:p-6 space-y-3">
                 <div className="flex items-center gap-2 text-sm font-semibold">
-                  <Database className="w-4 h-4 text-emerald-700 dark:text-emerald-400" />
+                  <Database className="w-4 h-4 text-emerald-700 dark:text-emerald-400 shrink-0" />
                   <span>Banco de Dados Firebase Conectado</span>
                 </div>
                 <div className="space-y-1.5 text-xs text-stone-600 dark:text-stone-400">
-                  <p>
+                  <p className="break-all">
                     Projeto Firebase: <strong className="font-mono text-stone-900 dark:text-stone-100">{FIREBASE_META.projectId}</strong>
                   </p>
-                  <p>
+                  <p className="break-all">
                     Firestore Database ID: <strong className="font-mono text-stone-900 dark:text-stone-100">{FIREBASE_META.databaseId}</strong>
                   </p>
-                  <p>
+                  <p className="break-all">
                     Administrador proprietário: <strong className="font-mono text-stone-900 dark:text-stone-100">{profile.email}</strong>
                   </p>
                 </div>
               </div>
 
-              <div className="rounded-2xl border border-stone-200 dark:border-stone-800 bg-white dark:bg-[#171A21] p-6 space-y-4">
+              <div className="rounded-2xl border border-stone-200 dark:border-stone-800 bg-white dark:bg-[#171A21] p-4 sm:p-6 space-y-4">
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <div className="flex items-center gap-2 text-sm font-semibold">
                     <CreditCard className="w-4 h-4 text-emerald-700 dark:text-emerald-400" />

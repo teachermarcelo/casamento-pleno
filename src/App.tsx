@@ -27,11 +27,35 @@ import {
 } from './types/wedding';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { LandingPage } from './components/LandingPage';
-import { OnboardingFlow } from './components/OnboardingFlow';
+import { OnboardingFlow, type PendingCheckoutDraft } from './components/OnboardingFlow';
 import { BrideDashboard } from './components/BrideDashboard';
 import { AdminDashboard } from './components/AdminDashboard';
 import { GuestWeddingSite } from './components/GuestWeddingSite';
 import { OfflineIndicator } from './components/PWAInstallButton';
+
+const PENDING_CHECKOUT_STORAGE_KEY = 'cp_pending_checkout';
+
+function loadPendingCheckoutDraft(): PendingCheckoutDraft | null {
+  try {
+    const raw = window.sessionStorage.getItem(PENDING_CHECKOUT_STORAGE_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as Partial<PendingCheckoutDraft>;
+    if (!parsed || typeof parsed !== 'object') return null;
+    return {
+      payerName: typeof parsed.payerName === 'string' ? parsed.payerName.slice(0, 100) : '',
+      payerEmail: typeof parsed.payerEmail === 'string' ? parsed.payerEmail.slice(0, 200) : '',
+      payerPhone: typeof parsed.payerPhone === 'string' ? parsed.payerPhone.slice(0, 24) : '',
+      brideName: typeof parsed.brideName === 'string' ? parsed.brideName.slice(0, 80) : '',
+      groomName: typeof parsed.groomName === 'string' ? parsed.groomName.slice(0, 80) : '',
+      paymentMethod: parsed.paymentMethod === 'card' ? 'card' : 'pix',
+      referenceId: typeof parsed.referenceId === 'string' ? parsed.referenceId.slice(0, 120) : undefined,
+      confirmed: Boolean(parsed.confirmed),
+      wantsSetup: Boolean(parsed.wantsSetup),
+    };
+  } catch {
+    return null;
+  }
+}
 
 interface GuestSitePreview {
   wedding: Wedding;
@@ -55,6 +79,21 @@ function AppContent() {
   const [impersonatedWedding, setImpersonatedWedding] = useState<Wedding | null>(null);
   const [impersonateForceOnboarding, setImpersonateForceOnboarding] = useState(false);
   const [showLandingPreview, setShowLandingPreview] = useState(false);
+  const [showGuestCheckout, setShowGuestCheckout] = useState<boolean>(() => {
+    try {
+      const params = new URLSearchParams(window.location.search);
+      return (
+        params.get('checkout') === '1' ||
+        params.get('pagamento') === 'sucesso' ||
+        params.get('checkout_status') === 'success'
+      );
+    } catch {
+      return false;
+    }
+  });
+  const [pendingCheckoutDraft, setPendingCheckoutDraft] = useState<PendingCheckoutDraft | null>(() =>
+    loadPendingCheckoutDraft()
+  );
   const [guestSite, setGuestSite] = useState<GuestSitePreview | null>(null);
   const [loadingPublicSlug, setLoadingPublicSlug] = useState(false);
   const [darkMode, setDarkMode] = useState<boolean>(() => {
@@ -234,6 +273,19 @@ function AppContent() {
     }
   };
 
+  const handleSaveCheckoutDraft = (draft: PendingCheckoutDraft | null) => {
+    setPendingCheckoutDraft(draft);
+    try {
+      if (!draft) {
+        window.sessionStorage.removeItem(PENDING_CHECKOUT_STORAGE_KEY);
+      } else {
+        window.sessionStorage.setItem(PENDING_CHECKOUT_STORAGE_KEY, JSON.stringify(draft));
+      }
+    } catch {
+      // Ignore storage errors in private mode
+    }
+  };
+
   const handleSignOut = async () => {
     await signOutUser();
     setViewMode('bride');
@@ -241,6 +293,7 @@ function AppContent() {
     setImpersonatedWedding(null);
     setImpersonateForceOnboarding(false);
     setShowLandingPreview(false);
+    setShowGuestCheckout(false);
     setGuestSite(null);
   };
 
@@ -302,12 +355,41 @@ function AppContent() {
     );
   }
 
-  // 3. Unauthenticated Landing Page
+  // 3. Unauthenticated Direct Checkout or Landing Page
   if (!firebaseUser || !profile) {
+    if (showGuestCheckout) {
+      return (
+        <>
+          <OnboardingFlow
+            profile={null}
+            startAtCheckout
+            pendingDraft={pendingCheckoutDraft}
+            onSaveDraft={handleSaveCheckoutDraft}
+            onRequestSignIn={handleSignIn}
+            signingIn={signingIn}
+            authError={authError}
+            onClearAuthError={() => setAuthError(null)}
+            onBackToLanding={() => {
+              setAuthError(null);
+              setShowGuestCheckout(false);
+            }}
+            onComplete={() => {}}
+            onSignOut={() => setShowGuestCheckout(false)}
+          />
+          <OfflineIndicator />
+        </>
+      );
+    }
+
     return (
       <>
         <LandingPage
           onSignIn={handleSignIn}
+          onStartCheckout={() => {
+            setAuthError(null);
+            setShowGuestCheckout(true);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }}
           signingIn={signingIn}
           darkMode={darkMode}
           onToggleDarkMode={handleToggleDarkMode}
@@ -435,7 +517,12 @@ function AppContent() {
         )}
         <OnboardingFlow
           profile={profile}
-          onComplete={(created) => setWedding(created)}
+          pendingDraft={pendingCheckoutDraft}
+          onSaveDraft={handleSaveCheckoutDraft}
+          onComplete={(created) => {
+            setShowGuestCheckout(false);
+            setWedding(created);
+          }}
           onSignOut={handleSignOut}
         />
         <OfflineIndicator />
@@ -469,6 +556,7 @@ function AppContent() {
         </div>
         <LandingPage
           onSignIn={() => setShowLandingPreview(false)}
+          onStartCheckout={() => setShowLandingPreview(false)}
           signingIn={false}
           darkMode={darkMode}
           onToggleDarkMode={handleToggleDarkMode}

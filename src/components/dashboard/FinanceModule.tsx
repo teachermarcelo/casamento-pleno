@@ -383,7 +383,7 @@ export const FinanceModule: React.FC<FinanceModuleProps> = ({
           <button
             type="button"
             onClick={() => exportWeddingReportPDF({ wedding, guests, expenses })}
-            className="inline-flex items-center gap-1.5 rounded-lg border border-stone-300 dark:border-stone-700 bg-white dark:bg-[#171A21] px-3.5 py-2 text-xs font-medium hover:bg-stone-50 dark:hover:bg-stone-800 cursor-pointer"
+            className="min-h-[40px] inline-flex items-center gap-1.5 rounded-lg border border-stone-300 dark:border-stone-700 bg-white dark:bg-[#171A21] px-3 py-2 text-xs font-medium hover:bg-stone-50 dark:hover:bg-stone-800 cursor-pointer"
           >
             <FileText className="w-3.5 h-3.5" />
             <span>Relatório PDF</span>
@@ -391,15 +391,15 @@ export const FinanceModule: React.FC<FinanceModuleProps> = ({
           <button
             type="button"
             onClick={handleExportCSV}
-            className="inline-flex items-center gap-1.5 rounded-lg border border-stone-300 dark:border-stone-700 bg-white dark:bg-[#171A21] px-3.5 py-2 text-xs font-medium hover:bg-stone-50 dark:hover:bg-stone-800 cursor-pointer"
+            className="min-h-[40px] inline-flex items-center gap-1.5 rounded-lg border border-stone-300 dark:border-stone-700 bg-white dark:bg-[#171A21] px-3 py-2 text-xs font-medium hover:bg-stone-50 dark:hover:bg-stone-800 cursor-pointer"
           >
             <FileSpreadsheet className="w-3.5 h-3.5" />
-            <span>Exportar CSV</span>
+            <span>CSV</span>
           </button>
           <button
             type="button"
             onClick={handleExportPaymentsCalendar}
-            className="inline-flex items-center gap-1.5 rounded-lg border border-stone-300 dark:border-stone-700 bg-white dark:bg-[#171A21] px-3.5 py-2 text-xs font-medium hover:bg-stone-50 dark:hover:bg-stone-800 cursor-pointer"
+            className="min-h-[40px] inline-flex items-center gap-1.5 rounded-lg border border-stone-300 dark:border-stone-700 bg-white dark:bg-[#171A21] px-3 py-2 text-xs font-medium hover:bg-stone-50 dark:hover:bg-stone-800 cursor-pointer"
           >
             <Calendar className="w-3.5 h-3.5" />
             <span>Agenda (.ics)</span>
@@ -409,9 +409,9 @@ export const FinanceModule: React.FC<FinanceModuleProps> = ({
 
       {/* Upcoming Due Alert */}
       {upcomingDue.length > 0 && (
-        <div className="rounded-2xl border border-amber-300/80 dark:border-amber-800 bg-amber-50/75 dark:bg-amber-950/30 p-4 flex items-start gap-3">
+        <div className="rounded-2xl border border-amber-300/80 dark:border-amber-800 bg-amber-50/75 dark:bg-amber-950/30 p-3.5 sm:p-4 flex items-start gap-3">
           <AlertTriangle className="w-4 h-4 text-amber-700 dark:text-amber-400 shrink-0 mt-0.5" />
-          <div className="text-xs text-amber-900 dark:text-amber-200">
+          <div className="text-xs text-amber-900 dark:text-amber-200 min-w-0">
             <p className="font-semibold">
               {upcomingDue.length} pagamento(s) com vencimento próximo ou pendente
             </p>
@@ -424,67 +424,67 @@ export const FinanceModule: React.FC<FinanceModuleProps> = ({
       )}
 
       {/* Richer Color-Coded Financial KPI Strip */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="rounded-2xl border border-stone-200 dark:border-stone-800 bg-white dark:bg-[#171A21] p-5">
-          <p className="text-xs font-medium text-stone-500">Valor Total Contratado</p>
-          <p className="mt-2 font-mono text-2xl font-semibold tabular-nums text-stone-900 dark:text-stone-100">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+        <div className="rounded-2xl border border-stone-200 dark:border-stone-800 bg-white dark:bg-[#171A21] p-3.5 sm:p-5 min-w-0">
+          <p className="text-[11px] sm:text-xs font-medium text-stone-500 truncate">Valor Contratado</p>
+          <p className="mt-1.5 sm:mt-2 font-mono text-base sm:text-2xl font-semibold tabular-nums text-stone-900 dark:text-stone-100 truncate">
             {formatBRL(totals.committed)}
           </p>
-          <p className={`mt-1.5 text-xs font-mono tabular-nums ${totals.budgetPct > 100 ? 'text-red-600' : 'text-stone-500'}`}>
-            {totals.budgetPct}% do teto de {formatBRL(totals.budget)}
+          <p className={`mt-1 sm:mt-1.5 text-[11px] sm:text-xs font-mono tabular-nums leading-snug ${totals.budgetPct > 100 ? 'text-red-600' : 'text-stone-500'}`}>
+            {totals.budgetPct}% do teto ({formatBRL(totals.budget)})
           </p>
         </div>
 
-        <div className="rounded-2xl border border-emerald-200/80 dark:border-emerald-900/60 bg-emerald-50/75 dark:bg-emerald-950/25 p-5">
-          <p className="text-xs font-medium text-emerald-800 dark:text-emerald-300">Valor Pago</p>
-          <p className="mt-2 font-mono text-2xl font-semibold tabular-nums text-emerald-700 dark:text-emerald-400">
+        <div className="rounded-2xl border border-emerald-200/80 dark:border-emerald-900/60 bg-emerald-50/75 dark:bg-emerald-950/25 p-3.5 sm:p-5 min-w-0">
+          <p className="text-[11px] sm:text-xs font-medium text-emerald-800 dark:text-emerald-300 truncate">Valor Pago</p>
+          <p className="mt-1.5 sm:mt-2 font-mono text-base sm:text-2xl font-semibold tabular-nums text-emerald-700 dark:text-emerald-400 truncate">
             {formatBRL(totals.paid)}
           </p>
-          <p className="mt-1.5 text-xs text-emerald-800/80 dark:text-emerald-300/80 tabular-nums">
-            {totals.paidPct}% quitado · {totals.paidCount} item(ns) pagos
+          <p className="mt-1 sm:mt-1.5 text-[11px] sm:text-xs text-emerald-800/80 dark:text-emerald-300/80 tabular-nums leading-snug">
+            {totals.paidPct}% · {totals.paidCount} pago(s)
           </p>
         </div>
 
-        <div className="rounded-2xl border border-amber-200/80 dark:border-amber-900/60 bg-amber-50/75 dark:bg-amber-950/25 p-5">
-          <p className="text-xs font-medium text-amber-900 dark:text-amber-300">Valor Pendente</p>
-          <p className="mt-2 font-mono text-2xl font-semibold tabular-nums text-amber-700 dark:text-amber-400">
+        <div className="rounded-2xl border border-amber-200/80 dark:border-amber-900/60 bg-amber-50/75 dark:bg-amber-950/25 p-3.5 sm:p-5 min-w-0">
+          <p className="text-[11px] sm:text-xs font-medium text-amber-900 dark:text-amber-300 truncate">Valor Pendente</p>
+          <p className="mt-1.5 sm:mt-2 font-mono text-base sm:text-2xl font-semibold tabular-nums text-amber-700 dark:text-amber-400 truncate">
             {formatBRL(totals.remainingToPay)}
           </p>
-          <p className="mt-1.5 text-xs text-amber-900/80 dark:text-amber-300/80">
+          <p className="mt-1 sm:mt-1.5 text-[11px] sm:text-xs text-amber-900/80 dark:text-amber-300/80 leading-snug">
             {totals.openCount} em aberto ({totals.partialCount} parciais)
           </p>
         </div>
 
         <div
-          className={`rounded-2xl border p-5 ${
+          className={`rounded-2xl border p-3.5 sm:p-5 min-w-0 ${
             totals.budgetDiff >= 0
               ? 'border-stone-200 dark:border-stone-800 bg-[#FAF7F2] dark:bg-[#171A21]'
               : 'border-red-200 dark:border-red-900/60 bg-red-50/70 dark:bg-red-950/25'
           }`}
         >
-          <p className="text-xs font-medium text-stone-600 dark:text-stone-400">
-            {totals.budgetDiff >= 0 ? 'Margem Livre no Orçamento' : 'Acima do Orçamento'}
+          <p className="text-[11px] sm:text-xs font-medium text-stone-600 dark:text-stone-400 truncate">
+            {totals.budgetDiff >= 0 ? 'Margem Livre' : 'Acima do Teto'}
           </p>
           <p
-            className={`mt-2 font-mono text-2xl font-semibold tabular-nums ${
+            className={`mt-1.5 sm:mt-2 font-mono text-base sm:text-2xl font-semibold tabular-nums truncate ${
               totals.budgetDiff >= 0 ? 'text-stone-900 dark:text-stone-100' : 'text-red-700 dark:text-red-400'
             }`}
           >
             {formatBRL(Math.abs(totals.budgetDiff))}
           </p>
-          <p className="mt-1.5 text-xs text-stone-500 tabular-nums">
-            Reserva guardada: {formatBRL(totals.savingsCurrent)} ({totals.savingsPct}%)
+          <p className="mt-1 sm:mt-1.5 text-[11px] sm:text-xs text-stone-500 tabular-nums truncate">
+            Reserva: {formatBRL(totals.savingsCurrent)} ({totals.savingsPct}%)
           </p>
         </div>
       </div>
 
       {/* Segmented Visual Bar: Pago vs Pendente vs Livre */}
-      <div className="rounded-2xl border border-stone-200 dark:border-stone-800 bg-white dark:bg-[#171A21] p-5 space-y-3">
+      <div className="rounded-2xl border border-stone-200 dark:border-stone-800 bg-white dark:bg-[#171A21] p-4 sm:p-5 space-y-3">
         <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
           <span className="font-semibold text-stone-800 dark:text-stone-200">
             Distribuição Visual do Orçamento ({formatBRL(Math.max(totals.budget, totals.committed))})
           </span>
-          <div className="flex flex-wrap items-center gap-4 text-stone-600 dark:text-stone-400">
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 text-stone-600 dark:text-stone-400">
             <span className="inline-flex items-center gap-1.5">
               <span className="h-2.5 w-2.5 rounded-sm bg-emerald-600" />
               Pago ({formatBRL(totals.paid)})
@@ -575,18 +575,24 @@ export const FinanceModule: React.FC<FinanceModuleProps> = ({
           </div>
         </div>
 
-        <div className="lg:col-span-7 rounded-2xl border border-stone-200 dark:border-stone-800 bg-white dark:bg-[#171A21] p-5">
+        <div className="lg:col-span-7 rounded-2xl border border-stone-200 dark:border-stone-800 bg-white dark:bg-[#171A21] p-4 sm:p-5">
           <p className="text-xs font-medium text-stone-500 mb-3">Pagamentos por Categoria (Pago vs Pendente)</p>
           <div className="h-56 w-full">
             {categoryChart.length === 0 ? (
-              <div className="h-full flex items-center justify-center text-xs text-stone-400">
+              <div className="h-full flex items-center justify-center text-xs text-stone-400 text-center px-4">
                 Adicione despesas ou fornecedores para visualizar o gráfico financeiro.
               </div>
             ) : (
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={categoryChart} margin={{ top: 4, right: 12, left: 0, bottom: 0 }}>
-                  <XAxis dataKey="category" tick={{ fontSize: 11, fill: '#78716C' }} axisLine={false} tickLine={false} />
-                  <YAxis tick={{ fontSize: 11, fill: '#78716C' }} axisLine={false} tickLine={false} />
+                <BarChart data={categoryChart} margin={{ top: 4, right: 8, left: -8, bottom: 0 }}>
+                  <XAxis dataKey="category" tick={{ fontSize: 10, fill: '#78716C' }} axisLine={false} tickLine={false} />
+                  <YAxis
+                    width={46}
+                    tickFormatter={(v) => (Number(v) >= 1000 ? `${Math.round(Number(v) / 1000)}k` : String(v))}
+                    tick={{ fontSize: 10, fill: '#78716C' }}
+                    axisLine={false}
+                    tickLine={false}
+                  />
                   <Tooltip formatter={(val) => formatBRL(Number(val) || 0)} />
                   <Bar dataKey="Pago" stackId="a" fill="#15803D" radius={[0, 0, 4, 4]} maxBarSize={36} />
                   <Bar dataKey="Pendente" stackId="a" fill="#F59E0B" radius={[4, 4, 0, 0]} maxBarSize={36} />
@@ -600,9 +606,9 @@ export const FinanceModule: React.FC<FinanceModuleProps> = ({
       {/* Add Manual Expense Form */}
       <form
         onSubmit={handleAddExpense}
-        className="rounded-2xl border border-stone-200 dark:border-stone-800 bg-white dark:bg-[#171A21] p-5 grid grid-cols-1 md:grid-cols-12 gap-3 items-end"
+        className="rounded-2xl border border-stone-200 dark:border-stone-800 bg-white dark:bg-[#171A21] p-4 sm:p-5 grid grid-cols-2 md:grid-cols-12 gap-3 items-end"
       >
-        <div className="md:col-span-3">
+        <div className="col-span-2 md:col-span-3">
           <label className="block text-xs text-stone-500 mb-1">Novo Lançamento Avulso</label>
           <input
             required
@@ -613,7 +619,7 @@ export const FinanceModule: React.FC<FinanceModuleProps> = ({
             className="w-full rounded-lg border border-stone-300 dark:border-stone-700 bg-transparent px-3 py-2 text-sm"
           />
         </div>
-        <div className="md:col-span-2">
+        <div className="col-span-2 md:col-span-2">
           <label className="block text-xs text-stone-500 mb-1">Categoria</label>
           <select
             value={category}
@@ -674,12 +680,12 @@ export const FinanceModule: React.FC<FinanceModuleProps> = ({
             className="w-full rounded-lg border border-stone-300 dark:border-stone-700 bg-transparent px-2 py-2 text-xs font-mono"
           />
         </div>
-        <div className="md:col-span-2">
+        <div className="col-span-2 md:col-span-2">
           <button
             type="submit"
             disabled={saving}
             style={{ backgroundColor: accentColor }}
-            className="w-full inline-flex items-center justify-center gap-1.5 py-2 px-3 text-sm font-medium text-white rounded-lg cursor-pointer"
+            className="w-full min-h-[42px] inline-flex items-center justify-center gap-1.5 py-2 px-3 text-sm font-medium text-white rounded-lg cursor-pointer"
           >
             <Plus className="w-4 h-4" />
             <span>Lançar</span>
@@ -688,12 +694,12 @@ export const FinanceModule: React.FC<FinanceModuleProps> = ({
       </form>
 
       {/* Filter Tabs on Payments Ledger */}
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="inline-flex flex-wrap items-center gap-1 rounded-xl bg-stone-200/70 dark:bg-stone-800/80 p-1">
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex items-center gap-1 overflow-x-auto no-scrollbar max-w-full rounded-xl bg-stone-200/70 dark:bg-stone-800/80 p-1">
           {(
             [
               ['all', `Todos (${expenses.length})`],
-              ['linked', `Fornecedores Conectados (${totals.linkedCount})`],
+              ['linked', `Fornecedores (${totals.linkedCount})`],
               ['pending', `Pendentes (${totals.pendingCount})`],
               ['partial', `Parciais (${totals.partialCount})`],
               ['paid', `Pagos (${totals.paidCount})`],
@@ -703,7 +709,7 @@ export const FinanceModule: React.FC<FinanceModuleProps> = ({
               key={tabKey}
               type="button"
               onClick={() => setFilterTab(tabKey)}
-              className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-colors cursor-pointer ${
+              className={`shrink-0 whitespace-nowrap min-h-[36px] px-3 py-1.5 text-xs font-medium rounded-lg transition-colors cursor-pointer ${
                 filterTab === tabKey
                   ? 'bg-white dark:bg-[#1C2029] text-stone-900 dark:text-stone-100 shadow-xs'
                   : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200'
@@ -715,8 +721,97 @@ export const FinanceModule: React.FC<FinanceModuleProps> = ({
         </div>
       </div>
 
-      {/* Connected Payments Ledger Table */}
-      <div className="rounded-2xl border border-stone-200 dark:border-stone-800 bg-white dark:bg-[#171A21] overflow-x-auto">
+      {/* Connected Payments Ledger: Mobile Cards + Desktop Table */}
+      <div className="rounded-2xl border border-stone-200 dark:border-stone-800 bg-white dark:bg-[#171A21] overflow-hidden">
+        <div className="md:hidden divide-y divide-stone-100 dark:divide-stone-800/80">
+          {filteredExpenses.length === 0 ? (
+            <div className="py-8 px-4 text-center text-xs text-stone-500">
+              Nenhum pagamento encontrado neste filtro.
+            </div>
+          ) : (
+            filteredExpenses.map((exp) => {
+              const pendingVal = Math.max(0, exp.amount - exp.paidAmount);
+              return (
+                <div key={exp.id} className="p-4 space-y-3">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="min-w-0">
+                      <p className="font-semibold text-sm text-stone-900 dark:text-stone-100 break-words">
+                        {exp.title}
+                      </p>
+                      <div className="flex flex-wrap items-center gap-1.5 text-[11px] text-stone-500 mt-0.5">
+                        <span>{exp.category}</span>
+                        {exp.vendorId && (
+                          <span className="inline-flex items-center gap-1 text-emerald-700 dark:text-emerald-400">
+                            <Link2 className="w-3 h-3" /> Fornecedor
+                          </span>
+                        )}
+                        <span>· Venc. {formatDateBR(exp.dueDate)}</span>
+                      </div>
+                    </div>
+                    <span
+                      className={`shrink-0 text-[11px] font-semibold px-2 py-0.5 rounded-md ${
+                        exp.status === 'paid'
+                          ? 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400'
+                          : exp.status === 'partial'
+                          ? 'bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-400'
+                          : 'bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-400'
+                      }`}
+                    >
+                      {exp.status === 'paid' ? 'Pago' : exp.status === 'partial' ? 'Parcial' : 'Pendente'}
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-3 gap-2 rounded-xl bg-stone-50 dark:bg-stone-900/50 border border-stone-200/70 dark:border-stone-800 p-2.5 text-[11px]">
+                    <div className="min-w-0">
+                      <p className="text-stone-500">Total</p>
+                      <p className="font-mono font-semibold tabular-nums truncate">{formatBRL(exp.amount)}</p>
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-stone-500">Pago</p>
+                      <p className="font-mono font-semibold tabular-nums text-emerald-700 dark:text-emerald-400 truncate">
+                        {formatBRL(exp.paidAmount)}
+                      </p>
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-stone-500">Pendente</p>
+                      <p className="font-mono font-semibold tabular-nums text-amber-700 dark:text-amber-400 truncate">
+                        {formatBRL(pendingVal)}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    {pendingVal > 0 ? (
+                      <button
+                        type="button"
+                        onClick={() => openAbateExpense(exp)}
+                        style={{ backgroundColor: accentColor }}
+                        className="flex-1 min-h-[40px] inline-flex items-center justify-center gap-1.5 rounded-lg px-3 py-2 text-xs font-semibold text-white hover:brightness-110 cursor-pointer"
+                      >
+                        <CreditCard className="w-3.5 h-3.5" />
+                        <span>Abater Pagamento</span>
+                      </button>
+                    ) : (
+                      <span className="flex-1 text-xs text-emerald-700 dark:text-emerald-400 font-medium">
+                        Quitado {exp.lastPaymentDate ? `em ${formatDateBR(exp.lastPaymentDate)}` : ''}
+                      </span>
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => deleteExpense(wedding.id, exp.id)}
+                      title="Excluir lançamento"
+                      className="h-10 w-10 shrink-0 flex items-center justify-center rounded-lg border border-stone-200 dark:border-stone-700 text-stone-400 hover:text-red-600 cursor-pointer"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+              );
+            })
+          )}
+        </div>
+
+        <div className="hidden md:block overflow-x-auto">
         <table className="w-full text-left text-sm">
           <thead>
             <tr className="border-b border-stone-200 dark:border-stone-800 text-xs text-stone-500">
@@ -811,6 +906,7 @@ export const FinanceModule: React.FC<FinanceModuleProps> = ({
             )}
           </tbody>
         </table>
+        </div>
       </div>
 
       <div className="flex justify-end">
@@ -835,23 +931,23 @@ export const FinanceModule: React.FC<FinanceModuleProps> = ({
         const remaining = Math.max(0, abatingExpense.amount - abatingExpense.paidAmount);
         return (
           <div
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/55 p-4 backdrop-blur-xs"
+            className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/55 p-0 sm:p-4 backdrop-blur-xs"
             role="dialog"
             aria-modal="true"
           >
-            <div className="w-full max-w-md rounded-2xl border border-stone-200 dark:border-stone-800 bg-white dark:bg-[#171A21] p-6 shadow-2xl space-y-5">
-              <div className="flex items-start justify-between gap-4">
-                <div>
+            <div className="w-full max-w-md max-h-[90vh] overflow-y-auto rounded-t-3xl sm:rounded-2xl border border-stone-200 dark:border-stone-800 bg-white dark:bg-[#171A21] p-5 sm:p-6 pb-[max(1.5rem,env(safe-area-inset-bottom))] shadow-2xl space-y-5">
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
                   <p className="text-xs font-medium" style={{ color: accentColor }}>
                     {abatingExpense.vendorId ? 'Abater & Sincronizar com Fornecedor' : 'Abater Pagamento'}
                   </p>
-                  <h3 className="mt-1 font-editorial text-2xl font-semibold">{abatingExpense.title}</h3>
+                  <h3 className="mt-1 font-editorial text-2xl font-semibold break-words">{abatingExpense.title}</h3>
                   <p className="text-xs text-stone-500">{abatingExpense.category}</p>
                 </div>
                 <button
                   type="button"
                   onClick={() => setAbatingExpense(null)}
-                  className="p-1.5 rounded-lg text-stone-400 hover:bg-stone-100 dark:hover:bg-stone-800 cursor-pointer"
+                  className="h-10 w-10 shrink-0 flex items-center justify-center rounded-lg text-stone-400 hover:bg-stone-100 dark:hover:bg-stone-800 cursor-pointer"
                 >
                   <X className="w-4 h-4" />
                 </button>
@@ -933,11 +1029,11 @@ export const FinanceModule: React.FC<FinanceModuleProps> = ({
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-2.5 pt-2">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-2">
                   <button
                     type="submit"
                     disabled={abateSubmitting}
-                    className="py-2.5 px-3 text-xs font-semibold rounded-lg border border-stone-300 dark:border-stone-700 hover:bg-stone-50 dark:hover:bg-stone-800 cursor-pointer disabled:opacity-60"
+                    className="min-h-[44px] py-2.5 px-3 text-xs font-semibold rounded-lg border border-stone-300 dark:border-stone-700 hover:bg-stone-50 dark:hover:bg-stone-800 cursor-pointer disabled:opacity-60"
                   >
                     Abater Parcial
                   </button>
@@ -946,7 +1042,7 @@ export const FinanceModule: React.FC<FinanceModuleProps> = ({
                     disabled={abateSubmitting}
                     onClick={(e) => handleAbateExpenseSubmit(e, 'full')}
                     style={{ backgroundColor: accentColor }}
-                    className="py-2.5 px-3 text-xs font-semibold text-white rounded-lg hover:brightness-110 cursor-pointer disabled:opacity-60"
+                    className="min-h-[44px] py-2.5 px-3 text-xs font-semibold text-white rounded-lg hover:brightness-110 cursor-pointer disabled:opacity-60"
                   >
                     Quitar Total ({formatBRL(remaining)})
                   </button>

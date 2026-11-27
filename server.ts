@@ -148,10 +148,12 @@ async function startServer() {
   // Create Mercado Pago Recurring Subscription (Card) or Pix Payment
   app.post('/api/payments/mercadopago/create-subscription', async (req, res) => {
     try {
-      const { payerEmail, payerName, weddingId, paymentMethod } = req.body ?? {};
+      const { payerEmail, payerName, payerPhone, weddingId, paymentMethod } = req.body ?? {};
 
-      if (typeof payerEmail !== 'string' || !payerEmail.includes('@') || payerEmail.length > 200) {
-        res.status(400).json({ error: 'E-mail do pagador inválido.' });
+      const normalizedEmail = typeof payerEmail === 'string' ? payerEmail.trim().toLowerCase() : '';
+      const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+      if (!emailPattern.test(normalizedEmail) || normalizedEmail.length > 200) {
+        res.status(400).json({ error: 'Informe um e-mail válido para continuar com o pagamento.' });
         return;
       }
       if (paymentMethod !== 'pix' && paymentMethod !== 'card') {
@@ -160,9 +162,14 @@ async function startServer() {
       }
 
       const safeWeddingId = typeof weddingId === 'string' && /^[a-zA-Z0-9_-]{1,128}$/.test(weddingId) ? weddingId : 'onboarding';
-      const safeName = typeof payerName === 'string' ? payerName.slice(0, 100) : 'Assinante Casamento Pleno';
+      const rawName = typeof payerName === 'string' ? payerName.trim() : '';
+      const safeName = rawName.length >= 2 ? rawName.slice(0, 100) : 'Assinante Casamento Pleno';
+      const nameParts = safeName.split(/\s+/);
+      const firstName = nameParts[0] || 'Cliente';
+      const lastName = nameParts.slice(1).join(' ') || 'Casamento Pleno';
+      const safePhone = typeof payerPhone === 'string' ? payerPhone.replace(/[^\d+()\s-]/g, '').slice(0, 24) : '';
       const accessToken = process.env.MERCADO_PAGO_ACCESS_TOKEN?.trim();
-      const appUrl = (process.env.APP_URL || 'https://casamentopleno.app').replace(/\/$/, '');
+      const appUrl = (process.env.APP_URL || 'https://casamento-pleno.vercel.app').replace(/\/$/, '');
 
       // Live Mercado Pago API integration when token is present in Secrets
       if (accessToken) {
@@ -176,7 +183,7 @@ async function startServer() {
             body: JSON.stringify({
               reason: 'Assinatura Mensal Casamento Pleno',
               external_reference: safeWeddingId,
-              payer_email: payerEmail,
+              payer_email: normalizedEmail,
               auto_recurring: {
                 frequency: 1,
                 frequency_type: 'months',
@@ -223,9 +230,11 @@ async function startServer() {
             description: 'Assinatura Mensal Casamento Pleno (Pix)',
             payment_method_id: 'pix',
             external_reference: safeWeddingId,
+            metadata: safePhone ? { payer_phone: safePhone } : undefined,
             payer: {
-              email: payerEmail,
-              first_name: safeName.split(' ')[0] || 'Cliente',
+              email: normalizedEmail,
+              first_name: firstName,
+              last_name: lastName,
             },
           }),
         });

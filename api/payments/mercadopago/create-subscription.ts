@@ -85,10 +85,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   try {
     const body = await readJsonBody(req);
-    const { payerEmail, payerName, weddingId, paymentMethod } = body;
+    const { payerEmail, payerName, payerPhone, weddingId, paymentMethod } = body;
 
-    if (typeof payerEmail !== 'string' || !payerEmail.includes('@') || payerEmail.length > 200) {
-      sendJson(res, 400, { error: 'E-mail do pagador inválido.' });
+    const normalizedEmail = typeof payerEmail === 'string' ? payerEmail.trim().toLowerCase() : '';
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+    if (!emailPattern.test(normalizedEmail) || normalizedEmail.length > 200) {
+      sendJson(res, 400, { error: 'Informe um e-mail válido para continuar com o pagamento.' });
       return;
     }
     if (paymentMethod !== 'pix' && paymentMethod !== 'card') {
@@ -100,10 +102,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       typeof weddingId === 'string' && /^[a-zA-Z0-9_-]{1,128}$/.test(weddingId)
         ? weddingId
         : 'onboarding';
-    const safeName =
-      typeof payerName === 'string' && payerName.trim()
-        ? payerName.trim().slice(0, 100)
-        : 'Assinante Casamento Pleno';
+    const rawName = typeof payerName === 'string' ? payerName.trim() : '';
+    const safeName = rawName.length >= 2 ? rawName.slice(0, 100) : 'Assinante Casamento Pleno';
+    const nameParts = safeName.split(/\s+/);
+    const firstName = nameParts[0] || 'Cliente';
+    const lastName = nameParts.slice(1).join(' ') || 'Casamento Pleno';
+    const safePhone =
+      typeof payerPhone === 'string' ? payerPhone.replace(/[^\d+()\s-]/g, '').slice(0, 24) : '';
     const accessToken = process.env.MERCADO_PAGO_ACCESS_TOKEN?.trim();
 
     const host = req.headers['x-forwarded-host'] || req.headers.host || '';
@@ -122,7 +127,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           body: JSON.stringify({
             reason: 'Assinatura Mensal Casamento Pleno',
             external_reference: safeWeddingId,
-            payer_email: payerEmail,
+            payer_email: normalizedEmail,
             auto_recurring: {
               frequency: 1,
               frequency_type: 'months',
@@ -169,9 +174,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           payment_method_id: 'pix',
           external_reference: safeWeddingId,
           notification_url: `${appUrl}/api/payments/mercadopago/webhook`,
+          metadata: safePhone ? { payer_phone: safePhone } : undefined,
           payer: {
-            email: payerEmail,
-            first_name: safeName.split(' ')[0] || 'Cliente',
+            email: normalizedEmail,
+            first_name: firstName,
+            last_name: lastName,
           },
         }),
       });

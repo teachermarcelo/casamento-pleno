@@ -246,7 +246,7 @@ export const VendorsModule: React.FC<VendorsModuleProps> = ({
           type="button"
           onClick={() => setShowAddForm((prev) => !prev)}
           style={{ backgroundColor: accentColor }}
-          className="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 text-xs font-semibold text-white rounded-xl hover:brightness-110 transition-all cursor-pointer shrink-0"
+          className="min-h-[42px] w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-4 py-2.5 text-xs font-semibold text-white rounded-xl hover:brightness-110 transition-all cursor-pointer shrink-0"
         >
           <Plus className="w-4 h-4" />
           <span>{showAddForm ? 'Fechar formulário' : 'Novo Fornecedor / Serviço'}</span>
@@ -254,52 +254,52 @@ export const VendorsModule: React.FC<VendorsModuleProps> = ({
       </div>
 
       {/* 4 Detailed Color-Coded Summary Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="rounded-2xl border border-stone-200 dark:border-stone-800 bg-white dark:bg-[#171A21] p-5">
-          <p className="text-xs font-medium text-stone-500">Valor Total Contratado</p>
-          <p className="mt-2 font-mono text-2xl font-semibold tabular-nums text-stone-900 dark:text-stone-100">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+        <div className="rounded-2xl border border-stone-200 dark:border-stone-800 bg-white dark:bg-[#171A21] p-3.5 sm:p-5 min-w-0">
+          <p className="text-[11px] sm:text-xs font-medium text-stone-500 truncate">Total Contratado</p>
+          <p className="mt-1.5 sm:mt-2 font-mono text-base sm:text-2xl font-semibold tabular-nums text-stone-900 dark:text-stone-100 truncate">
             {formatBRL(summary.totalContract)}
           </p>
-          <p className="mt-1.5 text-xs text-stone-500">
-            {summary.counts.all} fornecedor(es) · {summary.counts.checklistDone} no checklist
+          <p className="mt-1 sm:mt-1.5 text-[11px] sm:text-xs text-stone-500 leading-snug">
+            {summary.counts.all} forn. · {summary.counts.checklistDone} OK
           </p>
         </div>
 
-        <div className="rounded-2xl border border-emerald-200/80 dark:border-emerald-900/60 bg-emerald-50/70 dark:bg-emerald-950/25 p-5">
-          <p className="text-xs font-medium text-emerald-800 dark:text-emerald-300">Valor Pago</p>
-          <p className="mt-2 font-mono text-2xl font-semibold tabular-nums text-emerald-700 dark:text-emerald-400">
+        <div className="rounded-2xl border border-emerald-200/80 dark:border-emerald-900/60 bg-emerald-50/70 dark:bg-emerald-950/25 p-3.5 sm:p-5 min-w-0">
+          <p className="text-[11px] sm:text-xs font-medium text-emerald-800 dark:text-emerald-300 truncate">Valor Pago</p>
+          <p className="mt-1.5 sm:mt-2 font-mono text-base sm:text-2xl font-semibold tabular-nums text-emerald-700 dark:text-emerald-400 truncate">
             {formatBRL(summary.totalPaid)}
           </p>
-          <p className="mt-1.5 text-xs text-emerald-800/80 dark:text-emerald-300/80 tabular-nums">
-            {summary.pctPaid}% quitado · {summary.counts.paid} totalmente pago(s)
+          <p className="mt-1 sm:mt-1.5 text-[11px] sm:text-xs text-emerald-800/80 dark:text-emerald-300/80 tabular-nums leading-snug">
+            {summary.pctPaid}% · {summary.counts.paid} quitado(s)
           </p>
         </div>
 
-        <div className="rounded-2xl border border-amber-200/80 dark:border-amber-900/60 bg-amber-50/75 dark:bg-amber-950/25 p-5">
-          <p className="text-xs font-medium text-amber-900 dark:text-amber-300">Valor Pendente</p>
-          <p className="mt-2 font-mono text-2xl font-semibold tabular-nums text-amber-700 dark:text-amber-400">
+        <div className="rounded-2xl border border-amber-200/80 dark:border-amber-900/60 bg-amber-50/75 dark:bg-amber-950/25 p-3.5 sm:p-5 min-w-0">
+          <p className="text-[11px] sm:text-xs font-medium text-amber-900 dark:text-amber-300 truncate">Valor Pendente</p>
+          <p className="mt-1.5 sm:mt-2 font-mono text-base sm:text-2xl font-semibold tabular-nums text-amber-700 dark:text-amber-400 truncate">
             {formatBRL(summary.totalPending)}
           </p>
-          <p className="mt-1.5 text-xs text-amber-900/80 dark:text-amber-300/80">
-            {summary.counts.partial} parcial(is) · {summary.counts.pending} sem pagamento
+          <p className="mt-1 sm:mt-1.5 text-[11px] sm:text-xs text-amber-900/80 dark:text-amber-300/80 leading-snug">
+            {summary.counts.partial} parc. · {summary.counts.pending} pend.
           </p>
         </div>
 
-        <div className="rounded-2xl border border-stone-200 dark:border-stone-800 bg-[#FBF9F5] dark:bg-[#171A21] p-5 flex flex-col justify-between">
-          <div className="flex items-center justify-between text-xs">
-            <span className="font-medium text-stone-600 dark:text-stone-400">Progresso Quitado</span>
-            <span className="font-mono font-semibold tabular-nums" style={{ color: accentColor }}>
+        <div className="rounded-2xl border border-stone-200 dark:border-stone-800 bg-[#FBF9F5] dark:bg-[#171A21] p-3.5 sm:p-5 flex flex-col justify-between min-w-0">
+          <div className="flex items-center justify-between gap-2 text-[11px] sm:text-xs">
+            <span className="font-medium text-stone-600 dark:text-stone-400 truncate">Quitado</span>
+            <span className="font-mono font-semibold tabular-nums shrink-0" style={{ color: accentColor }}>
               {summary.pctPaid}%
             </span>
           </div>
-          <div className="mt-3 h-2.5 w-full rounded-full bg-stone-200/80 dark:bg-stone-800 overflow-hidden">
+          <div className="mt-2.5 sm:mt-3 h-2.5 w-full rounded-full bg-stone-200/80 dark:bg-stone-800 overflow-hidden">
             <div
               className="h-full rounded-full transition-all duration-500"
               style={{ width: `${summary.pctPaid}%`, backgroundColor: '#15803D' }}
             />
           </div>
-          <p className="mt-2 text-xs text-stone-500">
-            Sincronizado em tempo real com Pagamentos
+          <p className="mt-2 text-[11px] sm:text-xs text-stone-500 truncate">
+            Sincronizado com Pagamentos
           </p>
         </div>
       </div>
@@ -308,12 +308,12 @@ export const VendorsModule: React.FC<VendorsModuleProps> = ({
       {showAddForm && (
         <form
           onSubmit={handleAdd}
-          className="rounded-2xl border border-stone-200 dark:border-stone-800 bg-white dark:bg-[#171A21] p-6 space-y-4"
+          className="rounded-2xl border border-stone-200 dark:border-stone-800 bg-white dark:bg-[#171A21] p-4 sm:p-6 space-y-4"
         >
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
             <h3 className="font-editorial text-2xl font-semibold">Cadastrar Fornecedor & Contrato</h3>
             <span className="inline-flex items-center gap-1 text-xs text-emerald-700 dark:text-emerald-400">
-              <Link2 className="w-3.5 h-3.5" />
+              <Link2 className="w-3.5 h-3.5 shrink-0" />
               Conectado automaticamente à área de Pagamentos
             </span>
           </div>
@@ -444,7 +444,7 @@ export const VendorsModule: React.FC<VendorsModuleProps> = ({
 
       {/* Interactive Filter Tabs + Search */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
-        <div className="inline-flex flex-wrap items-center gap-1 rounded-xl bg-stone-200/70 dark:bg-stone-800/80 p-1">
+        <div className="flex items-center gap-1 overflow-x-auto no-scrollbar max-w-full rounded-xl bg-stone-200/70 dark:bg-stone-800/80 p-1">
           {(
             [
               ['all', `Todos (${summary.counts.all})`],
@@ -457,7 +457,7 @@ export const VendorsModule: React.FC<VendorsModuleProps> = ({
               key={tabKey}
               type="button"
               onClick={() => setStatusTab(tabKey)}
-              className={`px-3.5 py-1.5 text-xs font-medium rounded-lg transition-colors cursor-pointer ${
+              className={`shrink-0 whitespace-nowrap min-h-[36px] px-3 sm:px-3.5 py-1.5 text-xs font-medium rounded-lg transition-colors cursor-pointer ${
                 statusTab === tabKey
                   ? 'bg-white dark:bg-[#1C2029] text-stone-900 dark:text-stone-100 shadow-xs'
                   : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200'
@@ -481,7 +481,7 @@ export const VendorsModule: React.FC<VendorsModuleProps> = ({
 
       {/* Detailed Vendor Financial Cards */}
       {filteredVendors.length === 0 ? (
-        <div className="rounded-2xl border border-stone-200 dark:border-stone-800 bg-white dark:bg-[#171A21] p-10 text-center">
+        <div className="rounded-2xl border border-stone-200 dark:border-stone-800 bg-white dark:bg-[#171A21] p-8 sm:p-10 text-center">
           <p className="text-sm text-stone-500">
             Nenhum fornecedor encontrado neste filtro. Clique em “Novo Fornecedor / Serviço” para cadastrar.
           </p>
@@ -491,7 +491,7 @@ export const VendorsModule: React.FC<VendorsModuleProps> = ({
           {filteredVendors.map(({ vendor: v, linkedExpense, paid, pending, bucket, pct, lastDate, dueDate, method }) => (
             <div
               key={v.id}
-              className="rounded-2xl border border-stone-200 dark:border-stone-800 bg-white dark:bg-[#171A21] p-5 space-y-4 transition-colors hover:border-stone-300 dark:hover:border-stone-700"
+              className="rounded-2xl border border-stone-200 dark:border-stone-800 bg-white dark:bg-[#171A21] p-4 sm:p-5 space-y-4 transition-colors hover:border-stone-300 dark:hover:border-stone-700"
             >
               <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-4">
                 <div className="flex items-start gap-3 min-w-0">
@@ -536,13 +536,13 @@ export const VendorsModule: React.FC<VendorsModuleProps> = ({
                 </div>
 
                 {/* Actions */}
-                <div className="flex flex-wrap items-center gap-2 shrink-0">
+                <div className="flex items-center gap-2 shrink-0">
                   {pending > 0 ? (
                     <button
                       type="button"
                       onClick={() => openAbateModal(v, pending, dueDate, method)}
                       style={{ backgroundColor: accentColor }}
-                      className="inline-flex items-center gap-1.5 rounded-lg px-3.5 py-2 text-xs font-semibold text-white hover:brightness-110 transition-all cursor-pointer"
+                      className="flex-1 sm:flex-none min-h-[40px] inline-flex items-center justify-center gap-1.5 rounded-lg px-3.5 py-2 text-xs font-semibold text-white hover:brightness-110 transition-all cursor-pointer"
                     >
                       <CreditCard className="w-3.5 h-3.5" />
                       <span>Abater Pagamento</span>
@@ -558,7 +558,7 @@ export const VendorsModule: React.FC<VendorsModuleProps> = ({
                     type="button"
                     onClick={() => deleteVendor(wedding.id, v.id, linkedExpense?.id)}
                     title="Remover fornecedor e lançamento conectado"
-                    className="p-2 rounded-lg text-stone-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30 cursor-pointer"
+                    className="h-10 w-10 shrink-0 flex items-center justify-center rounded-lg border border-stone-200 dark:border-stone-700 sm:border-transparent text-stone-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30 cursor-pointer"
                   >
                     <Trash2 className="w-4 h-4" />
                   </button>
@@ -626,23 +626,23 @@ export const VendorsModule: React.FC<VendorsModuleProps> = ({
         const remaining = Math.max(0, abatingVendor.contractValue - alreadyPaid);
         return (
           <div
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/55 p-4 backdrop-blur-xs"
+            className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/55 p-0 sm:p-4 backdrop-blur-xs"
             role="dialog"
             aria-modal="true"
           >
-            <div className="w-full max-w-md rounded-2xl border border-stone-200 dark:border-stone-800 bg-white dark:bg-[#171A21] p-6 shadow-2xl space-y-5">
-              <div className="flex items-start justify-between gap-4">
-                <div>
+            <div className="w-full max-w-md max-h-[90vh] overflow-y-auto rounded-t-3xl sm:rounded-2xl border border-stone-200 dark:border-stone-800 bg-white dark:bg-[#171A21] p-5 sm:p-6 pb-[max(1.5rem,env(safe-area-inset-bottom))] shadow-2xl space-y-5">
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
                   <p className="text-xs font-medium" style={{ color: accentColor }}>
                     Abater Pagamento · Sincronizado com Financeiro
                   </p>
-                  <h3 className="mt-1 font-editorial text-2xl font-semibold">{abatingVendor.name}</h3>
+                  <h3 className="mt-1 font-editorial text-2xl font-semibold break-words">{abatingVendor.name}</h3>
                   <p className="text-xs text-stone-500">{abatingVendor.service}</p>
                 </div>
                 <button
                   type="button"
                   onClick={() => setAbatingVendor(null)}
-                  className="p-1.5 rounded-lg text-stone-400 hover:bg-stone-100 dark:hover:bg-stone-800 cursor-pointer"
+                  className="h-10 w-10 shrink-0 flex items-center justify-center rounded-lg text-stone-400 hover:bg-stone-100 dark:hover:bg-stone-800 cursor-pointer"
                 >
                   <X className="w-4 h-4" />
                 </button>
@@ -734,11 +734,11 @@ export const VendorsModule: React.FC<VendorsModuleProps> = ({
                   />
                 </div>
 
-                <div className="grid grid-cols-2 gap-2.5 pt-2">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-2">
                   <button
                     type="submit"
                     disabled={abateSubmitting}
-                    className="py-2.5 px-3 text-xs font-semibold rounded-lg border border-stone-300 dark:border-stone-700 hover:bg-stone-50 dark:hover:bg-stone-800 cursor-pointer disabled:opacity-60"
+                    className="min-h-[44px] py-2.5 px-3 text-xs font-semibold rounded-lg border border-stone-300 dark:border-stone-700 hover:bg-stone-50 dark:hover:bg-stone-800 cursor-pointer disabled:opacity-60"
                   >
                     Abater Valor Parcial
                   </button>
@@ -747,7 +747,7 @@ export const VendorsModule: React.FC<VendorsModuleProps> = ({
                     disabled={abateSubmitting}
                     onClick={(e) => handleAbateSubmit(e, 'full')}
                     style={{ backgroundColor: accentColor }}
-                    className="py-2.5 px-3 text-xs font-semibold text-white rounded-lg hover:brightness-110 cursor-pointer disabled:opacity-60"
+                    className="min-h-[44px] py-2.5 px-3 text-xs font-semibold text-white rounded-lg hover:brightness-110 cursor-pointer disabled:opacity-60"
                   >
                     Quitar Total ({formatBRL(remaining)})
                   </button>
@@ -1285,7 +1285,7 @@ export const CeremonyAndGiftsModule: React.FC<CeremonyAndGiftsModuleProps> = ({
               key={id}
               type="button"
               onClick={() => setSubTab(id)}
-              className={`px-2.5 sm:px-3.5 py-2 sm:py-1.5 text-xs font-medium rounded-lg transition-colors cursor-pointer text-center truncate ${
+              className={`min-h-[38px] px-2.5 sm:px-3.5 py-2 sm:py-1.5 text-xs font-medium rounded-lg transition-colors cursor-pointer text-center truncate ${
                 subTab === id
                   ? 'bg-white dark:bg-[#1C2029] text-stone-900 dark:text-stone-100 shadow-xs font-semibold'
                   : 'text-stone-600 dark:text-stone-400'
@@ -2039,7 +2039,7 @@ export const CeremonyAndGiftsModule: React.FC<CeremonyAndGiftsModuleProps> = ({
 
       {/* Floating Organizational Action Dock: Desfazer / Refazer / Novo */}
       <div
-        className="fixed bottom-[74px] lg:bottom-5 left-3 lg:left-auto lg:right-60 z-30 inline-flex items-center gap-1 rounded-full border border-[#DFBE7A]/50 bg-[#173526]/95 backdrop-blur-md text-[#FBF7F0] p-1 shadow-xl"
+        className="fixed bottom-[76px] lg:bottom-5 left-3 lg:left-auto lg:right-60 z-30 inline-flex items-center gap-0.5 sm:gap-1 rounded-full border border-[#DFBE7A]/50 bg-[#173526]/95 backdrop-blur-md text-[#FBF7F0] p-1 shadow-xl"
         aria-label="Ações rápidas de organização"
       >
         <button
@@ -2051,7 +2051,7 @@ export const CeremonyAndGiftsModule: React.FC<CeremonyAndGiftsModuleProps> = ({
               ? `Desfazer: ${undoStack[undoStack.length - 1].label}`
               : 'Nada para desfazer'
           }
-          className="inline-flex items-center gap-1.5 rounded-full px-3 py-2 text-xs font-semibold transition-colors hover:bg-white/10 disabled:opacity-40 cursor-pointer"
+          className="min-h-[38px] inline-flex items-center gap-1.5 rounded-full px-2.5 sm:px-3 py-1.5 text-xs font-semibold transition-colors hover:bg-white/10 disabled:opacity-40 cursor-pointer"
         >
           <Undo2 className="w-3.5 h-3.5 text-[#DFBE7A]" />
           <span className="hidden sm:inline">Desfazer</span>
@@ -2073,7 +2073,7 @@ export const CeremonyAndGiftsModule: React.FC<CeremonyAndGiftsModuleProps> = ({
               ? `Refazer: ${redoStack[redoStack.length - 1].label}`
               : 'Nada para refazer'
           }
-          className="inline-flex items-center gap-1.5 rounded-full px-3 py-2 text-xs font-semibold transition-colors hover:bg-white/10 disabled:opacity-40 cursor-pointer"
+          className="min-h-[38px] inline-flex items-center gap-1.5 rounded-full px-2.5 sm:px-3 py-1.5 text-xs font-semibold transition-colors hover:bg-white/10 disabled:opacity-40 cursor-pointer"
         >
           <Redo2 className="w-3.5 h-3.5 text-[#DFBE7A]" />
           <span className="hidden sm:inline">Refazer</span>
@@ -2090,7 +2090,7 @@ export const CeremonyAndGiftsModule: React.FC<CeremonyAndGiftsModuleProps> = ({
           type="button"
           onClick={focusQuickAdd}
           title="Adicionar novo item"
-          className="inline-flex items-center gap-1 rounded-full bg-[#DFBE7A] text-[#173526] hover:bg-[#EBD198] px-3 py-2 text-xs font-semibold transition-colors cursor-pointer"
+          className="min-h-[38px] inline-flex items-center gap-1 rounded-full bg-[#DFBE7A] text-[#173526] hover:bg-[#EBD198] px-3 py-1.5 text-xs font-semibold transition-colors cursor-pointer"
         >
           <Plus className="w-3.5 h-3.5" />
           <span className="hidden sm:inline">Novo</span>

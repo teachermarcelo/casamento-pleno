@@ -211,12 +211,14 @@ export const PanicButtonModal: React.FC<PanicButtonModalProps> = ({
         type="button"
         onClick={() => setOpen(true)}
         style={{ backgroundColor: color }}
-        className={`fixed bottom-[74px] lg:bottom-5 z-30 inline-flex items-center gap-2 rounded-full px-3.5 py-2.5 sm:px-5 sm:py-3 text-xs sm:text-sm font-semibold text-white shadow-lg hover:brightness-110 transition-transform active:scale-95 focus-visible:outline-2 focus-visible:outline-offset-2 whitespace-nowrap cursor-pointer ${
+        aria-label={label}
+        title={label}
+        className={`fixed bottom-[76px] lg:bottom-5 z-30 inline-flex items-center justify-center gap-2 rounded-full h-11 w-11 sm:h-auto sm:w-auto sm:px-5 sm:py-3 text-xs sm:text-sm font-semibold text-white shadow-lg ring-2 ring-white/25 hover:brightness-110 transition-transform active:scale-95 focus-visible:outline-2 focus-visible:outline-offset-2 whitespace-nowrap cursor-pointer ${
           position === 'bottom-left' ? 'left-3 sm:left-5' : 'right-3 sm:right-5'
         }`}
       >
-        <Wind className="w-4 h-4 shrink-0" />
-        <span>{label}</span>
+        <Wind className="w-5 h-5 sm:w-4 sm:h-4 shrink-0" />
+        <span className="hidden sm:inline">{label}</span>
       </button>
 
       <AnimatePresence>
@@ -226,43 +228,43 @@ export const PanicButtonModal: React.FC<PanicButtonModalProps> = ({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="fixed inset-0 z-50 flex items-center justify-center bg-stone-950/65 p-4 backdrop-blur-sm"
+            className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-stone-950/65 p-0 sm:p-4 backdrop-blur-sm"
             role="dialog"
             aria-modal="true"
             aria-labelledby="panic-modal-title"
           >
             <motion.div
-              initial={{ opacity: 0, scale: 0.96, y: 12 }}
+              initial={{ opacity: 0, scale: 0.96, y: 16 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.96, y: 12 }}
+              exit={{ opacity: 0, scale: 0.96, y: 16 }}
               transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
-              className="w-full max-w-xl overflow-hidden rounded-2xl bg-[#FAF9F6] dark:bg-[#14171D] border border-stone-200 dark:border-stone-800 shadow-2xl"
+              className="w-full max-w-xl max-h-[88vh] flex flex-col overflow-hidden rounded-t-3xl sm:rounded-2xl bg-[#FAF9F6] dark:bg-[#14171D] border border-stone-200 dark:border-stone-800 shadow-2xl"
             >
-              <div className="flex items-start justify-between gap-4 border-b border-stone-200 dark:border-stone-800 px-6 py-5">
-                <div>
-                  <p className="text-xs font-medium text-stone-500 dark:text-stone-400">
+              <div className="flex items-start justify-between gap-3 border-b border-stone-200 dark:border-stone-800 px-4 sm:px-6 py-4 sm:py-5 shrink-0">
+                <div className="min-w-0">
+                  <p className="text-[11px] sm:text-xs font-medium text-stone-500 dark:text-stone-400">
                     Espaço de Acolhimento · Saúde Mental da Noiva
                   </p>
-                  <h2 id="panic-modal-title" className="mt-1 font-editorial text-3xl font-semibold text-stone-900 dark:text-stone-100">
+                  <h2 id="panic-modal-title" className="mt-1 font-editorial text-2xl sm:text-3xl font-semibold text-stone-900 dark:text-stone-100 leading-tight">
                     Respire. Tudo vai ficar bem.
                   </h2>
                 </div>
                 <button
                   type="button"
                   onClick={() => setOpen(false)}
-                  className="p-2 rounded-lg text-stone-500 hover:bg-stone-200/70 dark:hover:bg-stone-800 transition-colors"
+                  className="h-10 w-10 shrink-0 flex items-center justify-center rounded-lg text-stone-500 hover:bg-stone-200/70 dark:hover:bg-stone-800 transition-colors cursor-pointer"
                   aria-label="Fechar espaço de acolhimento"
                 >
                   <X className="w-5 h-5" />
                 </button>
               </div>
 
-              <div className="px-6 pt-4">
-                <div className="inline-flex items-center gap-1 rounded-lg bg-stone-200/70 dark:bg-stone-800/80 p-1">
+              <div className="px-4 sm:px-6 pt-3.5 sm:pt-4 shrink-0">
+                <div className="flex items-center gap-1 overflow-x-auto no-scrollbar max-w-full rounded-lg bg-stone-200/70 dark:bg-stone-800/80 p-1">
                   <button
                     type="button"
                     onClick={() => setActiveTab('breath')}
-                    className={`px-3.5 py-1.5 text-xs font-medium rounded-md transition-colors whitespace-nowrap ${
+                    className={`shrink-0 min-h-[36px] px-3 sm:px-3.5 py-1.5 text-xs font-medium rounded-md transition-colors whitespace-nowrap cursor-pointer ${
                       activeTab === 'breath'
                         ? 'bg-white dark:bg-[#1C2029] text-stone-900 dark:text-stone-100 shadow-xs'
                         : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200'
@@ -273,7 +275,7 @@ export const PanicButtonModal: React.FC<PanicButtonModalProps> = ({
                   <button
                     type="button"
                     onClick={() => setActiveTab('audio')}
-                    className={`px-3.5 py-1.5 text-xs font-medium rounded-md transition-colors whitespace-nowrap ${
+                    className={`shrink-0 min-h-[36px] px-3 sm:px-3.5 py-1.5 text-xs font-medium rounded-md transition-colors whitespace-nowrap cursor-pointer ${
                       activeTab === 'audio'
                         ? 'bg-white dark:bg-[#1C2029] text-stone-900 dark:text-stone-100 shadow-xs'
                         : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200'
@@ -284,7 +286,7 @@ export const PanicButtonModal: React.FC<PanicButtonModalProps> = ({
                   <button
                     type="button"
                     onClick={() => setActiveTab('tips')}
-                    className={`px-3.5 py-1.5 text-xs font-medium rounded-md transition-colors whitespace-nowrap ${
+                    className={`shrink-0 min-h-[36px] px-3 sm:px-3.5 py-1.5 text-xs font-medium rounded-md transition-colors whitespace-nowrap cursor-pointer ${
                       activeTab === 'tips'
                         ? 'bg-white dark:bg-[#1C2029] text-stone-900 dark:text-stone-100 shadow-xs'
                         : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200'
@@ -295,9 +297,9 @@ export const PanicButtonModal: React.FC<PanicButtonModalProps> = ({
                 </div>
               </div>
 
-              <div className="p-6">
+              <div className="p-4 sm:p-6 overflow-y-auto pb-[max(1.25rem,env(safe-area-inset-bottom))]">
                 {activeTab === 'breath' && (
-                  <div className="flex flex-col items-center text-center py-4">
+                  <div className="flex flex-col items-center text-center py-2 sm:py-4">
                     <div className="relative flex h-52 w-52 items-center justify-center">
                       <motion.div
                         animate={{

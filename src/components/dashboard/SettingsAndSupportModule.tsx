@@ -219,11 +219,11 @@ export const SettingsAndSupportModule: React.FC<SettingsAndSupportModuleProps> =
   };
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+    <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-6 items-start">
       {/* Left: Photos, Colors, Identity, Panic Button, Notifications, Biometrics, Webhooks */}
-      <form onSubmit={handleSaveAll} className="lg:col-span-7 space-y-6">
+      <form onSubmit={handleSaveAll} className="lg:col-span-7 space-y-5 sm:space-y-6">
         {/* Estúdio de Fotos de Entrada & Enquadramento */}
-        <div className="rounded-2xl border border-stone-200 dark:border-stone-800 bg-white dark:bg-[#171A21] p-6 space-y-5">
+        <div className="rounded-2xl border border-stone-200 dark:border-stone-800 bg-white dark:bg-[#171A21] p-4 sm:p-6 space-y-5">
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-2">
               <Camera className="w-4 h-4" style={{ color: previewAccent }} />
@@ -378,7 +378,7 @@ export const SettingsAndSupportModule: React.FC<SettingsAndSupportModuleProps> =
         </div>
 
         {/* Paleta de Cores & Cor Personalizada + Identidade */}
-        <div className="rounded-2xl border border-stone-200 dark:border-stone-800 bg-white dark:bg-[#171A21] p-6 space-y-5">
+        <div className="rounded-2xl border border-stone-200 dark:border-stone-800 bg-white dark:bg-[#171A21] p-4 sm:p-6 space-y-5">
           <div className="flex items-center gap-2">
             <Palette className="w-4 h-4" style={{ color: previewAccent }} />
             <h3 className="font-editorial text-2xl font-semibold">Paleta de Cores & Dados do Casamento</h3>
@@ -485,7 +485,7 @@ export const SettingsAndSupportModule: React.FC<SettingsAndSupportModuleProps> =
         </div>
 
         {/* Botão do Surtando Customization */}
-        <div className="rounded-2xl border border-stone-200 dark:border-stone-800 bg-white dark:bg-[#171A21] p-6 space-y-4">
+        <div className="rounded-2xl border border-stone-200 dark:border-stone-800 bg-white dark:bg-[#171A21] p-4 sm:p-6 space-y-4">
           <div className="flex items-center gap-2">
             <Wind className="w-4 h-4" style={{ color: previewAccent }} />
             <h3 className="font-editorial text-2xl font-semibold">Design do Botão do Surtando</h3>
@@ -545,7 +545,7 @@ export const SettingsAndSupportModule: React.FC<SettingsAndSupportModuleProps> =
         </div>
 
         {/* Notifications, Biometric Vault & Webhooks */}
-        <div className="rounded-2xl border border-stone-200 dark:border-stone-800 bg-white dark:bg-[#171A21] p-6 space-y-5">
+        <div className="rounded-2xl border border-stone-200 dark:border-stone-800 bg-white dark:bg-[#171A21] p-4 sm:p-6 space-y-5">
           <div className="flex items-center gap-2">
             <Bell className="w-4 h-4" style={{ color: previewAccent }} />
             <h3 className="font-editorial text-2xl font-semibold">Notificações, Biometria & Webhooks</h3>
@@ -615,22 +615,22 @@ export const SettingsAndSupportModule: React.FC<SettingsAndSupportModuleProps> =
 
           <div className="pt-4 border-t border-stone-200 dark:border-stone-800 space-y-2.5">
             <label className="flex items-center gap-1.5 text-xs font-medium text-stone-600 dark:text-stone-400">
-              <Webhook className="w-3.5 h-3.5" />
+              <Webhook className="w-3.5 h-3.5 shrink-0" />
               <span>Webhook RESTful configurável (HTTPS)</span>
             </label>
-            <div className="flex gap-2">
+            <div className="flex flex-col sm:flex-row gap-2">
               <input
                 type="url"
                 maxLength={500}
                 value={webhookUrl}
                 onChange={(e) => setWebhookUrl(e.target.value)}
                 placeholder="https://seu-fluxo.n8n.cloud/webhook/casamento"
-                className="flex-1 rounded-lg border border-stone-300 dark:border-stone-700 bg-transparent px-3 py-2 text-xs font-mono"
+                className="flex-1 min-w-0 rounded-lg border border-stone-300 dark:border-stone-700 bg-transparent px-3 py-2 text-xs font-mono"
               />
               <button
                 type="button"
                 onClick={handleTestWebhook}
-                className="rounded-lg border border-stone-300 dark:border-stone-700 px-3 py-2 text-xs font-medium hover:bg-stone-50 dark:hover:bg-stone-800 cursor-pointer whitespace-nowrap"
+                className="min-h-[40px] rounded-lg border border-stone-300 dark:border-stone-700 px-3.5 py-2 text-xs font-medium hover:bg-stone-50 dark:hover:bg-stone-800 cursor-pointer whitespace-nowrap"
               >
                 Testar Webhook
               </button>
@@ -641,7 +641,7 @@ export const SettingsAndSupportModule: React.FC<SettingsAndSupportModuleProps> =
           <button
             type="submit"
             style={{ backgroundColor: previewAccent }}
-            className="w-full py-3 text-sm font-semibold text-white rounded-xl hover:brightness-110 transition-all cursor-pointer"
+            className="w-full min-h-[46px] py-3 text-sm font-semibold text-white rounded-xl hover:brightness-110 transition-all cursor-pointer"
           >
             Salvar fotos, cores e configurações
           </button>
@@ -649,17 +649,17 @@ export const SettingsAndSupportModule: React.FC<SettingsAndSupportModuleProps> =
       </form>
 
       {/* Right: Real-Time Customer Support Chat */}
-      <div className="lg:col-span-5 rounded-2xl border border-stone-200 dark:border-stone-800 bg-white dark:bg-[#171A21] flex flex-col h-[580px] sticky top-20">
-        <div className="p-5 border-b border-stone-200 dark:border-stone-800">
+      <div className="lg:col-span-5 rounded-2xl border border-stone-200 dark:border-stone-800 bg-white dark:bg-[#171A21] flex flex-col h-[440px] lg:h-[580px] lg:sticky lg:top-20">
+        <div className="p-4 sm:p-5 border-b border-stone-200 dark:border-stone-800">
           <h3 className="font-editorial text-2xl font-semibold">Suporte em Tempo Real</h3>
           <p className="text-xs text-stone-500">
             Converse diretamente com a equipe Casamento Pleno pelo chat interno.
           </p>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-5 space-y-3">
+        <div className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-3">
           {messages.length === 0 ? (
-            <div className="h-full flex items-center justify-center text-center text-xs text-stone-400 px-6">
+            <div className="h-full flex items-center justify-center text-center text-xs text-stone-400 px-4 sm:px-6">
               Envie sua dúvida sobre o site dos convidados, Pix ou planejamento. Responderemos aqui em tempo real.
             </div>
           ) : (
@@ -669,7 +669,7 @@ export const SettingsAndSupportModule: React.FC<SettingsAndSupportModuleProps> =
                 className={`flex flex-col ${m.senderRole === 'bride' ? 'items-end' : 'items-start'}`}
               >
                 <div
-                  className={`max-w-[82%] rounded-xl px-3.5 py-2.5 text-sm ${
+                  className={`max-w-[85%] rounded-xl px-3.5 py-2.5 text-sm break-words ${
                     m.senderRole === 'bride'
                       ? 'text-white'
                       : 'bg-stone-100 dark:bg-stone-800 text-stone-900 dark:text-stone-100'
@@ -684,19 +684,19 @@ export const SettingsAndSupportModule: React.FC<SettingsAndSupportModuleProps> =
           )}
         </div>
 
-        <form onSubmit={handleSendChat} className="p-4 border-t border-stone-200 dark:border-stone-800 flex gap-2">
+        <form onSubmit={handleSendChat} className="p-3.5 sm:p-4 border-t border-stone-200 dark:border-stone-800 flex gap-2">
           <input
             maxLength={1000}
             value={chatText}
             onChange={(e) => setChatText(e.target.value)}
             placeholder="Escreva sua mensagem..."
-            className="flex-1 rounded-lg border border-stone-300 dark:border-stone-700 bg-transparent px-3 py-2 text-sm"
+            className="flex-1 min-w-0 rounded-lg border border-stone-300 dark:border-stone-700 bg-transparent px-3 py-2 text-sm"
           />
           <button
             type="submit"
             disabled={sendingMsg}
             style={{ backgroundColor: previewAccent }}
-            className="inline-flex items-center justify-center rounded-lg px-4 py-2 text-white cursor-pointer disabled:opacity-60"
+            className="min-h-[42px] min-w-[44px] inline-flex items-center justify-center rounded-lg px-4 py-2 text-white cursor-pointer disabled:opacity-60 shrink-0"
             aria-label="Enviar mensagem"
           >
             <Send className="w-4 h-4" />

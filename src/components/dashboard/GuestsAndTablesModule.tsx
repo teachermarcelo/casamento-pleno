@@ -145,7 +145,7 @@ export const GuestsModule: React.FC<GuestsModuleProps> = ({ wedding, guests, acc
               setCopiedLink(true);
               setTimeout(() => setCopiedLink(false), 2000);
             }}
-            className="inline-flex items-center gap-1.5 rounded-lg border border-stone-300 dark:border-stone-700 bg-white dark:bg-[#171A21] px-3.5 py-2 text-xs font-medium hover:bg-stone-50 dark:hover:bg-stone-800 cursor-pointer"
+            className="min-h-[40px] inline-flex items-center gap-1.5 rounded-lg border border-stone-300 dark:border-stone-700 bg-white dark:bg-[#171A21] px-3 py-2 text-xs font-medium hover:bg-stone-50 dark:hover:bg-stone-800 cursor-pointer"
           >
             {copiedLink ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
             <span>{copiedLink ? 'Link copiado' : 'Copiar link RSVP'}</span>
@@ -154,64 +154,64 @@ export const GuestsModule: React.FC<GuestsModuleProps> = ({ wedding, guests, acc
             href={buildWhatsAppLink()}
             target="_blank"
             rel="noreferrer"
-            className="inline-flex items-center gap-1.5 rounded-lg border border-stone-300 dark:border-stone-700 bg-white dark:bg-[#171A21] px-3.5 py-2 text-xs font-medium hover:bg-stone-50 dark:hover:bg-stone-800"
+            className="min-h-[40px] inline-flex items-center gap-1.5 rounded-lg border border-stone-300 dark:border-stone-700 bg-white dark:bg-[#171A21] px-3 py-2 text-xs font-medium hover:bg-stone-50 dark:hover:bg-stone-800"
           >
             <MessageCircle className="w-3.5 h-3.5 text-emerald-600" />
-            <span>Enviar no WhatsApp</span>
+            <span>WhatsApp</span>
           </a>
           <button
             type="button"
             onClick={handleExportCSV}
-            className="inline-flex items-center gap-1.5 rounded-lg border border-stone-300 dark:border-stone-700 bg-white dark:bg-[#171A21] px-3.5 py-2 text-xs font-medium hover:bg-stone-50 dark:hover:bg-stone-800 cursor-pointer"
+            className="min-h-[40px] inline-flex items-center gap-1.5 rounded-lg border border-stone-300 dark:border-stone-700 bg-white dark:bg-[#171A21] px-3 py-2 text-xs font-medium hover:bg-stone-50 dark:hover:bg-stone-800 cursor-pointer"
           >
             <Download className="w-3.5 h-3.5" />
-            <span>Exportar CSV</span>
+            <span>CSV</span>
           </button>
         </div>
       </div>
 
       {/* KPI & Chart Row */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        <div className="lg:col-span-5 grid grid-cols-2 gap-4">
-          <div className="rounded-xl border border-stone-200 dark:border-stone-800 bg-white dark:bg-[#171A21] p-5">
-            <p className="text-xs text-stone-500 dark:text-stone-400">Total de Pessoas</p>
-            <p className="mt-2 font-mono text-3xl font-semibold tabular-nums">{stats.totalPeople}</p>
-            <p className="mt-1 text-xs text-stone-500 tabular-nums">
-              {stats.totalAdults} adultos · {stats.totalChildren} crianças
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-6">
+        <div className="lg:col-span-5 grid grid-cols-2 gap-3 sm:gap-4">
+          <div className="rounded-xl border border-stone-200 dark:border-stone-800 bg-white dark:bg-[#171A21] p-3.5 sm:p-5 min-w-0">
+            <p className="text-[11px] sm:text-xs text-stone-500 dark:text-stone-400 truncate">Total de Pessoas</p>
+            <p className="mt-1.5 sm:mt-2 font-mono text-2xl sm:text-3xl font-semibold tabular-nums">{stats.totalPeople}</p>
+            <p className="mt-1 text-[11px] sm:text-xs text-stone-500 tabular-nums">
+              {stats.totalAdults} ad. · {stats.totalChildren} cri.
             </p>
           </div>
-          <div className="rounded-xl border border-stone-200 dark:border-stone-800 bg-white dark:bg-[#171A21] p-5">
-            <p className="text-xs text-stone-500 dark:text-stone-400">Confirmados</p>
-            <p className="mt-2 font-mono text-3xl font-semibold tabular-nums text-emerald-700 dark:text-emerald-400">
+          <div className="rounded-xl border border-stone-200 dark:border-stone-800 bg-white dark:bg-[#171A21] p-3.5 sm:p-5 min-w-0">
+            <p className="text-[11px] sm:text-xs text-stone-500 dark:text-stone-400 truncate">Confirmados</p>
+            <p className="mt-1.5 sm:mt-2 font-mono text-2xl sm:text-3xl font-semibold tabular-nums text-emerald-700 dark:text-emerald-400">
               {stats.confirmedPeople}
             </p>
-            <p className="mt-1 text-xs text-stone-500 tabular-nums">
-              {stats.confirmedCount} convites confirmados
+            <p className="mt-1 text-[11px] sm:text-xs text-stone-500 tabular-nums">
+              {stats.confirmedCount} convite(s)
             </p>
           </div>
-          <div className="rounded-xl border border-stone-200 dark:border-stone-800 bg-white dark:bg-[#171A21] p-5">
-            <p className="text-xs text-stone-500 dark:text-stone-400">Aguardando</p>
-            <p className="mt-2 font-mono text-3xl font-semibold tabular-nums text-amber-700 dark:text-amber-400">
+          <div className="rounded-xl border border-stone-200 dark:border-stone-800 bg-white dark:bg-[#171A21] p-3.5 sm:p-5 min-w-0">
+            <p className="text-[11px] sm:text-xs text-stone-500 dark:text-stone-400 truncate">Aguardando</p>
+            <p className="mt-1.5 sm:mt-2 font-mono text-2xl sm:text-3xl font-semibold tabular-nums text-amber-700 dark:text-amber-400">
               {stats.pendingPeople}
             </p>
           </div>
-          <div className="rounded-xl border border-stone-200 dark:border-stone-800 bg-white dark:bg-[#171A21] p-5">
-            <p className="text-xs text-stone-500 dark:text-stone-400">Recusados</p>
-            <p className="mt-2 font-mono text-3xl font-semibold tabular-nums text-red-700 dark:text-red-400">
+          <div className="rounded-xl border border-stone-200 dark:border-stone-800 bg-white dark:bg-[#171A21] p-3.5 sm:p-5 min-w-0">
+            <p className="text-[11px] sm:text-xs text-stone-500 dark:text-stone-400 truncate">Recusados</p>
+            <p className="mt-1.5 sm:mt-2 font-mono text-2xl sm:text-3xl font-semibold tabular-nums text-red-700 dark:text-red-400">
               {stats.declinedPeople}
             </p>
           </div>
         </div>
 
-        <div className="lg:col-span-7 rounded-xl border border-stone-200 dark:border-stone-800 bg-white dark:bg-[#171A21] p-5">
+        <div className="lg:col-span-7 rounded-xl border border-stone-200 dark:border-stone-800 bg-white dark:bg-[#171A21] p-4 sm:p-5">
           <p className="text-xs font-medium text-stone-500 dark:text-stone-400 mb-3">
             Distribuição de Convidados (em número de pessoas)
           </p>
           <div className="h-44 w-full">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={chartData} margin={{ top: 4, right: 12, left: -16, bottom: 0 }}>
-                <XAxis dataKey="name" tick={{ fontSize: 11, fill: '#78716C' }} axisLine={false} tickLine={false} />
-                <YAxis tick={{ fontSize: 11, fill: '#78716C' }} axisLine={false} tickLine={false} allowDecimals={false} />
+              <BarChart data={chartData} margin={{ top: 4, right: 8, left: -20, bottom: 0 }}>
+                <XAxis dataKey="name" tick={{ fontSize: 10, fill: '#78716C' }} axisLine={false} tickLine={false} />
+                <YAxis tick={{ fontSize: 10, fill: '#78716C' }} axisLine={false} tickLine={false} allowDecimals={false} />
                 <Tooltip
                   contentStyle={{
                     borderRadius: '8px',
@@ -233,9 +233,9 @@ export const GuestsModule: React.FC<GuestsModuleProps> = ({ wedding, guests, acc
       {/* Add Guest Form */}
       <form
         onSubmit={handleAddGuest}
-        className="rounded-xl border border-stone-200 dark:border-stone-800 bg-white dark:bg-[#171A21] p-5 grid grid-cols-1 md:grid-cols-12 gap-3 items-end"
+        className="rounded-xl border border-stone-200 dark:border-stone-800 bg-white dark:bg-[#171A21] p-4 sm:p-5 grid grid-cols-2 md:grid-cols-12 gap-3 items-end"
       >
-        <div className="md:col-span-3">
+        <div className="col-span-2 md:col-span-3">
           <label className="block text-xs text-stone-500 mb-1">Nome / Família</label>
           <input
             required
@@ -293,24 +293,24 @@ export const GuestsModule: React.FC<GuestsModuleProps> = ({ wedding, guests, acc
             className="w-full rounded-lg border border-stone-300 dark:border-stone-700 bg-transparent px-2.5 py-2 text-sm font-mono"
           />
         </div>
-        <div className="md:col-span-1">
+        <div className="col-span-2 md:col-span-1">
           <label className="block text-xs text-stone-500 mb-1">Status</label>
           <select
             value={status}
             onChange={(e) => setStatus(e.target.value as Guest['status'])}
-            className="w-full rounded-lg border border-stone-300 dark:border-stone-700 bg-white dark:bg-[#171A21] px-2 py-2 text-xs"
+            className="w-full rounded-lg border border-stone-300 dark:border-stone-700 bg-white dark:bg-[#171A21] px-2.5 py-2 text-sm md:text-xs"
           >
             <option value="pending">Pendente</option>
             <option value="confirmed">Confirmado</option>
             <option value="declined">Recusado</option>
           </select>
         </div>
-        <div className="md:col-span-2">
+        <div className="col-span-2 md:col-span-2">
           <button
             type="submit"
             disabled={saving}
             style={{ backgroundColor: accentColor }}
-            className="w-full inline-flex items-center justify-center gap-1.5 py-2 px-3 text-sm font-medium text-white rounded-lg hover:brightness-110 cursor-pointer disabled:opacity-60"
+            className="w-full min-h-[42px] inline-flex items-center justify-center gap-1.5 py-2 px-3 text-sm font-medium text-white rounded-lg hover:brightness-110 cursor-pointer disabled:opacity-60"
           >
             <UserPlus className="w-4 h-4" />
             <span>Adicionar</span>
@@ -320,17 +320,17 @@ export const GuestsModule: React.FC<GuestsModuleProps> = ({ wedding, guests, acc
 
       {/* Filter & Guest Table */}
       <div className="rounded-xl border border-stone-200 dark:border-stone-800 bg-white dark:bg-[#171A21] overflow-hidden">
-        <div className="p-4 border-b border-stone-200 dark:border-stone-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <div className="relative flex-1 max-w-xs">
+        <div className="p-3.5 sm:p-4 border-b border-stone-200 dark:border-stone-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="relative flex-1 sm:max-w-xs">
             <Search className="w-4 h-4 text-stone-400 absolute left-3 top-1/2 -translate-y-1/2" />
             <input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Buscar convidado ou grupo..."
-              className="w-full rounded-lg border border-stone-300 dark:border-stone-700 bg-transparent pl-9 pr-3 py-1.5 text-sm"
+              className="w-full rounded-lg border border-stone-300 dark:border-stone-700 bg-transparent pl-9 pr-3 py-2 text-sm"
             />
           </div>
-          <div className="inline-flex items-center gap-1 rounded-lg bg-stone-100 dark:bg-stone-800 p-1">
+          <div className="flex items-center gap-1 overflow-x-auto no-scrollbar max-w-full rounded-lg bg-stone-100 dark:bg-stone-800 p-1">
             {(
               [
                 ['all', 'Todos'],
@@ -343,7 +343,7 @@ export const GuestsModule: React.FC<GuestsModuleProps> = ({ wedding, guests, acc
                 key={key}
                 type="button"
                 onClick={() => setStatusFilter(key)}
-                className={`px-3 py-1 text-xs font-medium rounded-md transition-colors cursor-pointer ${
+                className={`shrink-0 whitespace-nowrap min-h-[34px] px-3 py-1 text-xs font-medium rounded-md transition-colors cursor-pointer ${
                   statusFilter === key
                     ? 'bg-white dark:bg-[#1C2029] text-stone-900 dark:text-stone-100 shadow-xs'
                     : 'text-stone-600 dark:text-stone-400'
@@ -355,7 +355,76 @@ export const GuestsModule: React.FC<GuestsModuleProps> = ({ wedding, guests, acc
           </div>
         </div>
 
-        <div className="overflow-x-auto">
+        {/* Mobile Cards */}
+        <div className="md:hidden divide-y divide-stone-100 dark:divide-stone-800/80">
+          {filtered.length === 0 ? (
+            <div className="py-10 px-4 text-center text-sm text-stone-500">
+              Nenhum convidado encontrado com os filtros atuais.
+            </div>
+          ) : (
+            filtered.map((guest) => (
+              <div key={guest.id} className="p-4 space-y-3">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="font-semibold text-sm text-stone-900 dark:text-stone-100 break-words">
+                      {guest.name}
+                    </p>
+                    <p className="mt-0.5 text-xs text-stone-500 dark:text-stone-400">
+                      {guest.group} · {guest.source === 'public_rsvp' ? 'Via Site' : 'Painel'}
+                    </p>
+                  </div>
+                  <span className="shrink-0 font-mono tabular-nums text-xs text-stone-600 dark:text-stone-300 bg-stone-100 dark:bg-stone-800 px-2 py-1 rounded-md">
+                    {guest.adults} ad. / {guest.children} cri.
+                  </span>
+                </div>
+                {(guest.dietaryNotes || guest.rsvpMessage) && (
+                  <p className="text-xs text-stone-500 dark:text-stone-400 bg-stone-50 dark:bg-stone-900/50 rounded-lg px-2.5 py-1.5">
+                    {guest.dietaryNotes || guest.rsvpMessage}
+                  </p>
+                )}
+                <div className="flex items-center gap-2 pt-0.5">
+                  <select
+                    value={guest.status}
+                    onChange={(e) =>
+                      updateGuest(wedding.id, guest.id, { status: e.target.value as Guest['status'] })
+                    }
+                    className={`flex-1 min-h-[40px] rounded-lg border border-stone-200 dark:border-stone-700 bg-white dark:bg-[#171A21] px-3 py-1.5 text-xs font-semibold ${
+                      guest.status === 'confirmed'
+                        ? 'text-emerald-700 dark:text-emerald-400'
+                        : guest.status === 'declined'
+                        ? 'text-red-700 dark:text-red-400'
+                        : 'text-amber-700 dark:text-amber-400'
+                    }`}
+                  >
+                    <option value="pending">Pendente</option>
+                    <option value="confirmed">Confirmado</option>
+                    <option value="declined">Recusado</option>
+                  </select>
+                  <a
+                    href={buildWhatsAppLink(guest)}
+                    target="_blank"
+                    rel="noreferrer"
+                    title="Enviar convite RSVP pelo WhatsApp"
+                    className="h-10 w-10 shrink-0 flex items-center justify-center rounded-lg border border-emerald-200 dark:border-emerald-900/60 text-emerald-700 dark:text-emerald-400 bg-emerald-50/60 dark:bg-emerald-950/30"
+                  >
+                    <MessageCircle className="w-4 h-4" />
+                  </a>
+                  <button
+                    type="button"
+                    onClick={() => deleteGuest(wedding.id, guest.id)}
+                    title="Remover convidado"
+                    className="h-10 w-10 shrink-0 flex items-center justify-center rounded-lg border border-stone-200 dark:border-stone-700 text-stone-500 hover:text-red-600 cursor-pointer"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+
+        {/* Desktop Table */}
+        <div className="hidden md:block overflow-x-auto">
           <table className="w-full text-left text-sm">
             <thead>
               <tr className="border-b border-stone-200 dark:border-stone-800 text-xs text-stone-500 dark:text-stone-400">
@@ -513,9 +582,9 @@ export const TablesModule: React.FC<TablesModuleProps> = ({
       {/* Create Table Form */}
       <form
         onSubmit={handleAddTable}
-        className="rounded-xl border border-stone-200 dark:border-stone-800 bg-white dark:bg-[#171A21] p-5 grid grid-cols-1 sm:grid-cols-12 gap-3 items-end"
+        className="rounded-xl border border-stone-200 dark:border-stone-800 bg-white dark:bg-[#171A21] p-4 sm:p-5 grid grid-cols-2 sm:grid-cols-12 gap-3 items-end"
       >
-        <div className="sm:col-span-4">
+        <div className="col-span-2 sm:col-span-4">
           <label className="block text-xs text-stone-500 mb-1">Nome da Mesa</label>
           <input
             required
@@ -526,7 +595,7 @@ export const TablesModule: React.FC<TablesModuleProps> = ({
             className="w-full rounded-lg border border-stone-300 dark:border-stone-700 bg-transparent px-3 py-2 text-sm"
           />
         </div>
-        <div className="sm:col-span-2">
+        <div className="col-span-1 sm:col-span-2">
           <label className="block text-xs text-stone-500 mb-1">Lugares</label>
           <input
             type="number"
@@ -537,7 +606,7 @@ export const TablesModule: React.FC<TablesModuleProps> = ({
             className="w-full rounded-lg border border-stone-300 dark:border-stone-700 bg-transparent px-3 py-2 text-sm font-mono"
           />
         </div>
-        <div className="sm:col-span-2">
+        <div className="col-span-1 sm:col-span-2">
           <label className="block text-xs text-stone-500 mb-1">Formato</label>
           <select
             value={shape}
@@ -548,7 +617,7 @@ export const TablesModule: React.FC<TablesModuleProps> = ({
             <option value="rectangular">Retangular</option>
           </select>
         </div>
-        <div className="sm:col-span-2">
+        <div className="col-span-2 sm:col-span-2">
           <label className="block text-xs text-stone-500 mb-1">Setor</label>
           <input
             maxLength={80}
@@ -557,11 +626,11 @@ export const TablesModule: React.FC<TablesModuleProps> = ({
             className="w-full rounded-lg border border-stone-300 dark:border-stone-700 bg-transparent px-3 py-2 text-sm"
           />
         </div>
-        <div className="sm:col-span-2">
+        <div className="col-span-2 sm:col-span-2">
           <button
             type="submit"
             style={{ backgroundColor: accentColor }}
-            className="w-full inline-flex items-center justify-center gap-1.5 py-2 px-3 text-sm font-medium text-white rounded-lg hover:brightness-110 cursor-pointer"
+            className="w-full min-h-[42px] inline-flex items-center justify-center gap-1.5 py-2 px-3 text-sm font-medium text-white rounded-lg hover:brightness-110 cursor-pointer"
           >
             <Plus className="w-4 h-4" />
             <span>Criar Mesa</span>
@@ -569,9 +638,9 @@ export const TablesModule: React.FC<TablesModuleProps> = ({
         </div>
       </form>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-6 items-start">
         {/* Unassigned Confirmed Guests Sidebar */}
-        <div className="lg:col-span-4 rounded-xl border border-stone-200 dark:border-stone-800 bg-white dark:bg-[#171A21] p-5">
+        <div className="lg:col-span-4 rounded-xl border border-stone-200 dark:border-stone-800 bg-white dark:bg-[#171A21] p-4 sm:p-5">
           <div className="flex items-center justify-between mb-3">
             <h3 className="text-sm font-semibold">Confirmados sem mesa</h3>
             <span className="font-mono text-xs tabular-nums text-stone-500">

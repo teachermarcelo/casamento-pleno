@@ -31,6 +31,7 @@ import { SafeImage } from './SafeImage';
 
 interface LandingPageProps {
   onSignIn: () => void;
+  onStartCheckout: () => void;
   onOpenDemoSite: () => void;
   signingIn: boolean;
   darkMode: boolean;
@@ -126,6 +127,7 @@ const BotanicalCornerSvg: React.FC<{ className?: string }> = ({ className = 'w-2
 
 export const LandingPage: React.FC<LandingPageProps> = ({
   onSignIn,
+  onStartCheckout,
   onOpenDemoSite,
   signingIn,
   darkMode,
@@ -367,9 +369,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             <div className="mt-6 sm:mt-8 flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-center gap-3 sm:gap-3.5">
               <button
                 type="button"
-                onClick={onSignIn}
-                disabled={signingIn}
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 min-h-[48px] px-6 sm:px-7 py-3.5 text-sm font-semibold text-white bg-[#173526] hover:bg-[#11281D] rounded-full shadow-md shadow-[#173526]/20 transition-all cursor-pointer disabled:opacity-60"
+                onClick={onStartCheckout}
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 min-h-[48px] px-6 sm:px-7 py-3.5 text-sm font-semibold text-white bg-[#173526] hover:bg-[#11281D] rounded-full shadow-md shadow-[#173526]/20 transition-all cursor-pointer"
               >
                 <Heart className="w-4 h-4 text-[#DFBE7A] shrink-0" />
                 <span>Começar por {formatBRL(SUBSCRIPTION_PRICE)}/mês</span>
@@ -635,12 +636,11 @@ export const LandingPage: React.FC<LandingPageProps> = ({
 
             <button
               type="button"
-              onClick={onSignIn}
-              disabled={signingIn}
-              className="mt-5 sm:mt-6 w-full min-h-[48px] inline-flex items-center justify-center gap-2 py-3.5 px-5 text-sm font-semibold text-white bg-[#173526] hover:bg-[#10261B] rounded-full transition-colors cursor-pointer disabled:opacity-60"
+              onClick={onStartCheckout}
+              className="mt-5 sm:mt-6 w-full min-h-[48px] inline-flex items-center justify-center gap-2 py-3.5 px-5 text-sm font-semibold text-white bg-[#173526] hover:bg-[#10261B] rounded-full transition-colors cursor-pointer"
             >
               <Heart className="w-4 h-4 text-[#DFBE7A] shrink-0" />
-              <span>{signingIn ? 'Abrindo login Google...' : 'Criar conta e personalizar agora'}</span>
+              <span>Ir para o Checkout · {formatBRL(SUBSCRIPTION_PRICE)}/mês</span>
             </button>
           </div>
         </div>
