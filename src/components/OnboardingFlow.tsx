@@ -16,14 +16,17 @@ interface OnboardingFlowProps {
   profile: UserProfile;
   onComplete: (wedding: Wedding) => void;
   onSignOut: () => void;
+  startAtCheckout?: boolean;
 }
 
 export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
   profile,
   onComplete,
   onSignOut,
+  startAtCheckout = false,
 }) => {
-  const alreadySubscribed = profile.subscriptionStatus === 'active' || profile.role === 'admin';
+  const alreadySubscribed =
+    !startAtCheckout && (profile.subscriptionStatus === 'active' || profile.role === 'admin');
   const [step, setStep] = useState<'checkout' | 'setup'>(alreadySubscribed ? 'setup' : 'checkout');
 
   // Mercado Pago checkout state

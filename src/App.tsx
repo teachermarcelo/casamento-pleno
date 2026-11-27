@@ -51,6 +51,9 @@ function AppContent() {
   const [authError, setAuthError] = useState<AuthErrorInfo | null>(null);
 
   const [viewMode, setViewMode] = useState<'bride' | 'admin'>('bride');
+  const [impersonatedUser, setImpersonatedUser] = useState<UserProfile | null>(null);
+  const [impersonatedWedding, setImpersonatedWedding] = useState<Wedding | null>(null);
+  const [impersonateForceOnboarding, setImpersonateForceOnboarding] = useState(false);
   const [showLandingPreview, setShowLandingPreview] = useState(false);
   const [guestSite, setGuestSite] = useState<GuestSitePreview | null>(null);
   const [loadingPublicSlug, setLoadingPublicSlug] = useState(false);
@@ -184,6 +187,40 @@ function AppContent() {
     return () => unsub();
   }, [firebaseUser, profile?.weddingId]);
 
+  // Real-time listeners when Admin is simulating a Lead / Client view
+  useEffect(() => {
+    if (!firebaseUser || !impersonatedUser?.uid) return;
+    const unsub = onSnapshot(
+      doc(db, 'users', impersonatedUser.uid),
+      (snap) => {
+        if (snap.exists()) {
+          setImpersonatedUser(snap.data() as UserProfile);
+        }
+      },
+      () => {}
+    );
+    return () => unsub();
+  }, [firebaseUser, impersonatedUser?.uid]);
+
+  useEffect(() => {
+    if (!firebaseUser || !impersonatedUser?.weddingId) {
+      setImpersonatedWedding(null);
+      return;
+    }
+    const unsub = onSnapshot(
+      doc(db, 'weddings', impersonatedUser.weddingId),
+      (snap) => {
+        if (snap.exists()) {
+          setImpersonatedWedding(snap.data() as Wedding);
+        } else {
+          setImpersonatedWedding(null);
+        }
+      },
+      () => {}
+    );
+    return () => unsub();
+  }, [firebaseUser, impersonatedUser?.weddingId]);
+
   const handleSignIn = async () => {
     setSigningIn(true);
     setAuthError(null);
@@ -200,6 +237,9 @@ function AppContent() {
   const handleSignOut = async () => {
     await signOutUser();
     setViewMode('bride');
+    setImpersonatedUser(null);
+    setImpersonatedWedding(null);
+    setImpersonateForceOnboarding(false);
     setShowLandingPreview(false);
     setGuestSite(null);
   };
@@ -292,13 +332,81 @@ function AppContent() {
     profile.role === 'admin' ||
     (firebaseUser.email?.toLowerCase() === ADMIN_EMAIL && Boolean(firebaseUser.emailVerified));
 
-  // 4. Platform Owner Admin Console
+  // 4. Platform Owner Admin Console (or Client/Lead Simulation View)
+  if (isAdminAccount && impersonatedUser) {
+    const clientProfile: UserProfile = { ...impersonatedUser, role: 'bride' };
+    const exitSimulation = () => {
+      setImpersonatedUser(null);
+      setImpersonatedWedding(null);
+      setImpersonateForceOnboarding(false);
+      setViewMode('admin');
+    };
+    const showOnboarding = impersonateForceOnboarding || !impersonatedWedding;
+
+    return (
+      <>
+        <div className="sticky top-0 z-50 bg-[#10261B] text-[#FBF2DC] px-5 py-2.5 flex flex-wrap items-center justify-between gap-3 text-xs border-b border-[#DFBE7A]/40 shadow-sm">
+          <span>
+            Modo Visão do Cliente (Lead): <strong>{clientProfile.displayName}</strong> ({clientProfile.email}) —{' '}
+            <span className="text-[#DFBE7A]">acesso comum sem painel Admin</span>
+          </span>
+          <div className="flex flex-wrap items-center gap-2">
+            {impersonatedWedding && (
+              <button
+                type="button"
+                onClick={() => setImpersonateForceOnboarding((prev) => !prev)}
+                className="rounded-full border border-[#DFBE7A]/60 px-3 py-1 text-[11px] font-semibold text-[#FBF2DC] hover:bg-white/10 transition-colors cursor-pointer"
+              >
+                {showOnboarding ? 'Ir para o Painel do Cliente' : 'Ver Checkout & Setup'}
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={exitSimulation}
+              className="rounded-full bg-[#DFBE7A] text-[#173526] px-3.5 py-1 text-[11px] font-semibold hover:bg-[#EBD198] transition-colors cursor-pointer"
+            >
+              Voltar ao Console Admin
+            </button>
+          </div>
+        </div>
+
+        {showOnboarding ? (
+          <OnboardingFlow
+            profile={clientProfile}
+            startAtCheckout={impersonateForceOnboarding}
+            onComplete={(created) => {
+              setImpersonatedWedding(created);
+              setImpersonateForceOnboarding(false);
+            }}
+            onSignOut={exitSimulation}
+          />
+        ) : (
+          <BrideDashboard
+            profile={clientProfile}
+            wedding={impersonatedWedding}
+            darkMode={darkMode}
+            onToggleDarkMode={handleToggleDarkMode}
+            onPreviewGuestSite={(data) => setGuestSite({ ...data, isDemo: false })}
+            onPreviewLanding={() => setShowLandingPreview(true)}
+            onOpenAdmin={undefined}
+            onSignOut={exitSimulation}
+          />
+        )}
+        <OfflineIndicator />
+      </>
+    );
+  }
+
   if (isAdminAccount && viewMode === 'admin') {
     return (
       <>
         <AdminDashboard
           profile={{ ...profile, role: 'admin' }}
           onBackToBride={() => setViewMode('bride')}
+          onSimulateClient={(client, startAtOnboarding) => {
+            setImpersonatedUser({ ...client, role: 'bride' });
+            setImpersonateForceOnboarding(Boolean(startAtOnboarding));
+          }}
           onSignOut={handleSignOut}
         />
         <OfflineIndicator />

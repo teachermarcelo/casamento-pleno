@@ -208,6 +208,70 @@ export async function ensureUserProfile(user: User): Promise<UserProfile> {
   }
 }
 
+export async function createLeadClientByAdmin(params: {
+  id?: string;
+  email: string;
+  displayName: string;
+  leadSource?: string;
+  adminNotes?: string;
+}): Promise<UserProfile> {
+  const cleanEmail = sanitizeString(params.email.toLowerCase(), 200);
+  const uid = params.id ? sanitizeString(params.id, 128) : newId('lead');
+  const path = `users/${uid}`;
+  const ref = doc(db, 'users', uid);
+
+  try {
+    const existing = await getDoc(ref);
+    if (existing.exists()) {
+      return existing.data() as UserProfile;
+    }
+
+    const nextMonth = new Date();
+    nextMonth.setMonth(nextMonth.getMonth() + 1);
+    const nextIso = nextMonth.toISOString().slice(0, 10);
+
+    const payload = {
+      uid,
+      email: cleanEmail,
+      displayName: sanitizeString(params.displayName || cleanEmail.split('@')[0] || 'Lead Noivo', 120),
+      role: 'bride' as const,
+      subscriptionStatus: 'trial' as const,
+      planPrice: SUBSCRIPTION_PRICE,
+      paymentMethod: 'pending' as const,
+      mercadoPagoRef: '',
+      lastPaymentDate: '',
+      nextBillingDate: nextIso,
+      totalPaidSubscription: 0,
+      supportStatus: 'onboarding' as const,
+      adminNotes: sanitizeString(
+        params.adminNotes || 'Lead cadastrado para testar jornada completa (Checkout -> Setup -> Painel).',
+        600
+      ),
+      leadSource: sanitizeString(params.leadSource || 'Lead de Teste (Admin)', 80),
+      weddingId: '',
+      biometricEnabled: false,
+      pinHash: '',
+      darkMode: false,
+      webhookUrl: '',
+      panicButtonLabel: 'Botão do Surtando',
+      panicButtonColor: '#173526',
+      panicButtonPosition: 'bottom-right' as const,
+      breathingSeconds: 4,
+      notifyPayments: true,
+      notifyRsvp: true,
+      notifyDaysBefore: 5,
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
+    };
+
+    await setDoc(ref, payload);
+    const fresh = await getDoc(ref);
+    return fresh.data() as UserProfile;
+  } catch (error) {
+    handleFirestoreError(error, OperationType.CREATE, path);
+  }
+}
+
 export async function updateUserProfile(
   uid: string,
   updates: Partial<

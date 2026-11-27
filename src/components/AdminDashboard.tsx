@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   ArrowLeft,
   Check,
@@ -7,6 +7,7 @@ import {
   Database,
   Download,
   ExternalLink,
+  Eye,
   MessageSquare,
   Plus,
   Search,
@@ -15,6 +16,7 @@ import {
   Shield,
   Tag,
   Trash2,
+  UserPlus,
   Users,
 } from 'lucide-react';
 import { collection, onSnapshot, query, where } from 'firebase/firestore';
@@ -28,6 +30,7 @@ import {
   type Wedding,
 } from '../types/wedding';
 import {
+  createLeadClientByAdmin,
   DEFAULT_PLATFORM_CONFIG,
   savePlatformConfig,
   sendSupportMessage,
@@ -40,6 +43,7 @@ import { downloadCSV, formatBRL, formatDateBR, getGuestSiteUrl } from '../lib/ut
 interface AdminDashboardProps {
   profile: UserProfile;
   onBackToBride: () => void;
+  onSimulateClient: (client: UserProfile, startAtOnboarding?: boolean) => void;
   onSignOut: () => void;
 }
 
@@ -57,11 +61,18 @@ const SUPPORT_STATUS_OPTIONS: { value: SupportStatus; label: string }[] = [
 export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   profile,
   onBackToBride,
+  onSimulateClient,
   onSignOut,
 }) => {
   const [activeTab, setActiveTab] = useState<AdminTab>('crm');
   const [users, setUsers] = useState<UserProfile[]>([]);
+  const [usersLoaded, setUsersLoaded] = useState(false);
   const [weddings, setWeddings] = useState<Wedding[]>([]);
+  const seededGestorRef = useRef(false);
+  const [showAddLead, setShowAddLead] = useState(false);
+  const [newLeadEmail, setNewLeadEmail] = useState('');
+  const [newLeadName, setNewLeadName] = useState('');
+  const [creatingLead, setCreatingLead] = useState(false);
   const [mpStatus, setMpStatus] = useState<{
     configured: boolean;
     hasPublicKey: boolean;
@@ -95,7 +106,10 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
   useEffect(() => {
     const unsub = subscribeAdminData({
-      onUsers: setUsers,
+      onUsers: (list) => {
+        setUsers(list);
+        setUsersLoaded(true);
+      },
       onWeddings: (list) => {
         setWeddings(list);
         if (!selectedWeddingId && list.length > 0) {
@@ -112,14 +126,57 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
       setAnnouncementBanner(cfg.announcementBanner || '');
     });
     fetch('/api/payments/mercadopago/status')
-      .then((r) => r.json())
-      .then((d) => setMpStatus(d))
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => {
+        if (d) setMpStatus(d);
+      })
       .catch(() => {});
     return () => {
       unsub();
       unsubCfg();
     };
   }, [selectedWeddingId]);
+
+  // Automatically insert gestorpaid@gmail.com as a groom lead contracting the service if not yet present
+  useEffect(() => {
+    if (!usersLoaded || seededGestorRef.current) return;
+    const alreadyExists = users.some((u) => u.email.toLowerCase() === 'gestorpaid@gmail.com');
+    seededGestorRef.current = true;
+    if (!alreadyExists) {
+      createLeadClientByAdmin({
+        id: 'lead_gestorpaid',
+        email: 'gestorpaid@gmail.com',
+        displayName: 'Gestor Paid (Noivo Lead)',
+        leadSource: 'Lead Noivo (Teste de Jornada)',
+        adminNotes: 'Inserido para simular a jornada completa de contratação (Checkout R$ 39,90 -> Setup -> Painel do Noivo).',
+      }).catch((err) => {
+        console.error('Could not seed gestorpaid@gmail.com lead:', err);
+      });
+    }
+  }, [usersLoaded, users]);
+
+  const gestorLead = useMemo(
+    () => users.find((u) => u.email.toLowerCase() === 'gestorpaid@gmail.com') || null,
+    [users]
+  );
+
+  const handleCreateManualLead = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newLeadEmail.trim()) return;
+    setCreatingLead(true);
+    try {
+      await createLeadClientByAdmin({
+        email: newLeadEmail.trim(),
+        displayName: newLeadName.trim() || newLeadEmail.split('@')[0],
+        leadSource: 'Cadastro Manual (Admin)',
+      });
+      setNewLeadEmail('');
+      setNewLeadName('');
+      setShowAddLead(false);
+    } finally {
+      setCreatingLead(false);
+    }
+  };
 
   useEffect(() => {
     if (!selectedWeddingId) {
@@ -377,37 +434,118 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
         {/* TAB 1: Assinaturas, Pagamentos & CRM de Leads */}
         {activeTab === 'crm' && (
-          <div className="rounded-2xl border border-stone-200 dark:border-stone-800 bg-white dark:bg-[#171A21] overflow-hidden">
-            <div className="p-5 border-b border-stone-200 dark:border-stone-800 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-              <div>
-                <h2 className="font-editorial text-2xl font-semibold">
-                  Assinaturas, Pagamentos & Suporte aos Leads
-                </h2>
-                <p className="text-xs text-stone-500">
-                  Controle renovações, registre pagamentos mensais, acompanhe status de suporte e anotações de cada cliente.
-                </p>
+          <div className="space-y-5">
+            {/* Lead Journey Simulator Card for gestorpaid@gmail.com */}
+            {gestorLead && (
+              <div className="rounded-2xl bg-[#173526] text-[#FBF7F0] border border-[#DFBE7A]/40 p-5 flex flex-col lg:flex-row lg:items-center justify-between gap-4 shadow-sm">
+                <div className="space-y-1">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[#DFBE7A]">
+                    Simulador de Jornada do Lead / Noivo
+                  </p>
+                  <h3 className="font-editorial text-2xl font-semibold text-white">
+                    {gestorLead.displayName} ({gestorLead.email})
+                  </h3>
+                  <p className="text-xs text-[#E5E0D5]/85 max-w-2xl">
+                    Teste exatamente até onde um lead contratante consegue ir (Checkout R$ 39,90 → Personalização → Painel do Noivo/Noiva e Site dos Convidados), sem nenhum acesso ao Console do Criador.
+                  </p>
+                </div>
+                <div className="flex flex-wrap items-center gap-2.5 shrink-0">
+                  <button
+                    type="button"
+                    onClick={() => onSimulateClient(gestorLead, true)}
+                    className="inline-flex items-center gap-1.5 rounded-full bg-[#DFBE7A] text-[#173526] hover:bg-[#EBD198] px-4 py-2 text-xs font-semibold transition-colors cursor-pointer"
+                  >
+                    <Eye className="w-3.5 h-3.5" />
+                    <span>Simular Checkout & Setup</span>
+                  </button>
+                  {gestorLead.weddingId && (
+                    <button
+                      type="button"
+                      onClick={() => onSimulateClient(gestorLead, false)}
+                      className="inline-flex items-center gap-1.5 rounded-full border border-[#DFBE7A]/70 text-[#FBF2DC] hover:bg-white/10 px-4 py-2 text-xs font-semibold transition-colors cursor-pointer"
+                    >
+                      <ExternalLink className="w-3.5 h-3.5" />
+                      <span>Abrir Painel do Noivo</span>
+                    </button>
+                  )}
+                </div>
+              </div>
+            )}
+
+            <div className="rounded-2xl border border-stone-200 dark:border-stone-800 bg-white dark:bg-[#171A21] overflow-hidden">
+              <div className="p-5 border-b border-stone-200 dark:border-stone-800 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+                <div>
+                  <h2 className="font-editorial text-2xl font-semibold">
+                    Assinaturas, Pagamentos & Suporte aos Leads
+                  </h2>
+                  <p className="text-xs text-stone-500">
+                    Controle renovações, registre pagamentos mensais, acompanhe status de suporte e visualize o painel exato de cada lead.
+                  </p>
+                </div>
+
+                <div className="flex flex-wrap items-center gap-2.5">
+                  <div className="relative">
+                    <Search className="w-3.5 h-3.5 text-stone-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                    <input
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      placeholder="Buscar cliente ou nota..."
+                      className="rounded-xl border border-stone-300 dark:border-stone-700 bg-transparent pl-8 pr-3 py-1.5 text-xs w-52"
+                    />
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setShowAddLead((prev) => !prev)}
+                    className="inline-flex items-center gap-1.5 rounded-xl bg-[#173526] text-white px-3 py-1.5 text-xs font-semibold hover:bg-[#10261B] cursor-pointer"
+                  >
+                    <UserPlus className="w-3.5 h-3.5 text-[#DFBE7A]" />
+                    <span>Inserir Lead</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleExportSubscribers}
+                    className="inline-flex items-center gap-1.5 rounded-xl border border-stone-300 dark:border-stone-700 px-3 py-1.5 text-xs font-medium hover:bg-stone-50 dark:hover:bg-stone-800 cursor-pointer"
+                  >
+                    <Download className="w-3.5 h-3.5" />
+                    <span>Exportar CSV</span>
+                  </button>
+                </div>
               </div>
 
-              <div className="flex flex-wrap items-center gap-2.5">
-                <div className="relative">
-                  <Search className="w-3.5 h-3.5 text-stone-400 absolute left-3 top-1/2 -translate-y-1/2" />
-                  <input
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="Buscar cliente ou nota..."
-                    className="rounded-xl border border-stone-300 dark:border-stone-700 bg-transparent pl-8 pr-3 py-1.5 text-xs w-52"
-                  />
-                </div>
-                <button
-                  type="button"
-                  onClick={handleExportSubscribers}
-                  className="inline-flex items-center gap-1.5 rounded-xl border border-stone-300 dark:border-stone-700 px-3 py-1.5 text-xs font-medium hover:bg-stone-50 dark:hover:bg-stone-800 cursor-pointer"
+              {showAddLead && (
+                <form
+                  onSubmit={handleCreateManualLead}
+                  className="p-4 bg-[#FAF7F2] dark:bg-[#14171D] border-b border-stone-200 dark:border-stone-800 flex flex-wrap items-end gap-3"
                 >
-                  <Download className="w-3.5 h-3.5" />
-                  <span>Exportar CSV</span>
-                </button>
-              </div>
-            </div>
+                  <div className="flex-1 min-w-[200px]">
+                    <label className="block text-[11px] text-stone-500 mb-1">E-mail do Lead (Noiva/Noivo)</label>
+                    <input
+                      type="email"
+                      required
+                      value={newLeadEmail}
+                      onChange={(e) => setNewLeadEmail(e.target.value)}
+                      placeholder="Ex.: cliente@gmail.com"
+                      className="w-full rounded-lg border border-stone-300 dark:border-stone-700 bg-white dark:bg-[#171A21] px-3 py-1.5 text-xs"
+                    />
+                  </div>
+                  <div className="flex-1 min-w-[180px]">
+                    <label className="block text-[11px] text-stone-500 mb-1">Nome do Casal / Lead</label>
+                    <input
+                      value={newLeadName}
+                      onChange={(e) => setNewLeadName(e.target.value)}
+                      placeholder="Ex.: João & Camila"
+                      className="w-full rounded-lg border border-stone-300 dark:border-stone-700 bg-white dark:bg-[#171A21] px-3 py-1.5 text-xs"
+                    />
+                  </div>
+                  <button
+                    type="submit"
+                    disabled={creatingLead}
+                    className="rounded-lg bg-emerald-700 hover:bg-emerald-800 text-white px-4 py-1.5 text-xs font-semibold cursor-pointer disabled:opacity-60"
+                  >
+                    {creatingLead ? 'Salvando...' : 'Criar Lead'}
+                  </button>
+                </form>
+              )}
 
             <div className="px-5 py-3 border-b border-stone-100 dark:border-stone-800/80 flex flex-wrap gap-1.5">
               {(
@@ -550,6 +688,14 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                           <div className="flex flex-col items-end gap-1.5">
                             <button
                               type="button"
+                              onClick={() => onSimulateClient(u, !wed)}
+                              className="inline-flex items-center gap-1 rounded-lg bg-[#173526] hover:bg-[#10261B] text-[#FBF2DC] border border-[#DFBE7A]/50 px-3 py-1.5 text-[11px] font-semibold cursor-pointer"
+                            >
+                              <Eye className="w-3.5 h-3.5 text-[#DFBE7A]" />
+                              <span>{wed ? 'Ver como Cliente' : 'Simular Jornada'}</span>
+                            </button>
+                            <button
+                              type="button"
                               onClick={() => handleRecordSubscriptionPayment(u)}
                               className="inline-flex items-center gap-1 rounded-lg bg-emerald-700 hover:bg-emerald-800 px-3 py-1.5 text-[11px] font-semibold text-white cursor-pointer"
                             >
@@ -575,6 +721,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                   })}
                 </tbody>
               </table>
+            </div>
             </div>
           </div>
         )}
