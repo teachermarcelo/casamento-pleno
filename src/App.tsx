@@ -40,6 +40,7 @@ function AppContent() {
   const [signingIn, setSigningIn] = useState(false);
 
   const [viewMode, setViewMode] = useState<'bride' | 'admin'>('bride');
+  const [showLandingPreview, setShowLandingPreview] = useState(false);
   const [guestSite, setGuestSite] = useState<GuestSitePreview | null>(null);
   const [loadingPublicSlug, setLoadingPublicSlug] = useState(false);
   const [darkMode, setDarkMode] = useState<boolean>(() => {
@@ -177,6 +178,7 @@ function AppContent() {
   const handleSignOut = async () => {
     await signOutUser();
     setViewMode('bride');
+    setShowLandingPreview(false);
     setGuestSite(null);
   };
 
@@ -312,7 +314,41 @@ function AppContent() {
     );
   }
 
-  // 6. Authenticated Bride Dashboard
+  // 6. Optional preview of Public Landing Page while signed in
+  if (showLandingPreview) {
+    return (
+      <>
+        <div className="bg-[#10261B] text-[#FBF2DC] px-5 py-2 flex items-center justify-between text-xs border-b border-[#DFBE7A]/30">
+          <span>Visualizando a Página Inicial de Vendas (como visitante)</span>
+          <button
+            type="button"
+            onClick={() => setShowLandingPreview(false)}
+            className="rounded-full border border-[#DFBE7A]/70 px-3.5 py-1 font-semibold text-[#FBF2DC] hover:bg-[#DFBE7A] hover:text-[#173526] transition-colors cursor-pointer"
+          >
+            Voltar para o meu Painel
+          </button>
+        </div>
+        <LandingPage
+          onSignIn={() => setShowLandingPreview(false)}
+          signingIn={false}
+          darkMode={darkMode}
+          onToggleDarkMode={handleToggleDarkMode}
+          onOpenDemoSite={() =>
+            setGuestSite({
+              wedding: DEMO_WEDDING,
+              schedule: DEMO_SCHEDULE,
+              party: DEMO_PARTY,
+              gifts: DEMO_GIFTS,
+              isDemo: true,
+            })
+          }
+        />
+        <OfflineIndicator />
+      </>
+    );
+  }
+
+  // 7. Authenticated Bride Dashboard
   return (
     <>
       <BrideDashboard
@@ -321,6 +357,7 @@ function AppContent() {
         darkMode={darkMode}
         onToggleDarkMode={handleToggleDarkMode}
         onPreviewGuestSite={(data) => setGuestSite({ ...data, isDemo: false })}
+        onPreviewLanding={() => setShowLandingPreview(true)}
         onOpenAdmin={profile.role === 'admin' ? () => setViewMode('admin') : undefined}
         onSignOut={handleSignOut}
       />
