@@ -1,9 +1,19 @@
 import { useEffect, useState } from 'react';
 import { onAuthStateChanged, type User } from 'firebase/auth';
 import { doc, onSnapshot } from 'firebase/firestore';
-import { auth, db, handleFirestoreError, OperationType, signInWithGoogle, signOutUser } from './lib/firebase';
+import {
+  auth,
+  db,
+  formatFirebaseAuthError,
+  handleFirestoreError,
+  OperationType,
+  signInWithGoogle,
+  signOutUser,
+  type AuthErrorInfo,
+} from './lib/firebase';
 import { ensureUserProfile, loadPublicWeddingBySlug, updateUserProfile } from './lib/weddingService';
 import {
+  ADMIN_EMAIL,
   DEMO_GIFTS,
   DEMO_PARTY,
   DEMO_SCHEDULE,
@@ -38,6 +48,7 @@ function AppContent() {
   const [wedding, setWedding] = useState<Wedding | null>(null);
   const [loadingWedding, setLoadingWedding] = useState(false);
   const [signingIn, setSigningIn] = useState(false);
+  const [authError, setAuthError] = useState<AuthErrorInfo | null>(null);
 
   const [viewMode, setViewMode] = useState<'bride' | 'admin'>('bride');
   const [showLandingPreview, setShowLandingPreview] = useState(false);
@@ -112,9 +123,18 @@ function AppContent() {
       try {
         const ensured = await ensureUserProfile(user);
         setProfile(ensured);
+        setAuthError(null);
         if (typeof ensured.darkMode === 'boolean') {
           setDarkMode(ensured.darkMode);
         }
+      } catch (err) {
+        console.error('Failed to ensure user profile:', err);
+        setAuthError({
+          code: 'firestore/profile-init-failed',
+          title: 'Login Google concluído, mas o perfil não pôde ser salvo no banco',
+          message:
+            'Verifique sua conexão e se o Firebase Firestore está acessível neste domínio. Tente clicar em "Entrar com Google" novamente.',
+        });
       } finally {
         setAuthReady(true);
       }
@@ -166,10 +186,12 @@ function AppContent() {
 
   const handleSignIn = async () => {
     setSigningIn(true);
+    setAuthError(null);
     try {
       await signInWithGoogle();
     } catch (err) {
       console.error('Google Sign-In cancelled or failed:', err);
+      setAuthError(formatFirebaseAuthError(err));
     } finally {
       setSigningIn(false);
     }
@@ -249,6 +271,8 @@ function AppContent() {
           signingIn={signingIn}
           darkMode={darkMode}
           onToggleDarkMode={handleToggleDarkMode}
+          authError={authError}
+          onClearAuthError={() => setAuthError(null)}
           onOpenDemoSite={() =>
             setGuestSite({
               wedding: DEMO_WEDDING,
@@ -264,12 +288,16 @@ function AppContent() {
     );
   }
 
+  const isAdminAccount =
+    profile.role === 'admin' ||
+    (firebaseUser.email?.toLowerCase() === ADMIN_EMAIL && Boolean(firebaseUser.emailVerified));
+
   // 4. Platform Owner Admin Console
-  if (profile.role === 'admin' && viewMode === 'admin') {
+  if (isAdminAccount && viewMode === 'admin') {
     return (
       <>
         <AdminDashboard
-          profile={profile}
+          profile={{ ...profile, role: 'admin' }}
           onBackToBride={() => setViewMode('bride')}
           onSignOut={handleSignOut}
         />
@@ -282,15 +310,17 @@ function AppContent() {
   if (!loadingWedding && !wedding) {
     return (
       <>
-        {profile.role === 'admin' && (
-          <div className="bg-stone-900 text-stone-100 px-6 py-2.5 flex items-center justify-between text-xs">
-            <span>Conta Proprietária (Admin) detectada: {profile.email}</span>
+        {isAdminAccount && (
+          <div className="bg-[#173526] text-[#FBF2DC] px-6 py-3 flex flex-wrap items-center justify-between gap-3 text-xs border-b border-[#DFBE7A]/35">
+            <span>
+              Conta Proprietária (Admin) reconhecida: <strong>{profile.email}</strong>
+            </span>
             <button
               type="button"
               onClick={() => setViewMode('admin')}
-              className="font-semibold underline cursor-pointer"
+              className="rounded-full bg-[#DFBE7A] text-[#173526] px-4 py-1.5 font-semibold hover:bg-[#EBD198] transition-colors cursor-pointer"
             >
-              Ir direto para o Painel Administrativo
+              Abrir Painel Administrativo (Criador)
             </button>
           </div>
         )}
@@ -358,7 +388,7 @@ function AppContent() {
         onToggleDarkMode={handleToggleDarkMode}
         onPreviewGuestSite={(data) => setGuestSite({ ...data, isDemo: false })}
         onPreviewLanding={() => setShowLandingPreview(true)}
-        onOpenAdmin={profile.role === 'admin' ? () => setViewMode('admin') : undefined}
+        onOpenAdmin={isAdminAccount ? () => setViewMode('admin') : undefined}
         onSignOut={handleSignOut}
       />
       <OfflineIndicator />

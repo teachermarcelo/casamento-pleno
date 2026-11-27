@@ -1,9 +1,12 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
+  AlertTriangle,
   ArrowRight,
   BarChart3,
   Calendar,
   Check,
+  Copy,
+  ExternalLink,
   Heart,
   LayoutGrid,
   Monitor,
@@ -17,9 +20,11 @@ import {
   Users,
   Wallet,
   Wind,
+  X,
   Zap,
 } from 'lucide-react';
 import { GENERATED_ASSETS, SUBSCRIPTION_PRICE } from '../types/wedding';
+import type { AuthErrorInfo } from '../lib/firebase';
 import { formatBRL } from '../lib/utils';
 import { PWAInstallButton } from './PWAInstallButton';
 import { SafeImage } from './SafeImage';
@@ -30,6 +35,8 @@ interface LandingPageProps {
   signingIn: boolean;
   darkMode: boolean;
   onToggleDarkMode: () => void;
+  authError?: AuthErrorInfo | null;
+  onClearAuthError?: () => void;
 }
 
 const IntertwinedHeartsLogo: React.FC<{ className?: string }> = ({ className = 'w-9 h-8' }) => (
@@ -123,7 +130,10 @@ export const LandingPage: React.FC<LandingPageProps> = ({
   signingIn,
   darkMode,
   onToggleDarkMode,
+  authError,
+  onClearAuthError,
 }) => {
+  const [copiedDomain, setCopiedDomain] = useState(false);
   const featureDockItems = [
     {
       icon: <Users className="w-6 h-6 text-[#B68B3C]" strokeWidth={1.6} />,
@@ -218,6 +228,67 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           </div>
         </div>
       </header>
+
+      {/* Actionable Auth / Domain Configuration Notice */}
+      {authError && (
+        <div className="bg-[#FFF4E5] dark:bg-[#2A1F14] border-b border-[#E5B869] dark:border-[#6B4E23] text-[#4A2F0B] dark:text-[#FDE6BD]">
+          <div className="mx-auto max-w-7xl px-5 sm:px-8 py-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className="flex items-start gap-3">
+              <AlertTriangle className="w-5 h-5 text-[#B45309] dark:text-[#F59E0B] shrink-0 mt-0.5" />
+              <div className="space-y-1">
+                <p className="text-sm font-semibold">{authError.title}</p>
+                <p className="text-xs leading-relaxed opacity-90">{authError.message}</p>
+                {authError.code === 'auth/unauthorized-domain' && authError.hostname && (
+                  <p className="text-xs opacity-90">
+                    No Firebase Console, acesse <strong>Authentication → Settings → Authorized domains → Add domain</strong> e adicione:{' '}
+                    <code className="px-1.5 py-0.5 rounded bg-black/10 dark:bg-white/10 font-mono font-semibold">
+                      {authError.hostname}
+                    </code>
+                  </p>
+                )}
+              </div>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-2 shrink-0">
+              {authError.hostname && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    navigator.clipboard?.writeText(authError.hostname || '');
+                    setCopiedDomain(true);
+                    setTimeout(() => setCopiedDomain(false), 2000);
+                  }}
+                  className="inline-flex items-center gap-1.5 rounded-full border border-[#B45309]/40 bg-white/80 dark:bg-black/20 px-3.5 py-1.5 text-xs font-semibold hover:bg-white transition-colors cursor-pointer"
+                >
+                  {copiedDomain ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+                  <span>{copiedDomain ? 'Domínio copiado' : `Copiar ${authError.hostname}`}</span>
+                </button>
+              )}
+              {authError.consoleUrl && (
+                <a
+                  href={authError.consoleUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center gap-1.5 rounded-full bg-[#173526] text-[#FBF2DC] px-4 py-1.5 text-xs font-semibold hover:bg-[#10261B] transition-colors"
+                >
+                  <span>Abrir Firebase Console</span>
+                  <ExternalLink className="w-3.5 h-3.5" />
+                </a>
+              )}
+              {onClearAuthError && (
+                <button
+                  type="button"
+                  onClick={onClearAuthError}
+                  aria-label="Fechar aviso"
+                  className="p-1.5 rounded-full hover:bg-black/10 transition-colors cursor-pointer"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Editorial Luxury Hero with Curved Gold Arch & Floating 6-Pillar Dock */}
       <section id="inicio" className="relative overflow-hidden bg-[#FDF8F2] dark:bg-[#0F1612]">

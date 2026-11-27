@@ -442,6 +442,16 @@ export const BrideDashboard: React.FC<BrideDashboardProps> = ({
           </div>
 
           <div className="flex items-center gap-2 shrink-0">
+            {onOpenAdmin && (
+              <button
+                type="button"
+                onClick={onOpenAdmin}
+                className="inline-flex items-center gap-1.5 rounded-full bg-[#DFBE7A] text-[#173526] hover:bg-[#EBD198] px-3.5 py-1.5 text-xs font-semibold transition-colors whitespace-nowrap cursor-pointer"
+              >
+                <Shield className="w-3.5 h-3.5" />
+                <span>Painel Admin</span>
+              </button>
+            )}
             {onPreviewLanding && (
               <button
                 type="button"

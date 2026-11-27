@@ -113,22 +113,53 @@ export async function savePlatformConfig(config: {
 export async function ensureUserProfile(user: User): Promise<UserProfile> {
   const path = `users/${user.uid}`;
   const ref = doc(db, 'users', user.uid);
+  const isOwnerAdmin = user.email?.toLowerCase() === ADMIN_EMAIL && user.emailVerified;
+
   try {
     const snap = await getDoc(ref);
     if (snap.exists()) {
-      return snap.data() as UserProfile;
+      const existing = snap.data() as UserProfile;
+      if (isOwnerAdmin) {
+        try {
+          await setDoc(
+            doc(db, 'admins', user.uid),
+            {
+              uid: user.uid,
+              email: existing.email || user.email || ADMIN_EMAIL,
+              createdAt: serverTimestamp(),
+            },
+            { merge: true }
+          );
+        } catch {
+          // Non-blocking if admin doc already exists
+        }
+        if (existing.role !== 'admin') {
+          await updateDoc(ref, {
+            role: 'admin',
+            subscriptionStatus: 'active',
+            updatedAt: serverTimestamp(),
+          });
+          const upgraded = await getDoc(ref);
+          return upgraded.data() as UserProfile;
+        }
+      }
+      return existing;
     }
 
-    const isOwnerAdmin = user.email?.toLowerCase() === ADMIN_EMAIL && user.emailVerified;
     const todayIso = new Date().toISOString().slice(0, 10);
     const nextMonth = new Date();
     nextMonth.setMonth(nextMonth.getMonth() + 1);
     const nextIso = nextMonth.toISOString().slice(0, 10);
 
+    const fallbackName =
+      user.displayName?.trim() ||
+      user.email?.split('@')[0]?.trim() ||
+      'Noiva Casamento Pleno';
+
     const profilePayload = {
       uid: user.uid,
       email: sanitizeString(user.email || 'usuario@casamentopleno.com.br', 200),
-      displayName: sanitizeString(user.displayName || 'Noiva Casamento Pleno', 120),
+      displayName: sanitizeString(fallbackName, 120),
       role: isOwnerAdmin ? ('admin' as const) : ('bride' as const),
       subscriptionStatus: isOwnerAdmin ? ('active' as const) : ('trial' as const),
       planPrice: SUBSCRIPTION_PRICE,

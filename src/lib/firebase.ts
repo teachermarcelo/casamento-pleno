@@ -77,6 +77,62 @@ async function testConnection() {
 }
 testConnection();
 
+export interface AuthErrorInfo {
+  code: string;
+  title: string;
+  message: string;
+  hostname?: string;
+  consoleUrl?: string;
+}
+
+export function formatFirebaseAuthError(error: unknown): AuthErrorInfo {
+  const errObj = error as { code?: string; message?: string } | null;
+  const code = errObj?.code || '';
+  const rawMessage = errObj?.message || (error instanceof Error ? error.message : String(error));
+  const hostname = typeof window !== 'undefined' ? window.location.hostname : '';
+  const consoleUrl = `https://console.firebase.google.com/project/${firebaseConfig.projectId}/authentication/settings`;
+
+  if (code === 'auth/unauthorized-domain' || rawMessage.includes('unauthorized-domain')) {
+    return {
+      code: 'auth/unauthorized-domain',
+      title: 'Domínio ainda não autorizado no Firebase Authentication',
+      message: `O domínio "${hostname}" precisa ser autorizado no seu projeto Firebase (${firebaseConfig.projectId}) para liberar o cadastro e login com Google.`,
+      hostname,
+      consoleUrl,
+    };
+  }
+
+  if (code === 'auth/popup-blocked') {
+    return {
+      code,
+      title: 'Pop-up de login bloqueado pelo navegador',
+      message: 'Seu navegador bloqueou a janela do Google. Permita pop-ups para este site e clique em "Entrar com Google" novamente.',
+    };
+  }
+
+  if (code === 'auth/popup-closed-by-user' || code === 'auth/cancelled-popup-request') {
+    return {
+      code,
+      title: 'Login cancelado antes de concluir',
+      message: 'A janela de autenticação do Google foi fechada. Clique em "Entrar com Google" para tentar novamente.',
+    };
+  }
+
+  if (code === 'auth/network-request-failed') {
+    return {
+      code,
+      title: 'Falha de conexão com o Firebase',
+      message: 'Não foi possível conectar ao servidor de autenticação. Verifique sua conexão com a internet e tente novamente.',
+    };
+  }
+
+  return {
+    code: code || 'auth/unknown',
+    title: 'Não foi possível concluir o cadastro/login',
+    message: rawMessage || 'Ocorreu um erro inesperado ao autenticar com o Google. Tente novamente.',
+  };
+}
+
 export async function signInWithGoogle() {
   return signInWithPopup(auth, googleProvider);
 }
