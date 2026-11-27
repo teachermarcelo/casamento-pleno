@@ -162,21 +162,21 @@ export const LandingPage: React.FC<LandingPageProps> = ({
   ];
 
   return (
-    <div className="min-h-screen bg-[#FDF8F2] dark:bg-[#0D1310] text-[#1D2620] dark:text-[#F4EFE6]">
+    <div className="min-h-screen overflow-x-clip bg-[#FDF8F2] dark:bg-[#0D1310] text-[#1D2620] dark:text-[#F4EFE6]">
       {/* Deep Forest Green & Champagne Gold Top Bar */}
       <header className="sticky top-0 z-40 bg-[#173526] text-[#FBF7F0] border-b border-[#C9A35B]/25 shadow-sm">
-        <div className="mx-auto flex max-w-7xl items-center justify-between gap-6 px-5 sm:px-8 py-3.5">
+        <div className="mx-auto flex max-w-7xl items-center justify-between gap-2 sm:gap-6 px-3.5 sm:px-8 py-2.5 sm:py-3.5">
           {/* Brand Emblem */}
-          <a href="#inicio" className="flex items-center gap-3 shrink-0 group">
-            <IntertwinedHeartsLogo className="w-9 h-8 transition-transform group-hover:scale-105" />
-            <div className="leading-none">
-              <span className="font-editorial text-2xl sm:text-[26px] font-semibold tracking-tight text-white block">
+          <a href="#inicio" className="flex items-center gap-2 sm:gap-3 min-w-0 shrink group">
+            <IntertwinedHeartsLogo className="w-7 h-6 sm:w-9 sm:h-8 shrink-0 transition-transform group-hover:scale-105" />
+            <div className="leading-none min-w-0">
+              <span className="font-editorial text-xl sm:text-[26px] font-semibold tracking-tight text-white block truncate">
                 Casamento Pleno
               </span>
-              <div className="mt-0.5 flex items-center justify-center gap-2 text-[9px] tracking-[0.28em] text-[#DFBE7A]">
-                <span className="h-px w-6 bg-[#DFBE7A]/60" />
+              <div className="mt-0.5 flex items-center justify-center gap-1.5 sm:gap-2 text-[8px] sm:text-[9px] tracking-[0.26em] text-[#DFBE7A]">
+                <span className="h-px w-4 sm:w-6 bg-[#DFBE7A]/60" />
                 <span>APP</span>
-                <span className="h-px w-6 bg-[#DFBE7A]/60" />
+                <span className="h-px w-4 sm:w-6 bg-[#DFBE7A]/60" />
               </div>
             </div>
           </a>
@@ -205,11 +205,11 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           </nav>
 
           {/* Right Actions */}
-          <div className="flex items-center gap-2.5 shrink-0">
+          <div className="flex items-center gap-2 sm:gap-2.5 shrink-0">
             <button
               type="button"
               onClick={onToggleDarkMode}
-              className="p-2 rounded-full border border-[#DFBE7A]/35 text-[#F2DFB6] hover:bg-white/10 transition-colors cursor-pointer"
+              className="flex h-10 w-10 sm:h-9 sm:w-9 items-center justify-center rounded-full border border-[#DFBE7A]/35 text-[#F2DFB6] hover:bg-white/10 transition-colors cursor-pointer"
               aria-label="Alternar tema claro ou escuro"
               title={darkMode ? 'Modo Claro' : 'Modo Escuro'}
             >
@@ -220,10 +220,11 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               type="button"
               onClick={onSignIn}
               disabled={signingIn}
-              className="inline-flex items-center gap-2 px-4 sm:px-5 py-2 text-xs sm:text-sm font-medium text-[#FBF2DC] rounded-full border border-[#DFBE7A]/80 bg-[#1F4532]/70 hover:bg-[#DFBE7A] hover:text-[#173526] transition-all whitespace-nowrap shrink-0 disabled:opacity-60 cursor-pointer"
+              className="inline-flex items-center justify-center gap-1.5 sm:gap-2 min-h-[40px] px-3.5 sm:px-5 py-2 text-xs sm:text-sm font-medium text-[#FBF2DC] rounded-full border border-[#DFBE7A]/80 bg-[#1F4532]/70 hover:bg-[#DFBE7A] hover:text-[#173526] transition-all whitespace-nowrap shrink-0 disabled:opacity-60 cursor-pointer"
             >
-              <User className="w-4 h-4" />
-              <span>{signingIn ? 'Conectando...' : 'Entrar com Google'}</span>
+              <User className="w-4 h-4 shrink-0" />
+              <span className="sm:hidden">{signingIn ? 'Entrando...' : 'Entrar'}</span>
+              <span className="hidden sm:inline">{signingIn ? 'Conectando...' : 'Entrar com Google'}</span>
             </button>
           </div>
         </div>
@@ -293,7 +294,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
       {/* Editorial Luxury Hero with Curved Gold Arch & Floating 6-Pillar Dock */}
       <section id="inicio" className="relative overflow-hidden bg-[#FDF8F2] dark:bg-[#0F1612]">
         {/* Right-side Full Bleed Wedding Photograph on Desktop */}
-        <div className="lg:absolute lg:inset-y-0 lg:right-0 lg:w-[54%] relative h-[360px] sm:h-[440px] lg:h-auto overflow-hidden">
+        <div className="lg:absolute lg:inset-y-0 lg:right-0 lg:w-[54%] relative h-[230px] sm:h-[380px] lg:h-auto overflow-hidden">
           <SafeImage
             src={GENERATED_ASSETS.heroCouple}
             alt="Noivos sorrindo de mãos dadas sob arcos florais e luz dourada do entardecer"
@@ -337,66 +338,66 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         </div>
 
         {/* Left Editorial Content Column */}
-        <div className="relative z-20 mx-auto max-w-7xl px-5 sm:px-8 pt-10 lg:pt-16 pb-20 lg:pb-28">
+        <div className="relative z-20 mx-auto max-w-7xl px-4 sm:px-8 pt-6 sm:pt-10 lg:pt-16 pb-10 sm:pb-20 lg:pb-28">
           <div className="lg:w-[52%] lg:pr-10">
             {/* Eyebrow with Golden Hairlines */}
-            <div className="flex items-center gap-3 text-[11px] sm:text-xs font-semibold tracking-[0.18em] uppercase text-[#4B584E] dark:text-[#CFC6B4]">
-              <span className="h-px w-8 bg-[#C89F52]" />
+            <div className="flex items-center gap-2.5 sm:gap-3 text-[10px] sm:text-xs font-semibold tracking-[0.14em] sm:tracking-[0.18em] uppercase text-[#4B584E] dark:text-[#CFC6B4]">
+              <span className="h-px w-6 sm:w-8 shrink-0 bg-[#C89F52]" />
               <span>Planejamento de casamento, simples e completo</span>
-              <span className="hidden sm:inline-block h-px w-8 bg-[#C89F52]" />
+              <span className="hidden sm:inline-block h-px w-8 shrink-0 bg-[#C89F52]" />
             </div>
 
             {/* Hero Headline with Italic Gold Accent + Calligraphic Heart */}
             <h1
-              className="mt-5 font-editorial font-semibold tracking-tight text-[#1A241E] dark:text-[#FAF6EE] leading-[1.04]"
-              style={{ fontSize: 'clamp(2.65rem, 4.8vw, 4.35rem)', textWrap: 'balance' }}
+              className="mt-3.5 sm:mt-5 font-editorial font-semibold tracking-tight text-[#1A241E] dark:text-[#FAF6EE] leading-[1.06]"
+              style={{ fontSize: 'clamp(2.05rem, 4.8vw, 4.35rem)', textWrap: 'balance' }}
             >
               Organize cada detalhe do seu casamento{' '}
-              <span className="italic font-normal text-[#A87F32] dark:text-[#DFBE7A] whitespace-nowrap">
+              <span className="italic font-normal text-[#A87F32] dark:text-[#DFBE7A] sm:whitespace-nowrap">
                 sem perder a paz.
               </span>
-              <CalligraphicHeartFlourish className="inline-block w-14 sm:w-16 h-9 sm:h-10 align-middle -ml-1" />
+              <CalligraphicHeartFlourish className="inline-block w-11 sm:w-16 h-7 sm:h-10 align-middle -ml-0.5" />
             </h1>
 
-            <p className="mt-5 text-base sm:text-[17px] text-[#465149] dark:text-[#C4C0B6] leading-relaxed max-w-xl">
+            <p className="mt-4 sm:mt-5 text-[15px] sm:text-[17px] text-[#465149] dark:text-[#C4C0B6] leading-relaxed max-w-xl">
               Um painel sereno e completo para gerenciar convidados, mapa de mesas, orçamento com cofre biométrico, fornecedores conectados e o site dos convidados com presentes via Pix — acompanhado pelo exclusivo Botão do Surtando.
             </p>
 
             {/* Luxury Pill CTA Buttons */}
-            <div className="mt-8 flex flex-wrap items-center gap-3.5">
+            <div className="mt-6 sm:mt-8 flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-center gap-3 sm:gap-3.5">
               <button
                 type="button"
                 onClick={onSignIn}
                 disabled={signingIn}
-                className="inline-flex items-center gap-2.5 px-7 py-3.5 text-sm font-semibold text-white bg-[#173526] hover:bg-[#11281D] rounded-full shadow-md shadow-[#173526]/20 transition-all whitespace-nowrap cursor-pointer disabled:opacity-60"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 min-h-[48px] px-6 sm:px-7 py-3.5 text-sm font-semibold text-white bg-[#173526] hover:bg-[#11281D] rounded-full shadow-md shadow-[#173526]/20 transition-all cursor-pointer disabled:opacity-60"
               >
-                <Heart className="w-4 h-4 text-[#DFBE7A]" />
+                <Heart className="w-4 h-4 text-[#DFBE7A] shrink-0" />
                 <span>Começar por {formatBRL(SUBSCRIPTION_PRICE)}/mês</span>
-                <ArrowRight className="w-4 h-4 text-[#DFBE7A]" />
+                <ArrowRight className="w-4 h-4 text-[#DFBE7A] shrink-0" />
               </button>
 
               <button
                 type="button"
                 onClick={onOpenDemoSite}
-                className="inline-flex items-center gap-2 px-6 py-3.5 text-sm font-semibold text-[#173526] dark:text-[#F4EFE6] bg-white/80 dark:bg-[#17211C] border border-[#173526]/55 dark:border-[#DFBE7A]/50 rounded-full hover:bg-[#173526]/5 dark:hover:bg-[#1E2B24] transition-all whitespace-nowrap cursor-pointer"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 min-h-[48px] px-6 py-3.5 text-sm font-semibold text-[#173526] dark:text-[#F4EFE6] bg-white/80 dark:bg-[#17211C] border border-[#173526]/55 dark:border-[#DFBE7A]/50 rounded-full hover:bg-[#173526]/5 dark:hover:bg-[#1E2B24] transition-all cursor-pointer"
               >
-                <PlayCircle className="w-4 h-4 text-[#B68B3C]" />
+                <PlayCircle className="w-4 h-4 text-[#B68B3C] shrink-0" />
                 <span>Ver site modelo</span>
               </button>
             </div>
 
             {/* Clean Trust Micro-Indicators */}
-            <div className="mt-7 flex flex-wrap items-center gap-x-6 gap-y-2.5 text-xs font-medium text-[#36443A] dark:text-[#C7C1B5]">
+            <div className="mt-6 sm:mt-7 flex flex-wrap items-center gap-x-5 gap-y-2 text-xs font-medium text-[#36443A] dark:text-[#C7C1B5]">
               <span className="inline-flex items-center gap-1.5">
-                <ShieldCheck className="w-4 h-4 text-[#1E4733] dark:text-[#DFBE7A]" />
+                <ShieldCheck className="w-4 h-4 text-[#1E4733] dark:text-[#DFBE7A] shrink-0" />
                 Seguro e Privado
               </span>
               <span className="inline-flex items-center gap-1.5">
-                <Smartphone className="w-4 h-4 text-[#1E4733] dark:text-[#DFBE7A]" />
+                <Smartphone className="w-4 h-4 text-[#1E4733] dark:text-[#DFBE7A] shrink-0" />
                 Acesso em qualquer dispositivo
               </span>
               <span className="inline-flex items-center gap-1.5">
-                <Zap className="w-4 h-4 text-[#1E4733] dark:text-[#DFBE7A]" />
+                <Zap className="w-4 h-4 text-[#1E4733] dark:text-[#DFBE7A] shrink-0" />
                 Fácil de usar
               </span>
             </div>
@@ -406,7 +407,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         {/* Bottom Forest Green Wave + Floating 6-Pillar Feature Dock */}
         <div className="relative z-20">
           {/* Decorative Forest Green Wave with Gold Edge behind the Floating Dock */}
-          <div className="pointer-events-none absolute inset-x-0 bottom-0 h-24 sm:h-28 overflow-hidden">
+          <div className="pointer-events-none absolute inset-x-0 bottom-0 h-20 sm:h-28 overflow-hidden">
             <svg
               viewBox="0 0 1440 120"
               preserveAspectRatio="none"
@@ -428,18 +429,18 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           </div>
 
           {/* Floating Warm Ivory 6-Pillar Dock */}
-          <div className="relative mx-auto max-w-6xl px-5 sm:px-8 pb-8">
-            <div className="rounded-2xl sm:rounded-3xl bg-[#FDF9F3] dark:bg-[#151D19] border border-[#E5D8BF] dark:border-[#2C3A31] shadow-xl shadow-black/8 px-4 py-5 sm:px-6 sm:py-6">
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-y-5 lg:gap-y-0 lg:divide-x divide-[#E8DDC8] dark:divide-[#29352D]">
+          <div className="relative mx-auto max-w-6xl px-4 sm:px-8 pb-6 sm:pb-8">
+            <div className="rounded-2xl sm:rounded-3xl bg-[#FDF9F3] dark:bg-[#151D19] border border-[#E5D8BF] dark:border-[#2C3A31] shadow-xl shadow-black/8 px-3 py-4 sm:px-6 sm:py-6">
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-x-2 gap-y-4 sm:gap-y-5 lg:gap-y-0 lg:divide-x divide-[#E8DDC8] dark:divide-[#29352D]">
                 {featureDockItems.map((item) => (
                   <div
                     key={item.title}
-                    className="flex flex-col items-center justify-start text-center px-3"
+                    className="flex flex-col items-center justify-start text-center px-1.5 sm:px-3"
                   >
                     <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#F5ECDC] dark:bg-[#1E2A23]">
                       {item.icon}
                     </div>
-                    <p className="mt-2.5 text-xs font-semibold leading-snug text-[#1F2C24] dark:text-[#EFE9DC]">
+                    <p className="mt-2 text-[11px] sm:text-xs font-semibold leading-snug text-[#1F2C24] dark:text-[#EFE9DC]">
                       {item.title}
                     </p>
                   </div>
@@ -451,8 +452,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({
       </section>
 
       {/* Como Funciona — 3 Serene Steps on Deep Forest Green Accent Band */}
-      <section id="como-funciona" className="bg-[#173526] text-[#FBF7F0] py-16">
-        <div className="mx-auto max-w-7xl px-5 sm:px-8">
+      <section id="como-funciona" className="bg-[#173526] text-[#FBF7F0] py-12 sm:py-16">
+        <div className="mx-auto max-w-7xl px-4 sm:px-8">
           <div className="text-center max-w-2xl mx-auto">
             <p className="text-xs font-semibold tracking-[0.2em] uppercase text-[#DFBE7A]">
               Como Funciona
@@ -462,7 +463,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             </h2>
           </div>
 
-          <div className="mt-10 grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="mt-8 sm:mt-10 grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
             {[
               {
                 step: '01',
@@ -482,7 +483,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             ].map((item) => (
               <div
                 key={item.step}
-                className="rounded-2xl bg-white/6 border border-[#DFBE7A]/25 p-6 space-y-3"
+                className="rounded-2xl bg-white/6 border border-[#DFBE7A]/25 p-5 sm:p-6 space-y-2.5 sm:space-y-3"
               >
                 <span className="font-editorial text-3xl font-semibold text-[#DFBE7A]">
                   {item.step}
@@ -500,7 +501,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
       </section>
 
       {/* Core Modules — Warm Luxury Editorial Bento */}
-      <section id="recursos" className="mx-auto max-w-7xl px-5 sm:px-8 py-20">
+      <section id="recursos" className="mx-auto max-w-7xl px-4 sm:px-8 py-14 sm:py-20">
         <div className="max-w-2xl">
           <p className="text-xs font-semibold tracking-[0.18em] uppercase text-[#A87F32] dark:text-[#DFBE7A]">
             Arquitetura pensada para a tranquilidade
@@ -510,75 +511,75 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           </h2>
         </div>
 
-        <div className="mt-12 grid grid-cols-1 lg:grid-cols-12 gap-6">
-          <div className="lg:col-span-7 rounded-3xl border border-[#E5D8BF] dark:border-[#27332C] bg-white dark:bg-[#141B17] p-8 flex flex-col justify-between shadow-xs">
+        <div className="mt-8 sm:mt-12 grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6">
+          <div className="lg:col-span-7 rounded-2xl sm:rounded-3xl border border-[#E5D8BF] dark:border-[#27332C] bg-white dark:bg-[#141B17] p-5 sm:p-8 flex flex-col justify-between shadow-xs">
             <div>
               <div className="flex items-center gap-2 text-xs font-semibold text-[#A87F32] dark:text-[#DFBE7A]">
-                <Wind className="w-4 h-4" />
+                <Wind className="w-4 h-4 shrink-0" />
                 <span>01 · Diferencial exclusivo de bem-estar</span>
               </div>
-              <h3 className="mt-3 font-editorial text-3xl font-semibold">
+              <h3 className="mt-2.5 sm:mt-3 font-editorial text-2xl sm:text-3xl font-semibold">
                 Botão do Surtando® personalizável
               </h3>
-              <p className="mt-3 text-sm text-[#4B584E] dark:text-[#B9B5AB] leading-relaxed max-w-xl">
+              <p className="mt-2.5 sm:mt-3 text-sm text-[#4B584E] dark:text-[#B9B5AB] leading-relaxed max-w-xl">
                 Sempre acessível no painel, o botão flutuante abre um refúgio imediato com respiração guiada animada, áudios relaxantes para crises de ansiedade pré-casamento e higiene do sono. Personalize texto, cor, posição e ritmo da respiração.
               </p>
             </div>
-            <div className="mt-6 pt-5 border-t border-[#F0E6D4] dark:border-[#222D27] flex flex-wrap gap-6 text-xs font-medium text-[#5A655C] dark:text-[#ABA79D]">
+            <div className="mt-5 sm:mt-6 pt-4 sm:pt-5 border-t border-[#F0E6D4] dark:border-[#222D27] flex flex-wrap gap-x-5 gap-y-2 text-xs font-medium text-[#5A655C] dark:text-[#ABA79D]">
               <span>Respiração 4-4-6 guiada</span>
               <span>Áudios relaxantes offline</span>
               <span>Dicas diárias de sono</span>
             </div>
           </div>
 
-          <div className="lg:col-span-5 rounded-3xl border border-[#E5D8BF] dark:border-[#27332C] bg-white dark:bg-[#141B17] p-8 shadow-xs flex flex-col justify-between">
+          <div className="lg:col-span-5 rounded-2xl sm:rounded-3xl border border-[#E5D8BF] dark:border-[#27332C] bg-white dark:bg-[#141B17] p-5 sm:p-8 shadow-xs flex flex-col justify-between">
             <div>
               <div className="flex items-center gap-2 text-xs font-semibold text-[#A87F32] dark:text-[#DFBE7A]">
-                <Heart className="w-4 h-4" />
+                <Heart className="w-4 h-4 shrink-0" />
                 <span>02 · Gerado automaticamente</span>
               </div>
-              <h3 className="mt-3 font-editorial text-3xl font-semibold">
+              <h3 className="mt-2.5 sm:mt-3 font-editorial text-2xl sm:text-3xl font-semibold">
                 Site dos Convidados + Pix 0% taxa
               </h3>
-              <p className="mt-3 text-sm text-[#4B584E] dark:text-[#B9B5AB] leading-relaxed">
+              <p className="mt-2.5 sm:mt-3 text-sm text-[#4B584E] dark:text-[#B9B5AB] leading-relaxed">
                 Contagem regressiva, história do casal, Google Maps, dress code, área dos padrinhos, lista de presentes via Pix Copia e Cola direto na sua conta e RSVP em tempo real.
               </p>
             </div>
             <button
               type="button"
               onClick={onOpenDemoSite}
-              className="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-[#173526] dark:text-[#DFBE7A] hover:underline cursor-pointer"
+              className="mt-5 sm:mt-6 inline-flex items-center gap-2 text-sm font-semibold text-[#173526] dark:text-[#DFBE7A] hover:underline cursor-pointer"
             >
               <span>Explorar site modelo de Clara & Henrique</span>
-              <ArrowRight className="w-4 h-4" />
+              <ArrowRight className="w-4 h-4 shrink-0" />
             </button>
           </div>
 
-          <div className="lg:col-span-5 rounded-3xl border border-[#E5D8BF] dark:border-[#27332C] bg-white dark:bg-[#141B17] p-8 shadow-xs">
+          <div className="lg:col-span-5 rounded-2xl sm:rounded-3xl border border-[#E5D8BF] dark:border-[#27332C] bg-white dark:bg-[#141B17] p-5 sm:p-8 shadow-xs">
             <div className="flex items-center gap-2 text-xs font-semibold text-[#A87F32] dark:text-[#DFBE7A]">
-              <Users className="w-4 h-4" />
+              <Users className="w-4 h-4 shrink-0" />
               <span>03 · Convidados & Mesas</span>
             </div>
-            <h3 className="mt-3 font-editorial text-3xl font-semibold">
+            <h3 className="mt-2.5 sm:mt-3 font-editorial text-2xl sm:text-3xl font-semibold">
               RSVP WhatsApp e Mapa Interativo
             </h3>
-            <p className="mt-3 text-sm text-[#4B584E] dark:text-[#B9B5AB] leading-relaxed">
+            <p className="mt-2.5 sm:mt-3 text-sm text-[#4B584E] dark:text-[#B9B5AB] leading-relaxed">
               Envie links de confirmação pelo WhatsApp, acompanhe adultos e crianças em tempo real e distribua os convidados nas mesas da recepção com arrastar e soltar.
             </p>
           </div>
 
-          <div className="lg:col-span-7 rounded-3xl border border-[#E5D8BF] dark:border-[#27332C] bg-white dark:bg-[#141B17] p-8 shadow-xs">
+          <div className="lg:col-span-7 rounded-2xl sm:rounded-3xl border border-[#E5D8BF] dark:border-[#27332C] bg-white dark:bg-[#141B17] p-5 sm:p-8 shadow-xs">
             <div className="flex items-center gap-2 text-xs font-semibold text-[#A87F32] dark:text-[#DFBE7A]">
-              <BarChart3 className="w-4 h-4" />
+              <BarChart3 className="w-4 h-4 shrink-0" />
               <span>04 · Financeiro Conectado & Analytics</span>
             </div>
-            <h3 className="mt-3 font-editorial text-3xl font-semibold">
+            <h3 className="mt-2.5 sm:mt-3 font-editorial text-2xl sm:text-3xl font-semibold">
               Fornecedores, Pagamentos, Cofre Biométrico e Gráficos
             </h3>
-            <p className="mt-3 text-sm text-[#4B584E] dark:text-[#B9B5AB] leading-relaxed">
+            <p className="mt-2.5 sm:mt-3 text-sm text-[#4B584E] dark:text-[#B9B5AB] leading-relaxed">
               Cadastre fornecedores com sinal, parcelas e vencimentos, abata valores parciais ou totais, visualize gráficos de pizza por categoria e orçamento vs. total gasto, além de relatórios em PDF, CSV e agenda (.ics).
             </p>
-            <div className="mt-6 pt-5 border-t border-[#F0E6D4] dark:border-[#222D27] flex flex-wrap gap-6 text-xs font-medium text-[#5A655C] dark:text-[#ABA79D]">
+            <div className="mt-5 sm:mt-6 pt-4 sm:pt-5 border-t border-[#F0E6D4] dark:border-[#222D27] flex flex-wrap gap-x-5 gap-y-2 text-xs font-medium text-[#5A655C] dark:text-[#ABA79D]">
               <span>Gráficos Analytics Recharts</span>
               <span>Cofre com PIN / Biometria</span>
               <span>Exportação PDF, CSV e .ICS</span>
@@ -588,8 +589,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({
       </section>
 
       {/* Luxury Forest Green & Gold Pricing Card */}
-      <section id="plano" className="mx-auto max-w-7xl px-5 sm:px-8 pb-20">
-        <div className="rounded-3xl bg-[#173526] text-[#FBF7F0] border border-[#DFBE7A]/35 p-8 lg:p-12 grid grid-cols-1 lg:grid-cols-12 gap-10 items-center shadow-xl shadow-[#173526]/15">
+      <section id="plano" className="mx-auto max-w-7xl px-4 sm:px-8 pb-14 sm:pb-20">
+        <div className="rounded-2xl sm:rounded-3xl bg-[#173526] text-[#FBF7F0] border border-[#DFBE7A]/35 p-5 sm:p-8 lg:p-12 grid grid-cols-1 lg:grid-cols-12 gap-7 sm:gap-10 items-center shadow-xl shadow-[#173526]/15">
           <div className="lg:col-span-7">
             <p className="text-xs font-semibold tracking-[0.2em] uppercase text-[#DFBE7A]">
               Plano único · Sem surpresas
@@ -601,7 +602,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               Personalize cores, fotos e mensagens logo após a assinatura. Cobrança mensal transparente via Mercado Pago (Pix ou Cartão), com cancelamento simples a qualquer momento.
             </p>
 
-            <ul className="mt-7 grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm text-[#F5F0E6]">
+            <ul className="mt-6 sm:mt-7 grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3 text-sm text-[#F5F0E6]">
               {[
                 'Painel exclusivo com suas fotos e cores',
                 'Site dos convidados + Lista Pix sem taxas',
@@ -618,12 +619,12 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             </ul>
           </div>
 
-          <div className="lg:col-span-5 rounded-2xl bg-[#FDF8F2] text-[#1A241E] border border-[#DFBE7A]/60 p-7 shadow-lg">
+          <div className="lg:col-span-5 rounded-2xl bg-[#FDF8F2] text-[#1A241E] border border-[#DFBE7A]/60 p-5 sm:p-7 shadow-lg">
             <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#A87F32]">
               Assinatura Casamento Pleno
             </p>
             <div className="mt-3 flex items-baseline gap-1.5">
-              <span className="font-mono text-4xl font-semibold tabular-nums text-[#173526]">
+              <span className="font-mono text-3xl sm:text-4xl font-semibold tabular-nums text-[#173526]">
                 R$ 39,90
               </span>
               <span className="text-sm text-[#58655B]">/mês</span>
@@ -636,9 +637,9 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               type="button"
               onClick={onSignIn}
               disabled={signingIn}
-              className="mt-6 w-full inline-flex items-center justify-center gap-2 py-3.5 px-5 text-sm font-semibold text-white bg-[#173526] hover:bg-[#10261B] rounded-full transition-colors cursor-pointer disabled:opacity-60"
+              className="mt-5 sm:mt-6 w-full min-h-[48px] inline-flex items-center justify-center gap-2 py-3.5 px-5 text-sm font-semibold text-white bg-[#173526] hover:bg-[#10261B] rounded-full transition-colors cursor-pointer disabled:opacity-60"
             >
-              <Heart className="w-4 h-4 text-[#DFBE7A]" />
+              <Heart className="w-4 h-4 text-[#DFBE7A] shrink-0" />
               <span>{signingIn ? 'Abrindo login Google...' : 'Criar conta e personalizar agora'}</span>
             </button>
           </div>
@@ -646,11 +647,11 @@ export const LandingPage: React.FC<LandingPageProps> = ({
       </section>
 
       {/* Mobile PWA Section */}
-      <section id="celular" className="mx-auto max-w-7xl px-5 sm:px-8 pb-20">
-        <div className="rounded-3xl border border-[#E5D8BF] dark:border-[#27332C] bg-white dark:bg-[#141B17] p-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
-          <div className="flex items-start gap-4">
-            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[#F5ECDC] dark:bg-[#1F2B24] text-[#173526] dark:text-[#DFBE7A]">
-              <Smartphone className="w-6 h-6" />
+      <section id="celular" className="mx-auto max-w-7xl px-4 sm:px-8 pb-14 sm:pb-20">
+        <div className="rounded-2xl sm:rounded-3xl border border-[#E5D8BF] dark:border-[#27332C] bg-white dark:bg-[#141B17] p-5 sm:p-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-5 sm:gap-6">
+          <div className="flex items-start gap-3.5 sm:gap-4">
+            <div className="flex h-11 w-11 sm:h-12 sm:w-12 shrink-0 items-center justify-center rounded-2xl bg-[#F5ECDC] dark:bg-[#1F2B24] text-[#173526] dark:text-[#DFBE7A]">
+              <Smartphone className="w-5 h-5 sm:w-6 sm:h-6" />
             </div>
             <div>
               <h3 className="font-editorial text-2xl sm:text-3xl font-semibold">
@@ -661,27 +662,27 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               </p>
             </div>
           </div>
-          <div className="flex items-center gap-3 shrink-0">
+          <div className="flex items-center gap-3 w-full md:w-auto shrink-0">
             <PWAInstallButton />
           </div>
         </div>
       </section>
 
       {/* Forest Green & Gold Footer */}
-      <footer className="bg-[#173526] text-[#E5DFD3] border-t border-[#DFBE7A]/25 py-10">
-        <div className="mx-auto max-w-7xl px-5 sm:px-8 flex flex-col sm:flex-row items-center justify-between gap-5 text-xs">
-          <div className="flex items-center gap-3">
-            <IntertwinedHeartsLogo className="w-7 h-6" />
+      <footer className="bg-[#173526] text-[#E5DFD3] border-t border-[#DFBE7A]/25 py-8 sm:py-10">
+        <div className="mx-auto max-w-7xl px-4 sm:px-8 flex flex-col sm:flex-row items-center justify-between gap-4 sm:gap-5 text-xs text-center sm:text-left">
+          <div className="flex items-center gap-2.5 sm:gap-3">
+            <IntertwinedHeartsLogo className="w-7 h-6 shrink-0" />
             <div className="flex items-center gap-2">
-              <Calendar className="w-3.5 h-3.5 text-[#DFBE7A]" />
+              <Calendar className="w-3.5 h-3.5 text-[#DFBE7A] shrink-0 hidden sm:inline" />
               <span>Casamento Pleno © {new Date().getFullYear()} · Planejamento & Bem-Estar</span>
             </div>
           </div>
           <div className="flex items-center gap-6">
-            <button type="button" onClick={onOpenDemoSite} className="hover:text-[#DFBE7A] transition-colors cursor-pointer">
+            <button type="button" onClick={onOpenDemoSite} className="py-1 hover:text-[#DFBE7A] transition-colors cursor-pointer">
               Site Modelo
             </button>
-            <button type="button" onClick={onSignIn} className="hover:text-[#DFBE7A] transition-colors cursor-pointer">
+            <button type="button" onClick={onSignIn} className="py-1 hover:text-[#DFBE7A] transition-colors cursor-pointer">
               Entrar no Painel
             </button>
           </div>

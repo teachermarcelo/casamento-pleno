@@ -134,19 +134,19 @@ export const GuestWeddingSite: React.FC<GuestWeddingSiteProps> = ({
   const mapsLink = safeExternalUrl(wedding.venueMapsUrl) || `https://maps.google.com/?q=${encodeURIComponent(wedding.venueAddress || wedding.venueName || 'Brasil')}`;
 
   return (
-    <div className="min-h-screen bg-[#FAF9F6] dark:bg-[#0F1115] text-stone-900 dark:text-stone-100">
+    <div className="min-h-screen overflow-x-clip bg-[#FAF9F6] dark:bg-[#0F1115] text-stone-900 dark:text-stone-100">
       {/* Return Bar when previewing inside app */}
       {onExit && (
-        <div className="bg-stone-900 text-stone-100 px-6 py-2.5 flex items-center justify-between text-xs">
+        <div className="bg-stone-900 text-stone-100 px-4 sm:px-6 py-2.5 flex items-center justify-between gap-3 text-xs">
           <button
             type="button"
             onClick={onExit}
             className="inline-flex items-center gap-1.5 font-medium hover:underline cursor-pointer"
           >
-            <ArrowLeft className="w-3.5 h-3.5" />
+            <ArrowLeft className="w-3.5 h-3.5 shrink-0" />
             <span>Voltar para o Casamento Pleno</span>
           </button>
-          <span className="text-stone-400 hidden sm:inline">
+          <span className="text-stone-400 hidden sm:inline truncate">
             {isDemo ? 'Site Modelo Interativo (Clara & Henrique)' : `Visualização ao vivo · /?convite=${wedding.slug}`}
           </span>
         </div>
@@ -154,8 +154,8 @@ export const GuestWeddingSite: React.FC<GuestWeddingSiteProps> = ({
 
       {/* Clean 3-Zone Editorial Top Bar */}
       <header className="sticky top-0 z-30 border-b border-stone-200/80 dark:border-stone-800/80 bg-[#FAF9F6]/95 dark:bg-[#0F1115]/95 backdrop-blur-md">
-        <div className="mx-auto max-w-6xl px-6 py-4 flex items-center justify-between gap-8">
-          <a href="#topo" className="font-editorial text-2xl font-semibold whitespace-nowrap shrink-0">
+        <div className="mx-auto max-w-6xl px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between gap-3 sm:gap-8">
+          <a href="#topo" className="font-editorial text-xl sm:text-2xl font-semibold truncate min-w-0">
             {wedding.brideName} & {wedding.groomName}
           </a>
           <nav className="hidden md:flex items-center gap-7 text-sm font-medium text-stone-600 dark:text-stone-400">
@@ -175,15 +175,16 @@ export const GuestWeddingSite: React.FC<GuestWeddingSiteProps> = ({
           <a
             href="#rsvp"
             style={{ backgroundColor: accentColor }}
-            className="px-4 py-2 text-sm font-medium text-white rounded-lg hover:brightness-110 transition-all whitespace-nowrap shrink-0"
+            className="inline-flex items-center justify-center min-h-[40px] px-3.5 sm:px-4 py-2 text-xs sm:text-sm font-medium text-white rounded-lg hover:brightness-110 transition-all whitespace-nowrap shrink-0"
           >
-            Confirmar Presença
+            <span className="sm:hidden">Confirmar</span>
+            <span className="hidden sm:inline">Confirmar Presença</span>
           </a>
         </div>
       </header>
 
       {/* Hero with Editorial Photography & Live Countdown */}
-      <section id="topo" className="relative min-h-[76vh] flex items-end overflow-hidden">
+      <section id="topo" className="relative min-h-[66vh] sm:min-h-[76vh] flex items-end overflow-hidden">
         <SafeImage
           src={wedding.coverPhotoUrl || GENERATED_ASSETS.heroCouple}
           alt={`Foto de capa de ${wedding.brideName} e ${wedding.groomName}`}
@@ -191,22 +192,22 @@ export const GuestWeddingSite: React.FC<GuestWeddingSiteProps> = ({
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/35 to-black/15" />
 
-        <div className="relative z-10 mx-auto max-w-5xl w-full px-6 py-16 text-center text-white">
-          <p className="text-xs tracking-[0.22em] uppercase opacity-90">
+        <div className="relative z-10 mx-auto max-w-5xl w-full px-4 sm:px-6 py-10 sm:py-16 text-center text-white">
+          <p className="text-[11px] sm:text-xs tracking-[0.18em] sm:tracking-[0.22em] uppercase opacity-90">
             Save the Date · {formattedDate}
           </p>
           <h1
-            className="mt-3 font-editorial font-semibold tracking-tight leading-none"
-            style={{ fontSize: 'clamp(3rem, 7vw, 5.75rem)', textWrap: 'balance' }}
+            className="mt-2.5 sm:mt-3 font-editorial font-semibold tracking-tight leading-none"
+            style={{ fontSize: 'clamp(2.25rem, 7vw, 5.75rem)', textWrap: 'balance' }}
           >
             {wedding.brideName} & {wedding.groomName}
           </h1>
-          <p className="mt-5 mx-auto max-w-2xl text-base sm:text-lg text-white/90 font-light leading-relaxed">
+          <p className="mt-4 sm:mt-5 mx-auto max-w-2xl text-sm sm:text-lg text-white/90 font-light leading-relaxed">
             {wedding.welcomeMessage}
           </p>
 
           {/* Live Countdown */}
-          <div className="mt-10 mx-auto max-w-xl grid grid-cols-4 gap-3 sm:gap-5">
+          <div className="mt-7 sm:mt-10 mx-auto max-w-xl grid grid-cols-4 gap-2 sm:gap-5">
             {[
               { label: 'Dias', value: countdown.days },
               { label: 'Horas', value: countdown.hours },
@@ -215,12 +216,12 @@ export const GuestWeddingSite: React.FC<GuestWeddingSiteProps> = ({
             ].map((unit) => (
               <div
                 key={unit.label}
-                className="rounded-xl bg-white/12 backdrop-blur-md border border-white/20 py-4 px-2"
+                className="rounded-xl bg-white/12 backdrop-blur-md border border-white/20 py-3 sm:py-4 px-1.5 sm:px-2"
               >
-                <p className="font-mono text-2xl sm:text-4xl font-semibold tabular-nums">
+                <p className="font-mono text-xl sm:text-4xl font-semibold tabular-nums">
                   {String(unit.value).padStart(2, '0')}
                 </p>
-                <p className="mt-1 text-xs text-white/80">{unit.label}</p>
+                <p className="mt-0.5 sm:mt-1 text-[10px] sm:text-xs text-white/80">{unit.label}</p>
               </div>
             ))}
           </div>
@@ -228,8 +229,8 @@ export const GuestWeddingSite: React.FC<GuestWeddingSiteProps> = ({
       </section>
 
       {/* Nossa História */}
-      <section id="historia" className="mx-auto max-w-6xl px-6 py-20">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+      <section id="historia" className="mx-auto max-w-6xl px-4 sm:px-6 py-12 sm:py-20">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 sm:gap-12 items-center">
           <div className="lg:col-span-6 overflow-hidden rounded-2xl border border-stone-200 dark:border-stone-800 aspect-[4/3]">
             <SafeImage
               src={wedding.couplePhotoUrl || GENERATED_ASSETS.storyCouple}
@@ -237,21 +238,21 @@ export const GuestWeddingSite: React.FC<GuestWeddingSiteProps> = ({
               className={`w-full h-full object-cover ${getObjectPositionClass(wedding.couplePhotoPosition)}`}
             />
           </div>
-          <div className="lg:col-span-6 space-y-5">
+          <div className="lg:col-span-6 space-y-4 sm:space-y-5">
             <p className="text-xs font-medium" style={{ color: accentColor }}>
               Nossa História
             </p>
-            <h2 className="font-editorial text-4xl font-semibold text-stone-900 dark:text-stone-100">
+            <h2 className="font-editorial text-3xl sm:text-4xl font-semibold text-stone-900 dark:text-stone-100">
               Um encontro que se transformou em lar
             </h2>
-            <p className="text-base text-stone-600 dark:text-stone-400 leading-relaxed whitespace-pre-line">
+            <p className="text-[15px] sm:text-base text-stone-600 dark:text-stone-400 leading-relaxed whitespace-pre-line">
               {wedding.coupleStory || wedding.welcomeMessage}
             </p>
-            <div className="pt-4 flex flex-wrap gap-3">
+            <div className="pt-2 sm:pt-4 flex flex-wrap gap-3">
               <button
                 type="button"
                 onClick={() => buildWeddingDayICS(wedding, schedule)}
-                className="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-lg border border-stone-300 dark:border-stone-700 hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors cursor-pointer"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 min-h-[44px] px-4 py-2.5 text-sm font-medium rounded-lg border border-stone-300 dark:border-stone-700 hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors cursor-pointer"
               >
                 <Calendar className="w-4 h-4" />
                 <span>Salvar no Calendário (.ics)</span>
@@ -262,19 +263,19 @@ export const GuestWeddingSite: React.FC<GuestWeddingSiteProps> = ({
       </section>
 
       {/* Cerimônia, Local & Cronograma */}
-      <section id="evento" className="border-y border-stone-200 dark:border-stone-800 bg-white dark:bg-[#14171D] py-20">
-        <div className="mx-auto max-w-6xl px-6">
+      <section id="evento" className="border-y border-stone-200 dark:border-stone-800 bg-white dark:bg-[#14171D] py-12 sm:py-20">
+        <div className="mx-auto max-w-6xl px-4 sm:px-6">
           <div className="text-center max-w-2xl mx-auto">
             <p className="text-xs font-medium" style={{ color: accentColor }}>
               Cerimônia & Recepção
             </p>
-            <h2 className="mt-2 font-editorial text-4xl font-semibold">
+            <h2 className="mt-2 font-editorial text-3xl sm:text-4xl font-semibold">
               Detalhes do Grande Dia
             </h2>
           </div>
 
-          <div className="mt-12 grid grid-cols-1 lg:grid-cols-12 gap-10 items-stretch">
-            <div className="lg:col-span-6 rounded-2xl overflow-hidden border border-stone-200 dark:border-stone-800 min-h-[300px]">
+          <div className="mt-8 sm:mt-12 grid grid-cols-1 lg:grid-cols-12 gap-7 sm:gap-10 items-stretch">
+            <div className="lg:col-span-6 rounded-2xl overflow-hidden border border-stone-200 dark:border-stone-800 min-h-[220px] sm:min-h-[300px]">
               <SafeImage
                 src={GENERATED_ASSETS.venueGarden}
                 alt={wedding.venueName || 'Local da cerimônia'}
@@ -315,11 +316,11 @@ export const GuestWeddingSite: React.FC<GuestWeddingSiteProps> = ({
                     Cronograma do Dia
                   </p>
                   {schedule.map((item) => (
-                    <div key={item.id} className="flex items-baseline gap-4 text-sm">
-                      <span className="font-mono font-semibold tabular-nums w-14 shrink-0" style={{ color: accentColor }}>
+                    <div key={item.id} className="flex items-baseline gap-3.5 sm:gap-4 text-sm">
+                      <span className="font-mono font-semibold tabular-nums w-12 sm:w-14 shrink-0" style={{ color: accentColor }}>
                         {item.time}
                       </span>
-                      <div>
+                      <div className="min-w-0">
                         <p className="font-medium text-stone-900 dark:text-stone-100">{item.title}</p>
                         {item.description && (
                           <p className="text-xs text-stone-500 dark:text-stone-400">{item.description}</p>
@@ -336,7 +337,7 @@ export const GuestWeddingSite: React.FC<GuestWeddingSiteProps> = ({
                   target="_blank"
                   rel="noreferrer"
                   style={{ backgroundColor: accentColor }}
-                  className="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-medium text-white rounded-lg hover:brightness-110 transition-all"
+                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 min-h-[44px] px-5 py-2.5 text-sm font-medium text-white rounded-lg hover:brightness-110 transition-all"
                 >
                   <MapPin className="w-4 h-4" />
                   <span>Abrir rota no Google Maps</span>
@@ -349,17 +350,17 @@ export const GuestWeddingSite: React.FC<GuestWeddingSiteProps> = ({
 
       {/* Área dos Padrinhos */}
       {party.length > 0 && (
-        <section id="padrinhos" className="mx-auto max-w-6xl px-6 py-20">
+        <section id="padrinhos" className="mx-auto max-w-6xl px-4 sm:px-6 py-12 sm:py-20">
           <div className="text-center max-w-2xl mx-auto">
             <p className="text-xs font-medium" style={{ color: accentColor }}>
               Pessoas Inesquecíveis
             </p>
-            <h2 className="mt-2 font-editorial text-4xl font-semibold">
+            <h2 className="mt-2 font-editorial text-3xl sm:text-4xl font-semibold">
               Nossos Padrinhos e Madrinhas
             </h2>
           </div>
 
-          <div className="mt-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="mt-8 sm:mt-12 grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-6">
             {party.map((member) => (
               <div
                 key={member.id}
@@ -372,15 +373,15 @@ export const GuestWeddingSite: React.FC<GuestWeddingSiteProps> = ({
                     className="w-full h-full object-cover"
                   />
                 </div>
-                <div className="p-5">
-                  <p className="text-xs font-medium" style={{ color: accentColor }}>
+                <div className="p-3.5 sm:p-5">
+                  <p className="text-[11px] sm:text-xs font-medium" style={{ color: accentColor }}>
                     {member.role}
                   </p>
-                  <h3 className="mt-1 font-editorial text-2xl font-semibold text-stone-900 dark:text-stone-100">
+                  <h3 className="mt-1 font-editorial text-lg sm:text-2xl font-semibold text-stone-900 dark:text-stone-100 leading-tight">
                     {member.name}
                   </h3>
                   {member.description && (
-                    <p className="mt-2 text-xs text-stone-600 dark:text-stone-400 leading-relaxed">
+                    <p className="mt-1.5 sm:mt-2 text-[11px] sm:text-xs text-stone-600 dark:text-stone-400 leading-relaxed line-clamp-3">
                       {member.description}
                     </p>
                   )}
@@ -392,14 +393,14 @@ export const GuestWeddingSite: React.FC<GuestWeddingSiteProps> = ({
       )}
 
       {/* Lista de Presentes Inteligente (Pix) */}
-      <section id="presentes" className="border-t border-stone-200 dark:border-stone-800 bg-white dark:bg-[#14171D] py-20">
-        <div className="mx-auto max-w-6xl px-6">
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+      <section id="presentes" className="border-t border-stone-200 dark:border-stone-800 bg-white dark:bg-[#14171D] py-12 sm:py-20">
+        <div className="mx-auto max-w-6xl px-4 sm:px-6">
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 sm:gap-6">
             <div className="max-w-xl">
               <p className="text-xs font-medium" style={{ color: accentColor }}>
                 Lista de Presentes Inteligente · Pix Direto
               </p>
-              <h2 className="mt-2 font-editorial text-4xl font-semibold">
+              <h2 className="mt-2 font-editorial text-3xl sm:text-4xl font-semibold">
                 Presenteie os noivos com praticidade
               </h2>
               <p className="mt-2 text-sm text-stone-600 dark:text-stone-400">
@@ -408,13 +409,13 @@ export const GuestWeddingSite: React.FC<GuestWeddingSiteProps> = ({
             </div>
 
             {categories.length > 1 && (
-              <div className="inline-flex flex-wrap items-center gap-1 rounded-lg bg-stone-100 dark:bg-stone-800/80 p-1">
+              <div className="flex items-center gap-1 overflow-x-auto no-scrollbar max-w-full rounded-lg bg-stone-100 dark:bg-stone-800/80 p-1">
                 {categories.map((cat) => (
                   <button
                     key={cat}
                     type="button"
                     onClick={() => setGiftCategory(cat)}
-                    className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors cursor-pointer ${
+                    className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors whitespace-nowrap shrink-0 cursor-pointer ${
                       giftCategory === cat
                         ? 'bg-white dark:bg-[#1C2029] text-stone-900 dark:text-stone-100 shadow-xs'
                         : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200'
@@ -427,11 +428,11 @@ export const GuestWeddingSite: React.FC<GuestWeddingSiteProps> = ({
             )}
           </div>
 
-          <div className="mt-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="mt-8 sm:mt-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
             {filteredGifts.map((gift) => (
               <div
                 key={gift.id}
-                className="rounded-2xl border border-stone-200 dark:border-stone-800 bg-[#FAF9F6] dark:bg-[#171A21] p-6 flex flex-col justify-between"
+                className="rounded-2xl border border-stone-200 dark:border-stone-800 bg-[#FAF9F6] dark:bg-[#171A21] p-5 sm:p-6 flex flex-col justify-between"
               >
                 <div>
                   <p className="text-xs text-stone-500 dark:text-stone-400">{gift.category}</p>
@@ -445,8 +446,8 @@ export const GuestWeddingSite: React.FC<GuestWeddingSiteProps> = ({
                   )}
                 </div>
 
-                <div className="mt-6 pt-4 border-t border-stone-200 dark:border-stone-800 flex items-center justify-between gap-4">
-                  <span className="font-mono text-xl font-semibold tabular-nums text-stone-900 dark:text-stone-100">
+                <div className="mt-5 sm:mt-6 pt-4 border-t border-stone-200 dark:border-stone-800 flex items-center justify-between gap-3">
+                  <span className="font-mono text-lg sm:text-xl font-semibold tabular-nums text-stone-900 dark:text-stone-100">
                     {formatBRL(gift.price)}
                   </span>
                   <button
@@ -458,9 +459,9 @@ export const GuestWeddingSite: React.FC<GuestWeddingSiteProps> = ({
                       setGiverMessage('');
                     }}
                     style={{ backgroundColor: accentColor }}
-                    className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-semibold text-white rounded-lg hover:brightness-110 transition-all cursor-pointer"
+                    className="inline-flex items-center gap-1.5 min-h-[40px] px-3.5 sm:px-4 py-2 text-xs font-semibold text-white rounded-lg hover:brightness-110 transition-all cursor-pointer whitespace-nowrap"
                   >
-                    <Gift className="w-3.5 h-3.5" />
+                    <Gift className="w-3.5 h-3.5 shrink-0" />
                     <span>Presentear via Pix</span>
                   </button>
                 </div>
@@ -471,13 +472,13 @@ export const GuestWeddingSite: React.FC<GuestWeddingSiteProps> = ({
       </section>
 
       {/* RSVP Integrado */}
-      <section id="rsvp" className="mx-auto max-w-3xl px-6 py-20">
-        <div className="rounded-2xl border border-stone-200 dark:border-stone-800 bg-white dark:bg-[#171A21] p-8 sm:p-10">
+      <section id="rsvp" className="mx-auto max-w-3xl px-4 sm:px-6 py-12 sm:py-20">
+        <div className="rounded-2xl border border-stone-200 dark:border-stone-800 bg-white dark:bg-[#171A21] p-5 sm:p-10">
           <div className="text-center">
             <p className="text-xs font-medium" style={{ color: accentColor }}>
               Confirmação de Presença (RSVP)
             </p>
-            <h2 className="mt-2 font-editorial text-4xl font-semibold">
+            <h2 className="mt-2 font-editorial text-3xl sm:text-4xl font-semibold">
               Você vai celebrar conosco?
             </h2>
             <p className="mt-2 text-sm text-stone-600 dark:text-stone-400">
@@ -535,8 +536,8 @@ export const GuestWeddingSite: React.FC<GuestWeddingSiteProps> = ({
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4">
+                <div className="col-span-2 sm:col-span-1">
                   <label className="block text-xs font-medium text-stone-600 dark:text-stone-400 mb-1.5">
                     Confirmação
                   </label>
@@ -627,13 +628,13 @@ export const GuestWeddingSite: React.FC<GuestWeddingSiteProps> = ({
       {/* Pix Gift Modal */}
       {selectedGift && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-xs"
+          className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 p-0 sm:p-4 backdrop-blur-xs"
           role="dialog"
           aria-modal="true"
         >
-          <div className="w-full max-w-md rounded-2xl bg-white dark:bg-[#171A21] border border-stone-200 dark:border-stone-800 p-6 shadow-2xl">
+          <div className="w-full max-w-md max-h-[90vh] overflow-y-auto rounded-t-3xl sm:rounded-2xl bg-white dark:bg-[#171A21] border border-stone-200 dark:border-stone-800 p-5 sm:p-6 shadow-2xl">
             <div className="flex items-start justify-between gap-4">
-              <div>
+              <div className="min-w-0">
                 <p className="text-xs font-medium" style={{ color: accentColor }}>
                   Presente via Pix Direto
                 </p>
@@ -642,9 +643,9 @@ export const GuestWeddingSite: React.FC<GuestWeddingSiteProps> = ({
               <button
                 type="button"
                 onClick={() => setSelectedGift(null)}
-                className="p-1.5 rounded-lg text-stone-500 hover:bg-stone-100 dark:hover:bg-stone-800 cursor-pointer"
+                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg text-stone-500 hover:bg-stone-100 dark:hover:bg-stone-800 cursor-pointer"
               >
-                <X className="w-4 h-4" />
+                <X className="w-5 h-5" />
               </button>
             </div>
 
@@ -659,7 +660,7 @@ export const GuestWeddingSite: React.FC<GuestWeddingSiteProps> = ({
                   type="button"
                   onClick={() => setSelectedGift(null)}
                   style={{ backgroundColor: accentColor }}
-                  className="mt-3 px-5 py-2.5 text-sm font-medium text-white rounded-lg cursor-pointer"
+                  className="mt-3 w-full sm:w-auto min-h-[44px] px-5 py-2.5 text-sm font-medium text-white rounded-lg cursor-pointer"
                 >
                   Fechar
                 </button>
@@ -681,11 +682,11 @@ export const GuestWeddingSite: React.FC<GuestWeddingSiteProps> = ({
                       <QrCode className="w-3.5 h-3.5" />
                       <span>Código Pix Copia e Cola</span>
                     </label>
-                    <div className="flex gap-2">
+                    <div className="flex flex-col sm:flex-row gap-2">
                       <input
                         readOnly
                         value={pixPayload}
-                        className="flex-1 rounded-lg border border-stone-300 dark:border-stone-700 bg-white dark:bg-[#171A21] px-2.5 py-2 font-mono text-xs"
+                        className="flex-1 min-w-0 rounded-lg border border-stone-300 dark:border-stone-700 bg-white dark:bg-[#171A21] px-2.5 py-2 font-mono text-xs"
                       />
                       <button
                         type="button"
@@ -694,7 +695,7 @@ export const GuestWeddingSite: React.FC<GuestWeddingSiteProps> = ({
                           setPixCopied(true);
                           setTimeout(() => setPixCopied(false), 2000);
                         }}
-                        className="inline-flex items-center gap-1 rounded-lg border border-stone-300 dark:border-stone-700 bg-white dark:bg-[#171A21] px-3 py-2 text-xs font-medium cursor-pointer"
+                        className="inline-flex items-center justify-center gap-1 min-h-[42px] rounded-lg border border-stone-300 dark:border-stone-700 bg-white dark:bg-[#171A21] px-3 py-2 text-xs font-medium cursor-pointer shrink-0"
                       >
                         {pixCopied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
                         <span>{pixCopied ? 'Copiado' : 'Copiar'}</span>

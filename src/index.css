@@ -18,9 +18,37 @@
   --brand-soft: rgba(74, 93, 78, 0.22);
 }
 
-html {
+html,
+body {
   scroll-behavior: smooth;
   font-family: var(--font-sans);
+  overflow-x: clip;
+  max-width: 100%;
+  -webkit-tap-highlight-color: transparent;
+  overscroll-behavior-y: contain;
+}
+
+#root {
+  overflow-x: clip;
+  max-width: 100%;
+}
+
+/* Prevent iOS Safari zoom-in framing shift when focusing form controls on mobile */
+@media (max-width: 639px) {
+  input:not([type="checkbox"]):not([type="radio"]):not([type="color"]),
+  select,
+  textarea {
+    font-size: 16px;
+  }
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
 }
 
 .font-editorial {

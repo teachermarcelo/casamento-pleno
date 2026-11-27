@@ -176,16 +176,16 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
   const activeTheme = WEDDING_THEMES[themeKey];
 
   return (
-    <div className="min-h-screen bg-[#F8F7F4] dark:bg-[#0F1115] text-stone-900 dark:text-stone-100">
+    <div className="min-h-screen overflow-x-clip bg-[#F8F7F4] dark:bg-[#0F1115] text-stone-900 dark:text-stone-100">
       <header className="border-b border-stone-200 dark:border-stone-800 bg-white dark:bg-[#171A21]">
-        <div className="mx-auto max-w-5xl px-6 py-4 flex items-center justify-between gap-4">
-          <span className="font-editorial text-2xl font-semibold">Casamento Pleno</span>
-          <div className="flex items-center gap-4 text-xs text-stone-500 dark:text-stone-400">
+        <div className="mx-auto max-w-5xl px-4 sm:px-6 py-3.5 sm:py-4 flex items-center justify-between gap-3">
+          <span className="font-editorial text-xl sm:text-2xl font-semibold truncate">Casamento Pleno</span>
+          <div className="flex items-center gap-3 sm:gap-4 text-xs text-stone-500 dark:text-stone-400 shrink-0">
             <span className="hidden sm:inline">{profile.email}</span>
             <button
               type="button"
               onClick={onSignOut}
-              className="text-stone-700 dark:text-stone-300 hover:underline cursor-pointer"
+              className="min-h-[36px] px-2 text-stone-700 dark:text-stone-300 hover:underline cursor-pointer"
             >
               Sair
             </button>
@@ -260,12 +260,12 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
               )}
 
               {!checkoutResult ? (
-                <div className="mt-6 flex flex-wrap items-center gap-3">
+                <div className="mt-6 flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-center gap-3">
                   <button
                     type="button"
                     onClick={handleCreateCheckout}
                     disabled={checkoutLoading}
-                    className="px-6 py-3 text-sm font-semibold text-white rounded-lg transition-colors cursor-pointer disabled:opacity-60"
+                    className="w-full sm:w-auto min-h-[46px] px-6 py-3 text-sm font-semibold text-white rounded-lg transition-colors cursor-pointer disabled:opacity-60"
                     style={{ backgroundColor: 'var(--brand-primary)' }}
                   >
                     {checkoutLoading
@@ -278,7 +278,7 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
                   <button
                     type="button"
                     onClick={() => setStep('setup')}
-                    className="px-4 py-3 text-sm font-medium text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 cursor-pointer"
+                    className="w-full sm:w-auto min-h-[44px] px-4 py-2.5 text-sm font-medium text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 cursor-pointer"
                   >
                     Testar primeiro (modo demonstração)
                   </button>
@@ -368,14 +368,14 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
               )}
             </div>
 
-            <div className="lg:col-span-5 rounded-2xl border border-stone-200 dark:border-stone-800 bg-white dark:bg-[#171A21] p-7 space-y-5">
+            <div className="lg:col-span-5 rounded-2xl border border-stone-200 dark:border-stone-800 bg-white dark:bg-[#171A21] p-5 sm:p-7 space-y-5">
               <div className="flex items-center gap-2 text-xs text-stone-500 dark:text-stone-400">
                 <ShieldCheck className="w-4 h-4" />
                 <span>Resumo da Assinatura</span>
               </div>
-              <div className="flex items-baseline justify-between border-b border-stone-200 dark:border-stone-800 pb-4">
+              <div className="flex flex-wrap items-baseline justify-between gap-2 border-b border-stone-200 dark:border-stone-800 pb-4">
                 <span className="text-sm font-medium">Plano Casamento Pleno</span>
-                <span className="font-mono text-2xl font-semibold tabular-nums">
+                <span className="font-mono text-xl sm:text-2xl font-semibold tabular-nums">
                   {formatBRL(SUBSCRIPTION_PRICE)}/mês
                 </span>
               </div>
@@ -394,10 +394,10 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
             </div>
           </div>
         ) : (
-          <form onSubmit={handleFinishSetup} className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-            <div className="lg:col-span-7 rounded-2xl border border-stone-200 dark:border-stone-800 bg-white dark:bg-[#171A21] p-7 space-y-6">
+          <form onSubmit={handleFinishSetup} className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8">
+            <div className="lg:col-span-7 rounded-2xl border border-stone-200 dark:border-stone-800 bg-white dark:bg-[#171A21] p-5 sm:p-7 space-y-5 sm:space-y-6">
               <div>
-                <h1 className="font-editorial text-3xl font-semibold">
+                <h1 className="font-editorial text-2xl sm:text-3xl font-semibold">
                   Personalize o seu Casamento
                 </h1>
                 <p className="mt-1 text-sm text-stone-600 dark:text-stone-400">
@@ -630,16 +630,16 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
 
             {/* Live Preview Card */}
             <div className="lg:col-span-5">
-              <div className="sticky top-8 rounded-2xl border border-stone-200 dark:border-stone-800 bg-white dark:bg-[#171A21] overflow-hidden">
-                <div className="relative h-60">
+              <div className="lg:sticky lg:top-8 rounded-2xl border border-stone-200 dark:border-stone-800 bg-white dark:bg-[#171A21] overflow-hidden">
+                <div className="relative h-52 sm:h-60">
                   <SafeImage
                     src={coverPhotoUrl}
                     alt="Prévia da capa do site dos convidados"
                     className="w-full h-full object-cover"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/35 to-transparent flex flex-col justify-end p-6 text-white">
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/35 to-transparent flex flex-col justify-end p-5 sm:p-6 text-white">
                     <p className="text-xs opacity-90">Prévia do Site dos Convidados</p>
-                    <h2 className="font-editorial text-4xl font-semibold mt-1">
+                    <h2 className="font-editorial text-3xl sm:text-4xl font-semibold mt-1">
                       {brideName || 'Noiva'} & {groomName || 'Noivo'}
                     </h2>
                     <p className="text-xs font-mono mt-1 opacity-90">
@@ -647,7 +647,7 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
                     </p>
                   </div>
                 </div>
-                <div className="p-6 space-y-4">
+                <div className="p-5 sm:p-6 space-y-4">
                   <p className="text-sm text-stone-600 dark:text-stone-400 italic font-editorial text-lg leading-snug">
                     “{welcomeMessage}”
                   </p>

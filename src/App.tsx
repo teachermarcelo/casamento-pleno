@@ -345,27 +345,28 @@ function AppContent() {
 
     return (
       <>
-        <div className="sticky top-0 z-50 bg-[#10261B] text-[#FBF2DC] px-5 py-2.5 flex flex-wrap items-center justify-between gap-3 text-xs border-b border-[#DFBE7A]/40 shadow-sm">
-          <span>
-            Modo Visão do Cliente (Lead): <strong>{clientProfile.displayName}</strong> ({clientProfile.email}) —{' '}
-            <span className="text-[#DFBE7A]">acesso comum sem painel Admin</span>
+        <div className="sticky top-0 z-50 bg-[#10261B] text-[#FBF2DC] px-3.5 sm:px-5 py-2 flex flex-wrap items-center justify-between gap-2 text-[11px] sm:text-xs border-b border-[#DFBE7A]/40 shadow-sm">
+          <span className="truncate max-w-full">
+            Visão Lead: <strong>{clientProfile.displayName}</strong>{' '}
+            <span className="hidden sm:inline">({clientProfile.email}) — </span>
+            <span className="text-[#DFBE7A] hidden md:inline">acesso comum sem painel Admin</span>
           </span>
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
             {impersonatedWedding && (
               <button
                 type="button"
                 onClick={() => setImpersonateForceOnboarding((prev) => !prev)}
-                className="rounded-full border border-[#DFBE7A]/60 px-3 py-1 text-[11px] font-semibold text-[#FBF2DC] hover:bg-white/10 transition-colors cursor-pointer"
+                className="rounded-full border border-[#DFBE7A]/60 px-2.5 sm:px-3 py-1 text-[11px] font-semibold text-[#FBF2DC] hover:bg-white/10 transition-colors cursor-pointer"
               >
-                {showOnboarding ? 'Ir para o Painel do Cliente' : 'Ver Checkout & Setup'}
+                {showOnboarding ? 'Painel' : 'Ver Checkout'}
               </button>
             )}
             <button
               type="button"
               onClick={exitSimulation}
-              className="rounded-full bg-[#DFBE7A] text-[#173526] px-3.5 py-1 text-[11px] font-semibold hover:bg-[#EBD198] transition-colors cursor-pointer"
+              className="rounded-full bg-[#DFBE7A] text-[#173526] px-3 py-1 text-[11px] font-semibold hover:bg-[#EBD198] transition-colors cursor-pointer"
             >
-              Voltar ao Console Admin
+              Sair da Simulação
             </button>
           </div>
         </div>
@@ -456,14 +457,14 @@ function AppContent() {
   if (showLandingPreview) {
     return (
       <>
-        <div className="bg-[#10261B] text-[#FBF2DC] px-5 py-2 flex items-center justify-between text-xs border-b border-[#DFBE7A]/30">
-          <span>Visualizando a Página Inicial de Vendas (como visitante)</span>
+        <div className="bg-[#10261B] text-[#FBF2DC] px-3.5 sm:px-5 py-2 flex flex-wrap items-center justify-between gap-2 text-[11px] sm:text-xs border-b border-[#DFBE7A]/30">
+          <span className="truncate">Visualizando Página Inicial (visitante)</span>
           <button
             type="button"
             onClick={() => setShowLandingPreview(false)}
-            className="rounded-full border border-[#DFBE7A]/70 px-3.5 py-1 font-semibold text-[#FBF2DC] hover:bg-[#DFBE7A] hover:text-[#173526] transition-colors cursor-pointer"
+            className="rounded-full border border-[#DFBE7A]/70 px-3 py-1 font-semibold text-[#FBF2DC] hover:bg-[#DFBE7A] hover:text-[#173526] transition-colors cursor-pointer shrink-0"
           >
-            Voltar para o meu Painel
+            Voltar ao Painel
           </button>
         </div>
         <LandingPage
