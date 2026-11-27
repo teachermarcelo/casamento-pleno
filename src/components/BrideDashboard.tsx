@@ -417,18 +417,18 @@ export const BrideDashboard: React.FC<BrideDashboardProps> = ({
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col min-w-0">
         {/* Deep Forest Green & Gold Header Bar */}
-        <header className="sticky top-0 z-20 bg-[#173526] text-[#FBF7F0] border-b border-[#DFBE7A]/25 px-4 sm:px-8 py-3 flex items-center justify-between gap-3 shadow-xs">
-          <div className="flex items-center gap-3 min-w-0">
+        <header className="sticky top-0 z-20 bg-[#173526] text-[#FBF7F0] border-b border-[#DFBE7A]/25 px-3 sm:px-8 py-2.5 sm:py-3 flex items-center justify-between gap-2 shadow-xs">
+          <div className="flex items-center gap-2 sm:gap-3 min-w-0">
             <button
               type="button"
               onClick={() => setMobileMenuOpen(true)}
-              className="lg:hidden p-2 rounded-full border border-[#DFBE7A]/45 text-[#DFBE7A] hover:bg-white/10 cursor-pointer"
+              className="lg:hidden p-2 rounded-full border border-[#DFBE7A]/45 text-[#DFBE7A] hover:bg-white/10 cursor-pointer shrink-0"
               aria-label="Abrir menu"
             >
               <Menu className="w-4 h-4" />
             </button>
-            <div className="flex items-center gap-2.5 min-w-0">
-              <BrandHeartsMark className="w-7 h-6 lg:hidden shrink-0" />
+            <div className="flex items-center gap-2 min-w-0">
+              <BrandHeartsMark className="w-6 h-5 sm:w-7 sm:h-6 lg:hidden shrink-0" />
               <div className="flex items-center gap-2 text-sm truncate">
                 <span className="font-editorial text-xl font-semibold text-white hidden sm:inline">
                   {wedding.brideName} & {wedding.groomName}
@@ -441,40 +441,43 @@ export const BrideDashboard: React.FC<BrideDashboardProps> = ({
             </div>
           </div>
 
-          <div className="flex items-center gap-2 shrink-0">
+          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
             {onOpenAdmin && (
               <button
                 type="button"
                 onClick={onOpenAdmin}
-                className="inline-flex items-center gap-1.5 rounded-full bg-[#DFBE7A] text-[#173526] hover:bg-[#EBD198] px-3.5 py-1.5 text-xs font-semibold transition-colors whitespace-nowrap cursor-pointer"
+                className="inline-flex items-center gap-1 rounded-full bg-[#DFBE7A] text-[#173526] hover:bg-[#EBD198] px-2.5 sm:px-3.5 py-1.5 text-[11px] sm:text-xs font-semibold transition-colors whitespace-nowrap cursor-pointer"
               >
-                <Shield className="w-3.5 h-3.5" />
-                <span>Painel Admin</span>
+                <Shield className="w-3.5 h-3.5 shrink-0" />
+                <span className="hidden xs:inline sm:inline">Admin</span>
               </button>
             )}
             {onPreviewLanding && (
               <button
                 type="button"
                 onClick={onPreviewLanding}
-                className="hidden sm:inline-flex items-center gap-1.5 rounded-full border border-white/25 px-3.5 py-1.5 text-xs font-medium text-[#EFE9DC] hover:bg-white/10 transition-colors whitespace-nowrap cursor-pointer"
+                className="hidden md:inline-flex items-center gap-1.5 rounded-full border border-white/25 px-3.5 py-1.5 text-xs font-medium text-[#EFE9DC] hover:bg-white/10 transition-colors whitespace-nowrap cursor-pointer"
               >
                 <Globe className="w-3.5 h-3.5 text-[#DFBE7A]" />
                 <span>Página Inicial</span>
               </button>
             )}
-            <PWAInstallButton compact />
+            <div className="hidden sm:block">
+              <PWAInstallButton compact />
+            </div>
             <button
               type="button"
               onClick={() => onPreviewGuestSite({ wedding, schedule, party, gifts })}
-              className="inline-flex items-center gap-1.5 rounded-full border border-[#DFBE7A]/80 bg-[#1F4532] hover:bg-[#DFBE7A] text-[#FBF2DC] hover:text-[#173526] px-4 py-1.5 text-xs font-semibold transition-all whitespace-nowrap cursor-pointer"
+              className="inline-flex items-center gap-1.5 rounded-full border border-[#DFBE7A]/80 bg-[#1F4532] hover:bg-[#DFBE7A] text-[#FBF2DC] hover:text-[#173526] px-2.5 sm:px-4 py-1.5 text-[11px] sm:text-xs font-semibold transition-all whitespace-nowrap cursor-pointer"
             >
-              <ExternalLink className="w-3.5 h-3.5" />
-              <span>Site dos Convidados</span>
+              <ExternalLink className="w-3.5 h-3.5 shrink-0" />
+              <span className="hidden sm:inline">Site dos Convidados</span>
+              <span className="sm:hidden">Site</span>
             </button>
           </div>
         </header>
 
-        <main className="flex-1 mx-auto max-w-6xl w-full px-4 sm:px-8 py-7 pb-24">
+        <main className="flex-1 mx-auto max-w-6xl w-full px-3.5 sm:px-6 lg:px-8 py-5 sm:py-7 pb-36 lg:pb-24 overflow-x-hidden">
           {/* Optional Remote Announcement Banner controlled by Admin */}
           {platformConfig.announcementBanner && (
             <div className="mb-6 rounded-2xl border border-[#E5D8BF] dark:border-[#2C3A31] bg-white dark:bg-[#141B17] px-4 py-3 flex items-center gap-3 text-xs text-stone-700 dark:text-stone-300">
@@ -823,6 +826,50 @@ export const BrideDashboard: React.FC<BrideDashboardProps> = ({
           )}
         </main>
       </div>
+
+      {/* Mobile Bottom Tab Bar */}
+      <nav
+        aria-label="Navegação principal mobile"
+        className="lg:hidden fixed bottom-0 inset-x-0 z-30 bg-[#173526]/98 backdrop-blur-md text-[#FBF7F0] border-t border-[#DFBE7A]/25 px-1.5 pt-1.5 pb-[max(0.45rem,env(safe-area-inset-bottom))] shadow-[0_-4px_20px_rgba(0,0,0,0.18)]"
+      >
+        <div className="grid grid-cols-5 gap-1">
+          {(
+            [
+              { id: 'overview' as const, label: 'Início', icon: <LayoutDashboard className="w-4 h-4" /> },
+              { id: 'guests' as const, label: 'Convidados', icon: <Users className="w-4 h-4" /> },
+              { id: 'finance' as const, label: 'Financeiro', icon: <Wallet className="w-4 h-4" /> },
+              { id: 'ceremony' as const, label: 'Cerimônia', icon: <Heart className="w-4 h-4" /> },
+            ] as const
+          ).map((item) => {
+            const active = tab === item.id;
+            return (
+              <button
+                key={item.id}
+                type="button"
+                onClick={() => setTab(item.id)}
+                className={`flex flex-col items-center justify-center gap-0.5 rounded-xl py-1.5 text-[10px] font-medium transition-colors cursor-pointer ${
+                  active ? 'bg-[#FDF8F2] text-[#173526] font-semibold' : 'text-[#E7E1D5]/80'
+                }`}
+              >
+                <span className={active ? 'text-[#B68B3C]' : 'text-[#DFBE7A]/85'}>{item.icon}</span>
+                <span className="truncate max-w-full px-0.5">{item.label}</span>
+              </button>
+            );
+          })}
+          <button
+            type="button"
+            onClick={() => setMobileMenuOpen(true)}
+            className={`flex flex-col items-center justify-center gap-0.5 rounded-xl py-1.5 text-[10px] font-medium transition-colors cursor-pointer ${
+              tab === 'analytics' || tab === 'tables' || tab === 'vendors' || tab === 'settings'
+                ? 'bg-[#FDF8F2] text-[#173526] font-semibold'
+                : 'text-[#E7E1D5]/80'
+            }`}
+          >
+            <Menu className="w-4 h-4 text-[#DFBE7A]" />
+            <span>Mais</span>
+          </button>
+        </div>
+      </nav>
 
       {/* Módulo 6: Botão do Surtando (Personalizável pela cliente) */}
       <PanicButtonModal

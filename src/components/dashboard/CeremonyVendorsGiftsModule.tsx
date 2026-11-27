@@ -1,15 +1,21 @@
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
+  ArrowDown,
+  ArrowUp,
   Calendar,
   Check,
   CheckSquare,
   CreditCard,
   Gift,
+  GripVertical,
   Link2,
+  Pencil,
   Plus,
+  Redo2,
   Search,
   Square,
   Trash2,
+  Undo2,
   Upload,
   X,
 } from 'lucide-react';
@@ -34,6 +40,11 @@ import {
   deletePartyMember,
   deleteScheduleItem,
   deleteVendor,
+  reorderPartyMembers,
+  reorderScheduleItems,
+  updateGiftItem,
+  updatePartyMember,
+  updateScheduleItem,
   updateVendor,
 } from '../../lib/weddingService';
 import {
@@ -762,6 +773,71 @@ interface CeremonyAndGiftsModuleProps {
   accentColor: string;
 }
 
+type OrgHistoryAction =
+  | {
+      kind: 'schedule_add';
+      label: string;
+      item: { id: string; time: string; title: string; description: string; location: string; order: number };
+    }
+  | {
+      kind: 'schedule_delete';
+      label: string;
+      item: { id: string; time: string; title: string; description: string; location: string; order: number };
+    }
+  | {
+      kind: 'schedule_edit';
+      label: string;
+      id: string;
+      before: { time: string; title: string; description: string; location: string };
+      after: { time: string; title: string; description: string; location: string };
+    }
+  | {
+      kind: 'schedule_reorder';
+      label: string;
+      beforeIds: string[];
+      afterIds: string[];
+    }
+  | {
+      kind: 'party_add';
+      label: string;
+      item: { id: string; name: string; role: PartyMember['role']; description: string; photoUrl: string; order: number };
+    }
+  | {
+      kind: 'party_delete';
+      label: string;
+      item: { id: string; name: string; role: PartyMember['role']; description: string; photoUrl: string; order: number };
+    }
+  | {
+      kind: 'party_edit';
+      label: string;
+      id: string;
+      before: { name: string; role: PartyMember['role']; description: string; photoUrl: string };
+      after: { name: string; role: PartyMember['role']; description: string; photoUrl: string };
+    }
+  | {
+      kind: 'party_reorder';
+      label: string;
+      beforeIds: string[];
+      afterIds: string[];
+    }
+  | {
+      kind: 'gift_add';
+      label: string;
+      item: { id: string; title: string; category: string; price: number; description: string; active: boolean };
+    }
+  | {
+      kind: 'gift_delete';
+      label: string;
+      item: { id: string; title: string; category: string; price: number; description: string; active: boolean };
+    }
+  | {
+      kind: 'gift_edit';
+      label: string;
+      id: string;
+      before: { title: string; category: string; price: number; description: string };
+      after: { title: string; category: string; price: number; description: string };
+    };
+
 export const CeremonyAndGiftsModule: React.FC<CeremonyAndGiftsModuleProps> = ({
   wedding,
   schedule,
@@ -772,50 +848,436 @@ export const CeremonyAndGiftsModule: React.FC<CeremonyAndGiftsModuleProps> = ({
 }) => {
   const [subTab, setSubTab] = useState<'schedule' | 'party' | 'gifts'>('schedule');
 
-  // Schedule form
+  // Undo / Redo history & floating action status
+  const [undoStack, setUndoStack] = useState<OrgHistoryAction[]>([]);
+  const [redoStack, setRedoStack] = useState<OrgHistoryAction[]>([]);
+  const [historyBusy, setHistoryBusy] = useState(false);
+  const [toastMessage, setToastMessage] = useState('');
+  const toastTimeoutRef = useRef<number | null>(null);
+
+  // Refs for quick-add scroll focus
+  const scheduleTitleRef = useRef<HTMLInputElement>(null);
+  const partyNameRef = useRef<HTMLInputElement>(null);
+  const giftTitleRef = useRef<HTMLInputElement>(null);
+
+  // Schedule add form + edit + drag state
   const [sTime, setSTime] = useState('18:00');
   const [sTitle, setSTitle] = useState('');
   const [sDesc, setSDesc] = useState('');
+  const [sLoc, setSLoc] = useState('');
+  const [editingScheduleId, setEditingScheduleId] = useState<string | null>(null);
+  const [editSTime, setEditSTime] = useState('');
+  const [editSTitle, setEditSTitle] = useState('');
+  const [editSDesc, setEditSDesc] = useState('');
+  const [editSLoc, setEditSLoc] = useState('');
+  const [dragScheduleId, setDragScheduleId] = useState<string | null>(null);
+  const [dragOverScheduleId, setDragOverScheduleId] = useState<string | null>(null);
 
-  // Party form
+  // Party add form + edit + drag state
   const [pName, setPName] = useState('');
   const [pRole, setPRole] = useState<PartyMember['role']>('Madrinha');
   const [pDesc, setPDesc] = useState('');
   const [pPhoto, setPPhoto] = useState('');
+  const [editingPartyId, setEditingPartyId] = useState<string | null>(null);
+  const [editPName, setEditPName] = useState('');
+  const [editPRole, setEditPRole] = useState<PartyMember['role']>('Madrinha');
+  const [editPDesc, setEditPDesc] = useState('');
+  const [editPPhoto, setEditPPhoto] = useState('');
+  const [dragPartyId, setDragPartyId] = useState<string | null>(null);
+  const [dragOverPartyId, setDragOverPartyId] = useState<string | null>(null);
 
-  // Gift form
+  // Gift add form + edit state
   const [gTitle, setGTitle] = useState('');
   const [gCat, setGCat] = useState('Lua de Mel');
   const [gPrice, setGPrice] = useState('150');
   const [gDesc, setGDesc] = useState('');
+  const [editingGiftId, setEditingGiftId] = useState<string | null>(null);
+  const [editGTitle, setEditGTitle] = useState('');
+  const [editGCat, setEditGCat] = useState('');
+  const [editGPrice, setEditGPrice] = useState('');
+  const [editGDesc, setEditGDesc] = useState('');
 
-  const handlePartyPhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const showToast = useCallback((msg: string) => {
+    setToastMessage(msg);
+    if (toastTimeoutRef.current) {
+      window.clearTimeout(toastTimeoutRef.current);
+    }
+    toastTimeoutRef.current = window.setTimeout(() => setToastMessage(''), 2600);
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (toastTimeoutRef.current) window.clearTimeout(toastTimeoutRef.current);
+    };
+  }, []);
+
+  const recordAction = useCallback((action: OrgHistoryAction) => {
+    setUndoStack((prev) => [...prev.slice(-29), action]);
+    setRedoStack([]);
+  }, []);
+
+  const applyAction = useCallback(
+    async (action: OrgHistoryAction, direction: 'undo' | 'redo') => {
+      const isUndo = direction === 'undo';
+      switch (action.kind) {
+        case 'schedule_add':
+          if (isUndo) {
+            await deleteScheduleItem(wedding.id, action.item.id);
+          } else {
+            await addScheduleItem(wedding.id, wedding.ownerId, action.item);
+          }
+          break;
+        case 'schedule_delete':
+          if (isUndo) {
+            await addScheduleItem(wedding.id, wedding.ownerId, action.item);
+          } else {
+            await deleteScheduleItem(wedding.id, action.item.id);
+          }
+          break;
+        case 'schedule_edit':
+          await updateScheduleItem(wedding.id, action.id, isUndo ? action.before : action.after);
+          break;
+        case 'schedule_reorder':
+          await reorderScheduleItems(wedding.id, isUndo ? action.beforeIds : action.afterIds);
+          break;
+        case 'party_add':
+          if (isUndo) {
+            await deletePartyMember(wedding.id, action.item.id);
+          } else {
+            await addPartyMember(wedding.id, wedding.ownerId, action.item);
+          }
+          break;
+        case 'party_delete':
+          if (isUndo) {
+            await addPartyMember(wedding.id, wedding.ownerId, action.item);
+          } else {
+            await deletePartyMember(wedding.id, action.item.id);
+          }
+          break;
+        case 'party_edit':
+          await updatePartyMember(wedding.id, action.id, isUndo ? action.before : action.after);
+          break;
+        case 'party_reorder':
+          await reorderPartyMembers(wedding.id, isUndo ? action.beforeIds : action.afterIds);
+          break;
+        case 'gift_add':
+          if (isUndo) {
+            await deleteGiftItem(wedding.id, action.item.id);
+          } else {
+            await addGiftItem(wedding.id, wedding.ownerId, action.item);
+          }
+          break;
+        case 'gift_delete':
+          if (isUndo) {
+            await addGiftItem(wedding.id, wedding.ownerId, action.item);
+          } else {
+            await deleteGiftItem(wedding.id, action.item.id);
+          }
+          break;
+        case 'gift_edit':
+          await updateGiftItem(wedding.id, action.id, isUndo ? action.before : action.after);
+          break;
+      }
+    },
+    [wedding.id, wedding.ownerId]
+  );
+
+  const handleUndo = useCallback(async () => {
+    if (historyBusy || undoStack.length === 0) return;
+    const action = undoStack[undoStack.length - 1];
+    setHistoryBusy(true);
+    try {
+      await applyAction(action, 'undo');
+      setUndoStack((prev) => prev.slice(0, -1));
+      setRedoStack((prev) => [...prev.slice(-29), action]);
+      showToast(`Desfeito: ${action.label}`);
+    } finally {
+      setHistoryBusy(false);
+    }
+  }, [applyAction, historyBusy, showToast, undoStack]);
+
+  const handleRedo = useCallback(async () => {
+    if (historyBusy || redoStack.length === 0) return;
+    const action = redoStack[redoStack.length - 1];
+    setHistoryBusy(true);
+    try {
+      await applyAction(action, 'redo');
+      setRedoStack((prev) => prev.slice(0, -1));
+      setUndoStack((prev) => [...prev.slice(-29), action]);
+      showToast(`Refeito: ${action.label}`);
+    } finally {
+      setHistoryBusy(false);
+    }
+  }, [applyAction, historyBusy, redoStack, showToast]);
+
+  // Keyboard shortcuts Ctrl+Z / Ctrl+Y when not typing inside inputs
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement | null;
+      if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.tagName === 'SELECT')) {
+        return;
+      }
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z' && !e.shiftKey) {
+        if (undoStack.length > 0) {
+          e.preventDefault();
+          handleUndo();
+        }
+      } else if (
+        ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'y') ||
+        ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === 'z')
+      ) {
+        if (redoStack.length > 0) {
+          e.preventDefault();
+          handleRedo();
+        }
+      }
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [handleRedo, handleUndo, redoStack.length, undoStack.length]);
+
+  const handlePartyPhotoUpload = async (
+    e: React.ChangeEvent<HTMLInputElement>,
+    target: 'new' | 'edit' = 'new'
+  ) => {
     const file = e.target.files?.[0];
     if (!file) return;
     try {
       const compressed = await compressImageToDataUrl(file, 480);
-      setPPhoto(compressed);
+      if (target === 'edit') {
+        setEditPPhoto(compressed);
+      } else {
+        setPPhoto(compressed);
+      }
     } catch {
       // Ignore invalid image files
     }
     e.target.value = '';
   };
 
+  // Schedule handlers
+  const handleMoveSchedule = async (fromIndex: number, toIndex: number) => {
+    if (toIndex < 0 || toIndex >= schedule.length || fromIndex === toIndex) return;
+    const beforeIds = schedule.map((s) => s.id);
+    const reordered = [...schedule];
+    const [moved] = reordered.splice(fromIndex, 1);
+    reordered.splice(toIndex, 0, moved);
+    const afterIds = reordered.map((s) => s.id);
+    await reorderScheduleItems(wedding.id, afterIds);
+    recordAction({
+      kind: 'schedule_reorder',
+      label: `Mover "${moved.title}"`,
+      beforeIds,
+      afterIds,
+    });
+    showToast(`Ordem atualizada: ${moved.title}`);
+  };
+
+  const startEditSchedule = (item: ScheduleItem) => {
+    setEditingScheduleId(item.id);
+    setEditSTime(item.time);
+    setEditSTitle(item.title);
+    setEditSDesc(item.description || '');
+    setEditSLoc(item.location || '');
+  };
+
+  const saveEditSchedule = async (item: ScheduleItem) => {
+    if (!editSTitle.trim()) return;
+    const before = {
+      time: item.time,
+      title: item.title,
+      description: item.description || '',
+      location: item.location || '',
+    };
+    const after = {
+      time: editSTime,
+      title: editSTitle.trim(),
+      description: editSDesc.trim(),
+      location: editSLoc.trim(),
+    };
+    await updateScheduleItem(wedding.id, item.id, after);
+    recordAction({
+      kind: 'schedule_edit',
+      label: `Editar "${after.title}"`,
+      id: item.id,
+      before,
+      after,
+    });
+    setEditingScheduleId(null);
+    showToast(`Momento atualizado: ${after.title}`);
+  };
+
+  const handleDeleteSchedule = async (item: ScheduleItem) => {
+    await deleteScheduleItem(wedding.id, item.id);
+    recordAction({
+      kind: 'schedule_delete',
+      label: `Remover "${item.title}"`,
+      item: {
+        id: item.id,
+        time: item.time,
+        title: item.title,
+        description: item.description || '',
+        location: item.location || '',
+        order: item.order,
+      },
+    });
+    if (editingScheduleId === item.id) setEditingScheduleId(null);
+    showToast(`Removido: ${item.title} (clique em Desfazer para voltar)`);
+  };
+
+  // Party handlers
+  const handleMoveParty = async (fromIndex: number, toIndex: number) => {
+    if (toIndex < 0 || toIndex >= party.length || fromIndex === toIndex) return;
+    const beforeIds = party.map((m) => m.id);
+    const reordered = [...party];
+    const [moved] = reordered.splice(fromIndex, 1);
+    reordered.splice(toIndex, 0, moved);
+    const afterIds = reordered.map((m) => m.id);
+    await reorderPartyMembers(wedding.id, afterIds);
+    recordAction({
+      kind: 'party_reorder',
+      label: `Mover "${moved.name}"`,
+      beforeIds,
+      afterIds,
+    });
+    showToast(`Ordem atualizada: ${moved.name}`);
+  };
+
+  const startEditParty = (member: PartyMember) => {
+    setEditingPartyId(member.id);
+    setEditPName(member.name);
+    setEditPRole(member.role);
+    setEditPDesc(member.description || '');
+    setEditPPhoto(member.photoUrl || '');
+  };
+
+  const saveEditParty = async (member: PartyMember) => {
+    if (!editPName.trim()) return;
+    const before = {
+      name: member.name,
+      role: member.role,
+      description: member.description || '',
+      photoUrl: member.photoUrl || '',
+    };
+    const after = {
+      name: editPName.trim(),
+      role: editPRole,
+      description: editPDesc.trim(),
+      photoUrl: editPPhoto || member.photoUrl || '',
+    };
+    await updatePartyMember(wedding.id, member.id, after);
+    recordAction({
+      kind: 'party_edit',
+      label: `Editar "${after.name}"`,
+      id: member.id,
+      before,
+      after,
+    });
+    setEditingPartyId(null);
+    showToast(`Atualizado: ${after.name}`);
+  };
+
+  const handleDeleteParty = async (member: PartyMember) => {
+    await deletePartyMember(wedding.id, member.id);
+    recordAction({
+      kind: 'party_delete',
+      label: `Remover "${member.name}"`,
+      item: {
+        id: member.id,
+        name: member.name,
+        role: member.role,
+        description: member.description || '',
+        photoUrl: member.photoUrl || '',
+        order: member.order,
+      },
+    });
+    if (editingPartyId === member.id) setEditingPartyId(null);
+    showToast(`Removido: ${member.name} (clique em Desfazer para voltar)`);
+  };
+
+  // Gift handlers
+  const startEditGift = (gift: GiftItem) => {
+    setEditingGiftId(gift.id);
+    setEditGTitle(gift.title);
+    setEditGCat(gift.category);
+    setEditGPrice(String(gift.price));
+    setEditGDesc(gift.description || '');
+  };
+
+  const saveEditGift = async (gift: GiftItem) => {
+    if (!editGTitle.trim()) return;
+    const before = {
+      title: gift.title,
+      category: gift.category,
+      price: gift.price,
+      description: gift.description || '',
+    };
+    const after = {
+      title: editGTitle.trim(),
+      category: editGCat.trim() || 'Lua de Mel',
+      price: Math.max(1, Number(editGPrice) || gift.price),
+      description: editGDesc.trim(),
+    };
+    await updateGiftItem(wedding.id, gift.id, after);
+    recordAction({
+      kind: 'gift_edit',
+      label: `Editar "${after.title}"`,
+      id: gift.id,
+      before,
+      after,
+    });
+    setEditingGiftId(null);
+    showToast(`Presente atualizado: ${after.title}`);
+  };
+
+  const handleDeleteGift = async (gift: GiftItem) => {
+    await deleteGiftItem(wedding.id, gift.id);
+    recordAction({
+      kind: 'gift_delete',
+      label: `Remover "${gift.title}"`,
+      item: {
+        id: gift.id,
+        title: gift.title,
+        category: gift.category,
+        price: gift.price,
+        description: gift.description || '',
+        active: gift.active,
+      },
+    });
+    if (editingGiftId === gift.id) setEditingGiftId(null);
+    showToast(`Removido: ${gift.title} (clique em Desfazer para voltar)`);
+  };
+
+  const focusQuickAdd = () => {
+    const target =
+      subTab === 'schedule'
+        ? scheduleTitleRef.current
+        : subTab === 'party'
+        ? partyNameRef.current
+        : giftTitleRef.current;
+    if (target) {
+      target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      window.setTimeout(() => target.focus(), 250);
+    }
+  };
+
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h2 className="font-editorial text-3xl font-semibold">Cerimônia, Padrinhos & Presentes</h2>
-          <p className="text-sm text-stone-600 dark:text-stone-400">
-            Tudo o que você edita aqui aparece automaticamente no Site dos Convidados.
+    <div className="space-y-6 pb-8">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="min-w-0">
+          <h2 className="font-editorial text-2xl sm:text-3xl font-semibold">
+            Cerimônia, Padrinhos & Presentes
+          </h2>
+          <p className="text-xs sm:text-sm text-stone-600 dark:text-stone-400">
+            Mova, edite ou remova qualquer item. Tudo atualiza em tempo real no Site dos Convidados.
           </p>
         </div>
 
-        <div className="inline-flex items-center gap-1 rounded-xl bg-stone-200/70 dark:bg-stone-800 p-1">
+        <div className="grid grid-cols-3 sm:inline-flex items-center gap-1 rounded-xl bg-stone-200/70 dark:bg-stone-800 p-1 w-full sm:w-auto">
           {(
             [
               ['schedule', 'Cronograma'],
-              ['party', 'Padrinhos & Damas'],
+              ['party', 'Padrinhos'],
               ['gifts', 'Presentes Pix'],
             ] as const
           ).map(([id, label]) => (
@@ -823,9 +1285,9 @@ export const CeremonyAndGiftsModule: React.FC<CeremonyAndGiftsModuleProps> = ({
               key={id}
               type="button"
               onClick={() => setSubTab(id)}
-              className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-colors cursor-pointer ${
+              className={`px-2.5 sm:px-3.5 py-2 sm:py-1.5 text-xs font-medium rounded-lg transition-colors cursor-pointer text-center truncate ${
                 subTab === id
-                  ? 'bg-white dark:bg-[#1C2029] text-stone-900 dark:text-stone-100 shadow-xs'
+                  ? 'bg-white dark:bg-[#1C2029] text-stone-900 dark:text-stone-100 shadow-xs font-semibold'
                   : 'text-stone-600 dark:text-stone-400'
               }`}
             >
@@ -835,13 +1297,34 @@ export const CeremonyAndGiftsModule: React.FC<CeremonyAndGiftsModuleProps> = ({
         </div>
       </div>
 
+      {/* Inline Toast Feedback Banner */}
+      {toastMessage && (
+        <div className="rounded-xl border border-[#DFBE7A]/60 bg-[#173526] text-[#FBF7F0] px-4 py-2.5 flex items-center justify-between gap-3 text-xs shadow-sm">
+          <span>{toastMessage}</span>
+          {undoStack.length > 0 && (
+            <button
+              type="button"
+              onClick={handleUndo}
+              disabled={historyBusy}
+              className="inline-flex items-center gap-1 rounded-full bg-[#DFBE7A] text-[#173526] px-3 py-1 text-[11px] font-semibold hover:bg-[#EBD198] cursor-pointer shrink-0"
+            >
+              <Undo2 className="w-3 h-3" />
+              <span>Desfazer</span>
+            </button>
+          )}
+        </div>
+      )}
+
       {subTab === 'schedule' && (
         <div className="space-y-5">
-          <div className="flex justify-end">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <p className="text-xs text-stone-500 dark:text-stone-400">
+              Arraste os blocos ou use as setas para reordenar o roteiro do grande dia.
+            </p>
             <button
               type="button"
               onClick={() => buildWeddingDayICS(wedding, schedule)}
-              className="inline-flex items-center gap-1.5 rounded-lg border border-stone-300 dark:border-stone-700 bg-white dark:bg-[#171A21] px-3.5 py-2 text-xs font-medium cursor-pointer"
+              className="inline-flex items-center gap-1.5 rounded-lg border border-stone-300 dark:border-stone-700 bg-white dark:bg-[#171A21] px-3.5 py-2 text-xs font-medium hover:bg-stone-50 dark:hover:bg-stone-800 cursor-pointer"
             >
               <Calendar className="w-3.5 h-3.5" />
               <span>Exportar Cronograma (.ics)</span>
@@ -852,18 +1335,28 @@ export const CeremonyAndGiftsModule: React.FC<CeremonyAndGiftsModuleProps> = ({
             onSubmit={async (e) => {
               e.preventDefault();
               if (!sTitle.trim()) return;
-              await addScheduleItem(wedding.id, wedding.ownerId, {
+              const nextOrder = schedule.length + 1;
+              const newItemData = {
                 time: sTime,
-                title: sTitle,
-                description: sDesc,
-                order: schedule.length + 1,
+                title: sTitle.trim(),
+                description: sDesc.trim(),
+                location: sLoc.trim(),
+                order: nextOrder,
+              };
+              const createdId = await addScheduleItem(wedding.id, wedding.ownerId, newItemData);
+              recordAction({
+                kind: 'schedule_add',
+                label: `Adicionar "${newItemData.title}"`,
+                item: { id: createdId, ...newItemData },
               });
               setSTitle('');
               setSDesc('');
+              setSLoc('');
+              showToast(`Adicionado ao cronograma: ${newItemData.title}`);
             }}
-            className="rounded-2xl border border-stone-200 dark:border-stone-800 bg-white dark:bg-[#171A21] p-5 grid grid-cols-1 md:grid-cols-12 gap-3 items-end"
+            className="rounded-2xl border border-stone-200 dark:border-stone-800 bg-white dark:bg-[#171A21] p-4 sm:p-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-3 items-end"
           >
-            <div className="md:col-span-2">
+            <div className="lg:col-span-2 min-w-0">
               <label className="block text-xs text-stone-500 mb-1">Horário</label>
               <input
                 type="time"
@@ -873,9 +1366,10 @@ export const CeremonyAndGiftsModule: React.FC<CeremonyAndGiftsModuleProps> = ({
                 className="w-full rounded-lg border border-stone-300 dark:border-stone-700 bg-transparent px-3 py-2 text-sm font-mono"
               />
             </div>
-            <div className="md:col-span-4">
+            <div className="lg:col-span-3 min-w-0">
               <label className="block text-xs text-stone-500 mb-1">Momento</label>
               <input
+                ref={scheduleTitleRef}
                 required
                 maxLength={120}
                 value={sTitle}
@@ -884,7 +1378,7 @@ export const CeremonyAndGiftsModule: React.FC<CeremonyAndGiftsModuleProps> = ({
                 className="w-full rounded-lg border border-stone-300 dark:border-stone-700 bg-transparent px-3 py-2 text-sm"
               />
             </div>
-            <div className="md:col-span-4">
+            <div className="lg:col-span-3 min-w-0">
               <label className="block text-xs text-stone-500 mb-1">Descrição</label>
               <input
                 maxLength={300}
@@ -894,11 +1388,21 @@ export const CeremonyAndGiftsModule: React.FC<CeremonyAndGiftsModuleProps> = ({
                 className="w-full rounded-lg border border-stone-300 dark:border-stone-700 bg-transparent px-3 py-2 text-sm"
               />
             </div>
-            <div className="md:col-span-2">
+            <div className="lg:col-span-2 min-w-0">
+              <label className="block text-xs text-stone-500 mb-1">Local (opcional)</label>
+              <input
+                maxLength={120}
+                value={sLoc}
+                onChange={(e) => setSLoc(e.target.value)}
+                placeholder="Ex.: Salão"
+                className="w-full rounded-lg border border-stone-300 dark:border-stone-700 bg-transparent px-3 py-2 text-sm"
+              />
+            </div>
+            <div className="sm:col-span-2 lg:col-span-2">
               <button
                 type="submit"
                 style={{ backgroundColor: accentColor }}
-                className="w-full py-2 px-3 text-sm font-medium text-white rounded-lg cursor-pointer"
+                className="w-full py-2.5 lg:py-2 px-3 text-sm font-semibold text-white rounded-lg hover:brightness-110 transition-all cursor-pointer"
               >
                 Adicionar
               </button>
@@ -906,29 +1410,181 @@ export const CeremonyAndGiftsModule: React.FC<CeremonyAndGiftsModuleProps> = ({
           </form>
 
           <div className="space-y-2.5">
-            {schedule.map((item) => (
-              <div
-                key={item.id}
-                className="rounded-2xl border border-stone-200 dark:border-stone-800 bg-white dark:bg-[#171A21] p-4 flex items-center justify-between gap-4"
-              >
-                <div className="flex items-baseline gap-4">
-                  <span className="font-mono text-sm font-semibold tabular-nums" style={{ color: accentColor }}>
-                    {item.time}
-                  </span>
-                  <div>
-                    <p className="text-sm font-semibold">{item.title}</p>
-                    {item.description && <p className="text-xs text-stone-500">{item.description}</p>}
-                  </div>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => deleteScheduleItem(wedding.id, item.id)}
-                  className="p-1.5 text-stone-400 hover:text-red-600 cursor-pointer"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </button>
+            {schedule.length === 0 ? (
+              <div className="rounded-2xl border border-stone-200 dark:border-stone-800 bg-white dark:bg-[#171A21] p-8 text-center text-sm text-stone-500">
+                Nenhum momento no cronograma ainda. Adicione o primeiro acima.
               </div>
-            ))}
+            ) : (
+              schedule.map((item, idx) => {
+                const isEditing = editingScheduleId === item.id;
+                const isDragTarget = dragOverScheduleId === item.id && dragScheduleId !== item.id;
+                return (
+                  <div
+                    key={item.id}
+                    draggable={!isEditing}
+                    onDragStart={() => setDragScheduleId(item.id)}
+                    onDragOver={(e) => {
+                      e.preventDefault();
+                      if (dragScheduleId && dragScheduleId !== item.id) {
+                        setDragOverScheduleId(item.id);
+                      }
+                    }}
+                    onDragLeave={() => setDragOverScheduleId(null)}
+                    onDrop={async (e) => {
+                      e.preventDefault();
+                      if (dragScheduleId && dragScheduleId !== item.id) {
+                        const fromIdx = schedule.findIndex((s) => s.id === dragScheduleId);
+                        if (fromIdx !== -1) {
+                          await handleMoveSchedule(fromIdx, idx);
+                        }
+                      }
+                      setDragScheduleId(null);
+                      setDragOverScheduleId(null);
+                    }}
+                    onDragEnd={() => {
+                      setDragScheduleId(null);
+                      setDragOverScheduleId(null);
+                    }}
+                    className={`rounded-2xl border bg-white dark:bg-[#171A21] p-4 transition-all ${
+                      isDragTarget
+                        ? 'border-[#B68B3C] ring-2 ring-[#DFBE7A]/40'
+                        : 'border-stone-200 dark:border-stone-800 hover:border-stone-300 dark:hover:border-stone-700'
+                    }`}
+                  >
+                    {isEditing ? (
+                      <div className="space-y-3">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-2.5">
+                          <div className="lg:col-span-2">
+                            <label className="block text-[11px] text-stone-500 mb-1">Horário</label>
+                            <input
+                              type="time"
+                              value={editSTime}
+                              onChange={(e) => setEditSTime(e.target.value)}
+                              className="w-full rounded-lg border border-stone-300 dark:border-stone-700 bg-transparent px-2.5 py-2 text-sm font-mono"
+                            />
+                          </div>
+                          <div className="lg:col-span-4">
+                            <label className="block text-[11px] text-stone-500 mb-1">Momento</label>
+                            <input
+                              maxLength={120}
+                              value={editSTitle}
+                              onChange={(e) => setEditSTitle(e.target.value)}
+                              className="w-full rounded-lg border border-stone-300 dark:border-stone-700 bg-transparent px-2.5 py-2 text-sm"
+                            />
+                          </div>
+                          <div className="lg:col-span-4">
+                            <label className="block text-[11px] text-stone-500 mb-1">Descrição</label>
+                            <input
+                              maxLength={300}
+                              value={editSDesc}
+                              onChange={(e) => setEditSDesc(e.target.value)}
+                              className="w-full rounded-lg border border-stone-300 dark:border-stone-700 bg-transparent px-2.5 py-2 text-sm"
+                            />
+                          </div>
+                          <div className="lg:col-span-2">
+                            <label className="block text-[11px] text-stone-500 mb-1">Local</label>
+                            <input
+                              maxLength={120}
+                              value={editSLoc}
+                              onChange={(e) => setEditSLoc(e.target.value)}
+                              className="w-full rounded-lg border border-stone-300 dark:border-stone-700 bg-transparent px-2.5 py-2 text-sm"
+                            />
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-end gap-2">
+                          <button
+                            type="button"
+                            onClick={() => setEditingScheduleId(null)}
+                            className="inline-flex items-center gap-1 rounded-lg border border-stone-300 dark:border-stone-700 px-3 py-1.5 text-xs font-medium cursor-pointer"
+                          >
+                            <X className="w-3.5 h-3.5" />
+                            <span>Cancelar</span>
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => saveEditSchedule(item)}
+                            style={{ backgroundColor: accentColor }}
+                            className="inline-flex items-center gap-1 rounded-lg px-3.5 py-1.5 text-xs font-semibold text-white cursor-pointer"
+                          >
+                            <Check className="w-3.5 h-3.5" />
+                            <span>Salvar</span>
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                        <div className="flex items-start gap-3 min-w-0">
+                          <span
+                            className="hidden sm:inline-flex mt-0.5 text-stone-300 dark:text-stone-600 cursor-grab active:cursor-grabbing shrink-0"
+                            title="Arraste para mover"
+                          >
+                            <GripVertical className="w-4 h-4" />
+                          </span>
+                          <span
+                            className="font-mono text-sm font-semibold tabular-nums shrink-0 rounded-lg bg-stone-100 dark:bg-stone-800/80 px-2.5 py-1"
+                            style={{ color: accentColor }}
+                          >
+                            {item.time}
+                          </span>
+                          <div className="min-w-0">
+                            <p className="text-sm font-semibold break-words">{item.title}</p>
+                            {item.description && (
+                              <p className="text-xs text-stone-500 dark:text-stone-400 mt-0.5 break-words">
+                                {item.description}
+                              </p>
+                            )}
+                            {item.location && (
+                              <p className="text-[11px] text-stone-400 mt-0.5">Local: {item.location}</p>
+                            )}
+                          </div>
+                        </div>
+
+                        <div className="flex items-center justify-end gap-1.5 shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-stone-100 dark:border-stone-800">
+                          <button
+                            type="button"
+                            disabled={idx === 0}
+                            onClick={() => handleMoveSchedule(idx, idx - 1)}
+                            title="Mover para cima"
+                            aria-label={`Mover ${item.title} para cima`}
+                            className="p-2 rounded-lg border border-stone-200 dark:border-stone-700 text-stone-500 hover:text-stone-900 dark:hover:text-stone-100 hover:bg-stone-50 dark:hover:bg-stone-800 disabled:opacity-30 cursor-pointer"
+                          >
+                            <ArrowUp className="w-3.5 h-3.5" />
+                          </button>
+                          <button
+                            type="button"
+                            disabled={idx === schedule.length - 1}
+                            onClick={() => handleMoveSchedule(idx, idx + 1)}
+                            title="Mover para baixo"
+                            aria-label={`Mover ${item.title} para baixo`}
+                            className="p-2 rounded-lg border border-stone-200 dark:border-stone-700 text-stone-500 hover:text-stone-900 dark:hover:text-stone-100 hover:bg-stone-50 dark:hover:bg-stone-800 disabled:opacity-30 cursor-pointer"
+                          >
+                            <ArrowDown className="w-3.5 h-3.5" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => startEditSchedule(item)}
+                            title="Editar momento"
+                            aria-label={`Editar ${item.title}`}
+                            className="p-2 rounded-lg border border-stone-200 dark:border-stone-700 text-stone-600 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-800 cursor-pointer"
+                          >
+                            <Pencil className="w-3.5 h-3.5" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteSchedule(item)}
+                            title="Remover momento"
+                            aria-label={`Remover ${item.title}`}
+                            className="p-2 rounded-lg border border-stone-200 dark:border-stone-700 text-stone-400 hover:text-red-600 hover:border-red-200 hover:bg-red-50 dark:hover:bg-red-950/30 cursor-pointer"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                );
+              })
+            )}
           </div>
         </div>
       )}
@@ -939,22 +1595,30 @@ export const CeremonyAndGiftsModule: React.FC<CeremonyAndGiftsModuleProps> = ({
             onSubmit={async (e) => {
               e.preventDefault();
               if (!pName.trim()) return;
-              await addPartyMember(wedding.id, wedding.ownerId, {
-                name: pName,
+              const newMember = {
+                name: pName.trim(),
                 role: pRole,
-                description: pDesc,
+                description: pDesc.trim(),
                 photoUrl: pPhoto,
                 order: party.length + 1,
+              };
+              const createdId = await addPartyMember(wedding.id, wedding.ownerId, newMember);
+              recordAction({
+                kind: 'party_add',
+                label: `Adicionar "${newMember.name}"`,
+                item: { id: createdId, ...newMember },
               });
               setPName('');
               setPDesc('');
               setPPhoto('');
+              showToast(`Adicionado aos padrinhos: ${newMember.name}`);
             }}
-            className="rounded-2xl border border-stone-200 dark:border-stone-800 bg-white dark:bg-[#171A21] p-5 grid grid-cols-1 md:grid-cols-12 gap-3 items-end"
+            className="rounded-2xl border border-stone-200 dark:border-stone-800 bg-white dark:bg-[#171A21] p-4 sm:p-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-3 items-end"
           >
-            <div className="md:col-span-3">
+            <div className="lg:col-span-3 min-w-0">
               <label className="block text-xs text-stone-500 mb-1">Nome</label>
               <input
+                ref={partyNameRef}
                 required
                 maxLength={100}
                 value={pName}
@@ -963,7 +1627,7 @@ export const CeremonyAndGiftsModule: React.FC<CeremonyAndGiftsModuleProps> = ({
                 className="w-full rounded-lg border border-stone-300 dark:border-stone-700 bg-transparent px-3 py-2 text-sm"
               />
             </div>
-            <div className="md:col-span-2">
+            <div className="lg:col-span-2 min-w-0">
               <label className="block text-xs text-stone-500 mb-1">Papel</label>
               <select
                 value={pRole}
@@ -976,7 +1640,7 @@ export const CeremonyAndGiftsModule: React.FC<CeremonyAndGiftsModuleProps> = ({
                 <option value="Pajem">Pajem</option>
               </select>
             </div>
-            <div className="md:col-span-3">
+            <div className="lg:col-span-3 min-w-0">
               <label className="block text-xs text-stone-500 mb-1">Homenagem / Descrição</label>
               <input
                 maxLength={300}
@@ -986,19 +1650,19 @@ export const CeremonyAndGiftsModule: React.FC<CeremonyAndGiftsModuleProps> = ({
                 className="w-full rounded-lg border border-stone-300 dark:border-stone-700 bg-transparent px-3 py-2 text-sm"
               />
             </div>
-            <div className="md:col-span-2">
+            <div className="lg:col-span-2 min-w-0">
               <label className="block text-xs text-stone-500 mb-1">Foto (arquivo)</label>
               <label className="w-full inline-flex items-center justify-center gap-1.5 rounded-lg border border-stone-300 dark:border-stone-700 px-3 py-2 text-xs font-medium cursor-pointer hover:bg-stone-50 dark:hover:bg-stone-800">
-                <Upload className="w-3.5 h-3.5" />
-                <span>{pPhoto ? 'Foto pronta' : 'Escolher foto'}</span>
-                <input type="file" accept="image/*" onChange={handlePartyPhotoUpload} className="hidden" />
+                <Upload className="w-3.5 h-3.5 shrink-0" />
+                <span className="truncate">{pPhoto ? 'Foto pronta' : 'Escolher foto'}</span>
+                <input type="file" accept="image/*" onChange={(e) => handlePartyPhotoUpload(e, 'new')} className="hidden" />
               </label>
             </div>
-            <div className="md:col-span-2">
+            <div className="sm:col-span-2 lg:col-span-2">
               <button
                 type="submit"
                 style={{ backgroundColor: accentColor }}
-                className="w-full py-2 px-3 text-sm font-medium text-white rounded-lg cursor-pointer"
+                className="w-full py-2.5 lg:py-2 px-3 text-sm font-semibold text-white rounded-lg hover:brightness-110 transition-all cursor-pointer"
               >
                 Adicionar
               </button>
@@ -1006,32 +1670,156 @@ export const CeremonyAndGiftsModule: React.FC<CeremonyAndGiftsModuleProps> = ({
           </form>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {party.map((m) => (
-              <div
-                key={m.id}
-                className="rounded-2xl border border-stone-200 dark:border-stone-800 bg-white dark:bg-[#171A21] p-4 flex items-center justify-between gap-3"
-              >
-                <div className="flex items-center gap-3 min-w-0">
-                  <div className="h-12 w-12 rounded-full overflow-hidden shrink-0 border border-stone-200 dark:border-stone-700">
-                    <SafeImage src={m.photoUrl} alt={m.name} className="w-full h-full object-cover" />
-                  </div>
-                  <div className="min-w-0">
-                    <p className="text-xs font-medium" style={{ color: accentColor }}>
-                      {m.role}
-                    </p>
-                    <p className="text-sm font-semibold truncate">{m.name}</p>
-                    {m.description && <p className="text-xs text-stone-500 truncate">{m.description}</p>}
-                  </div>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => deletePartyMember(wedding.id, m.id)}
-                  className="p-1.5 text-stone-400 hover:text-red-600 cursor-pointer"
+            {party.map((m, idx) => {
+              const isEditing = editingPartyId === m.id;
+              const isDragTarget = dragOverPartyId === m.id && dragPartyId !== m.id;
+              return (
+                <div
+                  key={m.id}
+                  draggable={!isEditing}
+                  onDragStart={() => setDragPartyId(m.id)}
+                  onDragOver={(e) => {
+                    e.preventDefault();
+                    if (dragPartyId && dragPartyId !== m.id) setDragOverPartyId(m.id);
+                  }}
+                  onDragLeave={() => setDragOverPartyId(null)}
+                  onDrop={async (e) => {
+                    e.preventDefault();
+                    if (dragPartyId && dragPartyId !== m.id) {
+                      const fromIdx = party.findIndex((p) => p.id === dragPartyId);
+                      if (fromIdx !== -1) await handleMoveParty(fromIdx, idx);
+                    }
+                    setDragPartyId(null);
+                    setDragOverPartyId(null);
+                  }}
+                  onDragEnd={() => {
+                    setDragPartyId(null);
+                    setDragOverPartyId(null);
+                  }}
+                  className={`rounded-2xl border bg-white dark:bg-[#171A21] p-4 flex flex-col justify-between gap-3 transition-all ${
+                    isDragTarget
+                      ? 'border-[#B68B3C] ring-2 ring-[#DFBE7A]/40'
+                      : 'border-stone-200 dark:border-stone-800 hover:border-stone-300 dark:hover:border-stone-700'
+                  }`}
                 >
-                  <Trash2 className="w-4 h-4" />
-                </button>
-              </div>
-            ))}
+                  {isEditing ? (
+                    <div className="space-y-2.5">
+                      <input
+                        maxLength={100}
+                        value={editPName}
+                        onChange={(e) => setEditPName(e.target.value)}
+                        placeholder="Nome"
+                        className="w-full rounded-lg border border-stone-300 dark:border-stone-700 bg-transparent px-2.5 py-1.5 text-sm"
+                      />
+                      <select
+                        value={editPRole}
+                        onChange={(e) => setEditPRole(e.target.value as PartyMember['role'])}
+                        className="w-full rounded-lg border border-stone-300 dark:border-stone-700 bg-white dark:bg-[#171A21] px-2.5 py-1.5 text-xs"
+                      >
+                        <option value="Madrinha">Madrinha</option>
+                        <option value="Padrinho">Padrinho</option>
+                        <option value="Dama de Honra">Dama de Honra</option>
+                        <option value="Pajem">Pajem</option>
+                      </select>
+                      <input
+                        maxLength={300}
+                        value={editPDesc}
+                        onChange={(e) => setEditPDesc(e.target.value)}
+                        placeholder="Homenagem / Descrição"
+                        className="w-full rounded-lg border border-stone-300 dark:border-stone-700 bg-transparent px-2.5 py-1.5 text-xs"
+                      />
+                      <div className="flex items-center justify-between gap-2 pt-1">
+                        <label className="inline-flex items-center gap-1 rounded-lg border border-stone-300 dark:border-stone-700 px-2.5 py-1.5 text-[11px] font-medium cursor-pointer">
+                          <Upload className="w-3 h-3" />
+                          <span>Trocar foto</span>
+                          <input type="file" accept="image/*" onChange={(e) => handlePartyPhotoUpload(e, 'edit')} className="hidden" />
+                        </label>
+                        <div className="flex items-center gap-1.5">
+                          <button
+                            type="button"
+                            onClick={() => setEditingPartyId(null)}
+                            className="p-1.5 rounded-lg border border-stone-300 dark:border-stone-700 text-stone-500 cursor-pointer"
+                            aria-label="Cancelar edição"
+                          >
+                            <X className="w-3.5 h-3.5" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => saveEditParty(m)}
+                            style={{ backgroundColor: accentColor }}
+                            className="inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-xs font-semibold text-white cursor-pointer"
+                          >
+                            <Check className="w-3.5 h-3.5" />
+                            <span>Salvar</span>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    <>
+                      <div className="flex items-center gap-3 min-w-0">
+                        <div className="h-12 w-12 rounded-full overflow-hidden shrink-0 border border-stone-200 dark:border-stone-700">
+                          <SafeImage src={m.photoUrl} alt={m.name} className="w-full h-full object-cover" />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <p className="text-xs font-medium" style={{ color: accentColor }}>
+                            {m.role}
+                          </p>
+                          <p className="text-sm font-semibold truncate">{m.name}</p>
+                          {m.description && (
+                            <p className="text-xs text-stone-500 dark:text-stone-400 line-clamp-2">
+                              {m.description}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="flex items-center justify-between pt-2.5 border-t border-stone-100 dark:border-stone-800">
+                        <div className="flex items-center gap-1">
+                          <button
+                            type="button"
+                            disabled={idx === 0}
+                            onClick={() => handleMoveParty(idx, idx - 1)}
+                            title="Mover para trás"
+                            className="p-1.5 rounded-lg border border-stone-200 dark:border-stone-700 text-stone-500 hover:bg-stone-50 dark:hover:bg-stone-800 disabled:opacity-30 cursor-pointer"
+                          >
+                            <ArrowUp className="w-3.5 h-3.5" />
+                          </button>
+                          <button
+                            type="button"
+                            disabled={idx === party.length - 1}
+                            onClick={() => handleMoveParty(idx, idx + 1)}
+                            title="Mover para frente"
+                            className="p-1.5 rounded-lg border border-stone-200 dark:border-stone-700 text-stone-500 hover:bg-stone-50 dark:hover:bg-stone-800 disabled:opacity-30 cursor-pointer"
+                          >
+                            <ArrowDown className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <button
+                            type="button"
+                            onClick={() => startEditParty(m)}
+                            title="Editar"
+                            className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg border border-stone-200 dark:border-stone-700 text-xs text-stone-600 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-800 cursor-pointer"
+                          >
+                            <Pencil className="w-3 h-3" />
+                            <span>Editar</span>
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteParty(m)}
+                            title="Remover"
+                            className="p-1.5 rounded-lg border border-stone-200 dark:border-stone-700 text-stone-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30 cursor-pointer"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      </div>
+                    </>
+                  )}
+                </div>
+              );
+            })}
           </div>
         </div>
       )}
@@ -1042,20 +1830,29 @@ export const CeremonyAndGiftsModule: React.FC<CeremonyAndGiftsModuleProps> = ({
             onSubmit={async (e) => {
               e.preventDefault();
               if (!gTitle.trim()) return;
-              await addGiftItem(wedding.id, wedding.ownerId, {
-                title: gTitle,
-                category: gCat,
-                price: Number(gPrice) || 100,
-                description: gDesc,
+              const newGift = {
+                title: gTitle.trim(),
+                category: gCat.trim() || 'Lua de Mel',
+                price: Math.max(1, Number(gPrice) || 100),
+                description: gDesc.trim(),
+                active: true,
+              };
+              const createdId = await addGiftItem(wedding.id, wedding.ownerId, newGift);
+              recordAction({
+                kind: 'gift_add',
+                label: `Criar cota "${newGift.title}"`,
+                item: { id: createdId, ...newGift },
               });
               setGTitle('');
               setGDesc('');
+              showToast(`Cota criada: ${newGift.title}`);
             }}
-            className="rounded-2xl border border-stone-200 dark:border-stone-800 bg-white dark:bg-[#171A21] p-5 grid grid-cols-1 md:grid-cols-12 gap-3 items-end"
+            className="rounded-2xl border border-stone-200 dark:border-stone-800 bg-white dark:bg-[#171A21] p-4 sm:p-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-3 items-end"
           >
-            <div className="md:col-span-3">
+            <div className="lg:col-span-3 min-w-0">
               <label className="block text-xs text-stone-500 mb-1">Presente Simbólico</label>
               <input
+                ref={giftTitleRef}
                 required
                 maxLength={120}
                 value={gTitle}
@@ -1064,7 +1861,7 @@ export const CeremonyAndGiftsModule: React.FC<CeremonyAndGiftsModuleProps> = ({
                 className="w-full rounded-lg border border-stone-300 dark:border-stone-700 bg-transparent px-3 py-2 text-sm"
               />
             </div>
-            <div className="md:col-span-2">
+            <div className="lg:col-span-2 min-w-0">
               <label className="block text-xs text-stone-500 mb-1">Categoria</label>
               <input
                 maxLength={60}
@@ -1073,7 +1870,7 @@ export const CeremonyAndGiftsModule: React.FC<CeremonyAndGiftsModuleProps> = ({
                 className="w-full rounded-lg border border-stone-300 dark:border-stone-700 bg-transparent px-3 py-2 text-sm"
               />
             </div>
-            <div className="md:col-span-2">
+            <div className="lg:col-span-2 min-w-0">
               <label className="block text-xs text-stone-500 mb-1">Valor Pix (R$)</label>
               <input
                 type="number"
@@ -1084,7 +1881,7 @@ export const CeremonyAndGiftsModule: React.FC<CeremonyAndGiftsModuleProps> = ({
                 className="w-full rounded-lg border border-stone-300 dark:border-stone-700 bg-transparent px-3 py-2 text-sm font-mono"
               />
             </div>
-            <div className="md:col-span-3">
+            <div className="lg:col-span-3 min-w-0">
               <label className="block text-xs text-stone-500 mb-1">Descrição</label>
               <input
                 maxLength={300}
@@ -1094,11 +1891,11 @@ export const CeremonyAndGiftsModule: React.FC<CeremonyAndGiftsModuleProps> = ({
                 className="w-full rounded-lg border border-stone-300 dark:border-stone-700 bg-transparent px-3 py-2 text-sm"
               />
             </div>
-            <div className="md:col-span-2">
+            <div className="sm:col-span-2 lg:col-span-2">
               <button
                 type="submit"
                 style={{ backgroundColor: accentColor }}
-                className="w-full inline-flex items-center justify-center gap-1.5 py-2 px-3 text-sm font-medium text-white rounded-lg cursor-pointer"
+                className="w-full inline-flex items-center justify-center gap-1.5 py-2.5 lg:py-2 px-3 text-sm font-semibold text-white rounded-lg hover:brightness-110 transition-all cursor-pointer"
               >
                 <Gift className="w-4 h-4" />
                 <span>Criar Cota</span>
@@ -1107,27 +1904,100 @@ export const CeremonyAndGiftsModule: React.FC<CeremonyAndGiftsModuleProps> = ({
           </form>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {gifts.map((g) => (
-              <div
-                key={g.id}
-                className="rounded-2xl border border-stone-200 dark:border-stone-800 bg-white dark:bg-[#171A21] p-4 flex items-start justify-between gap-3"
-              >
-                <div>
-                  <p className="text-xs text-stone-500">{g.category}</p>
-                  <p className="text-sm font-semibold mt-0.5">{g.title}</p>
-                  <p className="font-mono text-sm font-semibold tabular-nums mt-2" style={{ color: accentColor }}>
-                    {formatBRL(g.price)}
-                  </p>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => deleteGiftItem(wedding.id, g.id)}
-                  className="p-1.5 text-stone-400 hover:text-red-600 cursor-pointer"
+            {gifts.map((g) => {
+              const isEditing = editingGiftId === g.id;
+              return (
+                <div
+                  key={g.id}
+                  className="rounded-2xl border border-stone-200 dark:border-stone-800 bg-white dark:bg-[#171A21] p-4 flex flex-col justify-between gap-3"
                 >
-                  <Trash2 className="w-4 h-4" />
-                </button>
-              </div>
-            ))}
+                  {isEditing ? (
+                    <div className="space-y-2.5">
+                      <input
+                        maxLength={120}
+                        value={editGTitle}
+                        onChange={(e) => setEditGTitle(e.target.value)}
+                        placeholder="Título do presente"
+                        className="w-full rounded-lg border border-stone-300 dark:border-stone-700 bg-transparent px-2.5 py-1.5 text-sm"
+                      />
+                      <div className="grid grid-cols-2 gap-2">
+                        <input
+                          maxLength={60}
+                          value={editGCat}
+                          onChange={(e) => setEditGCat(e.target.value)}
+                          placeholder="Categoria"
+                          className="w-full rounded-lg border border-stone-300 dark:border-stone-700 bg-transparent px-2.5 py-1.5 text-xs"
+                        />
+                        <input
+                          type="number"
+                          min={1}
+                          value={editGPrice}
+                          onChange={(e) => setEditGPrice(e.target.value)}
+                          className="w-full rounded-lg border border-stone-300 dark:border-stone-700 bg-transparent px-2.5 py-1.5 text-xs font-mono"
+                        />
+                      </div>
+                      <input
+                        maxLength={300}
+                        value={editGDesc}
+                        onChange={(e) => setEditGDesc(e.target.value)}
+                        placeholder="Descrição"
+                        className="w-full rounded-lg border border-stone-300 dark:border-stone-700 bg-transparent px-2.5 py-1.5 text-xs"
+                      />
+                      <div className="flex justify-end gap-1.5">
+                        <button
+                          type="button"
+                          onClick={() => setEditingGiftId(null)}
+                          className="px-2.5 py-1.5 rounded-lg border border-stone-300 dark:border-stone-700 text-xs cursor-pointer"
+                        >
+                          Cancelar
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => saveEditGift(g)}
+                          style={{ backgroundColor: accentColor }}
+                          className="px-3 py-1.5 rounded-lg text-xs font-semibold text-white cursor-pointer"
+                        >
+                          Salvar
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <>
+                      <div>
+                        <p className="text-xs text-stone-500">{g.category}</p>
+                        <p className="text-sm font-semibold mt-0.5">{g.title}</p>
+                        {g.description && (
+                          <p className="text-xs text-stone-500 dark:text-stone-400 mt-1 line-clamp-2">
+                            {g.description}
+                          </p>
+                        )}
+                        <p className="font-mono text-sm font-semibold tabular-nums mt-2" style={{ color: accentColor }}>
+                          {formatBRL(g.price)}
+                        </p>
+                      </div>
+                      <div className="flex items-center justify-end gap-1.5 pt-2.5 border-t border-stone-100 dark:border-stone-800">
+                        <button
+                          type="button"
+                          onClick={() => startEditGift(g)}
+                          className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg border border-stone-200 dark:border-stone-700 text-xs text-stone-600 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-800 cursor-pointer"
+                        >
+                          <Pencil className="w-3 h-3" />
+                          <span>Editar</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteGift(g)}
+                          className="p-1.5 rounded-lg border border-stone-200 dark:border-stone-700 text-stone-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30 cursor-pointer"
+                          title="Remover cota"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    </>
+                  )}
+                </div>
+              );
+            })}
           </div>
 
           {contributions.length > 0 && (
@@ -1135,7 +2005,7 @@ export const CeremonyAndGiftsModule: React.FC<CeremonyAndGiftsModuleProps> = ({
               <h3 className="text-sm font-semibold mb-3">Presentes Pix Recebidos pelo Site</h3>
               <div className="divide-y divide-stone-100 dark:divide-stone-800">
                 {contributions.map((c) => (
-                  <div key={c.id} className="py-3 flex items-center justify-between gap-4 text-sm">
+                  <div key={c.id} className="py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-sm">
                     <div>
                       <p className="font-medium">
                         {c.guestName} · <span className="text-stone-500">{c.giftTitle}</span>
@@ -1166,6 +2036,66 @@ export const CeremonyAndGiftsModule: React.FC<CeremonyAndGiftsModuleProps> = ({
           )}
         </div>
       )}
+
+      {/* Floating Organizational Action Dock: Desfazer / Refazer / Novo */}
+      <div
+        className="fixed bottom-[74px] lg:bottom-5 left-3 lg:left-auto lg:right-60 z-30 inline-flex items-center gap-1 rounded-full border border-[#DFBE7A]/50 bg-[#173526]/95 backdrop-blur-md text-[#FBF7F0] p-1 shadow-xl"
+        aria-label="Ações rápidas de organização"
+      >
+        <button
+          type="button"
+          onClick={handleUndo}
+          disabled={historyBusy || undoStack.length === 0}
+          title={
+            undoStack.length > 0
+              ? `Desfazer: ${undoStack[undoStack.length - 1].label}`
+              : 'Nada para desfazer'
+          }
+          className="inline-flex items-center gap-1.5 rounded-full px-3 py-2 text-xs font-semibold transition-colors hover:bg-white/10 disabled:opacity-40 cursor-pointer"
+        >
+          <Undo2 className="w-3.5 h-3.5 text-[#DFBE7A]" />
+          <span className="hidden sm:inline">Desfazer</span>
+          {undoStack.length > 0 && (
+            <span className="font-mono text-[10px] rounded-full bg-[#DFBE7A]/20 text-[#DFBE7A] px-1.5">
+              {undoStack.length}
+            </span>
+          )}
+        </button>
+
+        <span className="h-4 w-px bg-white/15" aria-hidden="true" />
+
+        <button
+          type="button"
+          onClick={handleRedo}
+          disabled={historyBusy || redoStack.length === 0}
+          title={
+            redoStack.length > 0
+              ? `Refazer: ${redoStack[redoStack.length - 1].label}`
+              : 'Nada para refazer'
+          }
+          className="inline-flex items-center gap-1.5 rounded-full px-3 py-2 text-xs font-semibold transition-colors hover:bg-white/10 disabled:opacity-40 cursor-pointer"
+        >
+          <Redo2 className="w-3.5 h-3.5 text-[#DFBE7A]" />
+          <span className="hidden sm:inline">Refazer</span>
+          {redoStack.length > 0 && (
+            <span className="font-mono text-[10px] rounded-full bg-[#DFBE7A]/20 text-[#DFBE7A] px-1.5">
+              {redoStack.length}
+            </span>
+          )}
+        </button>
+
+        <span className="h-4 w-px bg-white/15" aria-hidden="true" />
+
+        <button
+          type="button"
+          onClick={focusQuickAdd}
+          title="Adicionar novo item"
+          className="inline-flex items-center gap-1 rounded-full bg-[#DFBE7A] text-[#173526] hover:bg-[#EBD198] px-3 py-2 text-xs font-semibold transition-colors cursor-pointer"
+        >
+          <Plus className="w-3.5 h-3.5" />
+          <span className="hidden sm:inline">Novo</span>
+        </button>
+      </div>
     </div>
   );
 };

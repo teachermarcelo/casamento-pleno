@@ -3,6 +3,7 @@ import {
   ArrowLeft,
   Check,
   CheckCircle2,
+  Copy,
   CreditCard,
   Database,
   Download,
@@ -10,6 +11,7 @@ import {
   Eye,
   MessageSquare,
   Plus,
+  RefreshCw,
   Search,
   Send,
   Settings2,
@@ -77,9 +79,13 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
     configured: boolean;
     hasPublicKey: boolean;
     hasWebhookSecret: boolean;
+    environment?: 'unconfigured' | 'sandbox' | 'production';
     webhookEndpoint: string;
     checkoutEndpoint: string;
+    liveCheck?: { ok: boolean; accountName?: string; siteId?: string; error?: string };
   } | null>(null);
+  const [testingMp, setTestingMp] = useState(false);
+  const [copiedWebhook, setCopiedWebhook] = useState(false);
 
   // CRM filters & inline notes
   const [leadFilter, setLeadFilter] = useState<LeadFilter>('all');
@@ -175,6 +181,45 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
       setShowAddLead(false);
     } finally {
       setCreatingLead(false);
+    }
+  };
+
+  const handleTestMercadoPago = async () => {
+    setTestingMp(true);
+    try {
+      const res = await fetch('/api/payments/mercadopago/status?verify=1');
+      if (res.ok) {
+        const data = await res.json();
+        setMpStatus(data);
+      } else {
+        setMpStatus({
+          configured: false,
+          hasPublicKey: false,
+          hasWebhookSecret: false,
+          environment: 'unconfigured',
+          webhookEndpoint: `${window.location.origin}/api/payments/mercadopago/webhook`,
+          checkoutEndpoint: '/api/payments/mercadopago/create-subscription',
+          liveCheck: {
+            ok: false,
+            error: 'Rota /api/payments/mercadopago/status indisponível. Faça redeploy na Vercel para ativar as Serverless Functions.',
+          },
+        });
+      }
+    } catch {
+      setMpStatus({
+        configured: false,
+        hasPublicKey: false,
+        hasWebhookSecret: false,
+        environment: 'unconfigured',
+        webhookEndpoint: `${window.location.origin}/api/payments/mercadopago/webhook`,
+        checkoutEndpoint: '/api/payments/mercadopago/create-subscription',
+        liveCheck: {
+          ok: false,
+          error: 'Não foi possível contactar a API do servidor.',
+        },
+      });
+    } finally {
+      setTestingMp(false);
     }
   };
 
@@ -966,36 +1011,114 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                 </div>
               </div>
 
-              <div className="rounded-2xl border border-stone-200 dark:border-stone-800 bg-white dark:bg-[#171A21] p-6 space-y-3">
-                <div className="flex items-center justify-between gap-2">
+              <div className="rounded-2xl border border-stone-200 dark:border-stone-800 bg-white dark:bg-[#171A21] p-6 space-y-4">
+                <div className="flex flex-wrap items-center justify-between gap-2">
                   <div className="flex items-center gap-2 text-sm font-semibold">
-                    <CreditCard className="w-4 h-4 text-stone-700 dark:text-stone-300" />
+                    <CreditCard className="w-4 h-4 text-emerald-700 dark:text-emerald-400" />
                     <span>Integração Mercado Pago (R$ 39,90/mês)</span>
                   </div>
                   <span
-                    className={`text-xs font-semibold ${
+                    className={`rounded-full px-2.5 py-0.5 text-[11px] font-semibold ${
                       mpStatus?.configured
-                        ? 'text-emerald-700 dark:text-emerald-400'
-                        : 'text-amber-700 dark:text-amber-400'
+                        ? mpStatus.environment === 'sandbox'
+                          ? 'bg-sky-100 text-sky-800 dark:bg-sky-950/60 dark:text-sky-300'
+                          : 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300'
+                        : 'bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300'
                     }`}
                   >
-                    {mpStatus?.configured ? 'Produção Ativa' : 'Pronto para Credenciais'}
+                    {mpStatus?.configured
+                      ? mpStatus.environment === 'sandbox'
+                        ? 'Modo Teste (Sandbox)'
+                        : 'Produção Ativa'
+                      : 'Aguardando Credenciais'}
                   </span>
                 </div>
-                <div className="space-y-1.5 text-xs text-stone-600 dark:text-stone-400">
-                  <p>
-                    Para ativar cobranças reais, adicione nos <strong>Secrets</strong> do projeto:
-                    <span className="font-mono block mt-1 text-stone-800 dark:text-stone-200">
-                      MERCADO_PAGO_ACCESS_TOKEN · MERCADO_PAGO_PUBLIC_KEY · MERCADO_PAGO_WEBHOOK_SECRET
-                    </span>
-                  </p>
-                  <p>
-                    Webhook URL:{' '}
-                    <code className="font-mono text-stone-800 dark:text-stone-200 break-all">
-                      {mpStatus?.webhookEndpoint || '/api/payments/mercadopago/webhook'}
-                    </code>
+
+                {/* Status Checklist for the 3 env vars */}
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-[11px]">
+                  {[
+                    { key: 'MERCADO_PAGO_ACCESS_TOKEN', ok: Boolean(mpStatus?.configured) },
+                    { key: 'MERCADO_PAGO_PUBLIC_KEY', ok: Boolean(mpStatus?.hasPublicKey) },
+                    { key: 'MERCADO_PAGO_WEBHOOK_SECRET', ok: Boolean(mpStatus?.hasWebhookSecret) },
+                  ].map((item) => (
+                    <div
+                      key={item.key}
+                      className={`rounded-xl border px-3 py-2 flex items-center justify-between gap-2 ${
+                        item.ok
+                          ? 'border-emerald-200 dark:border-emerald-900/60 bg-emerald-50/70 dark:bg-emerald-950/20 text-emerald-800 dark:text-emerald-300'
+                          : 'border-stone-200 dark:border-stone-800 bg-stone-50 dark:bg-stone-900/50 text-stone-600 dark:text-stone-400'
+                      }`}
+                    >
+                      <span className="font-mono truncate" title={item.key}>
+                        {item.key.replace('MERCADO_PAGO_', '')}
+                      </span>
+                      <span className="font-semibold shrink-0">{item.ok ? 'OK' : 'Falta'}</span>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Webhook URL + 1-click Copy */}
+                <div className="space-y-1.5 text-xs">
+                  <p className="text-stone-500">URL do Webhook para colar no Painel Mercado Pago Developers:</p>
+                  <div className="flex flex-col sm:flex-row gap-2">
+                    <input
+                      type="text"
+                      readOnly
+                      value={
+                        mpStatus?.webhookEndpoint && mpStatus.webhookEndpoint.startsWith('http')
+                          ? mpStatus.webhookEndpoint
+                          : `${typeof window !== 'undefined' ? window.location.origin : ''}/api/payments/mercadopago/webhook`
+                      }
+                      className="flex-1 rounded-lg border border-stone-300 dark:border-stone-700 bg-stone-50 dark:bg-[#0F1115] px-3 py-1.5 font-mono text-[11px]"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const url =
+                          mpStatus?.webhookEndpoint && mpStatus.webhookEndpoint.startsWith('http')
+                            ? mpStatus.webhookEndpoint
+                            : `${window.location.origin}/api/payments/mercadopago/webhook`;
+                        navigator.clipboard?.writeText(url);
+                        setCopiedWebhook(true);
+                        setTimeout(() => setCopiedWebhook(false), 2000);
+                      }}
+                      className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-stone-300 dark:border-stone-700 px-3 py-1.5 text-xs font-medium hover:bg-stone-50 dark:hover:bg-stone-800 cursor-pointer shrink-0"
+                    >
+                      {copiedWebhook ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
+                      <span>{copiedWebhook ? 'Copiado' : 'Copiar Webhook'}</span>
+                    </button>
+                  </div>
+                </div>
+
+                {/* Live Connection Verification */}
+                <div className="flex flex-wrap items-center justify-between gap-2 pt-1">
+                  <button
+                    type="button"
+                    onClick={handleTestMercadoPago}
+                    disabled={testingMp}
+                    className="inline-flex items-center gap-1.5 rounded-xl bg-[#173526] hover:bg-[#10261B] text-[#FBF2DC] border border-[#DFBE7A]/40 px-4 py-2 text-xs font-semibold cursor-pointer disabled:opacity-60"
+                  >
+                    <RefreshCw className={`w-3.5 h-3.5 text-[#DFBE7A] ${testingMp ? 'animate-spin' : ''}`} />
+                    <span>{testingMp ? 'Verificando no servidor...' : 'Testar Conexão Mercado Pago'}</span>
+                  </button>
+                  <p className="text-[11px] text-stone-500">
+                    Configure as 3 chaves em <strong>Vercel → Settings → Environment Variables</strong>.
                   </p>
                 </div>
+
+                {mpStatus?.liveCheck && (
+                  <div
+                    className={`rounded-xl border px-3.5 py-2.5 text-xs ${
+                      mpStatus.liveCheck.ok
+                        ? 'border-emerald-200 dark:border-emerald-900 bg-emerald-50 dark:bg-emerald-950/30 text-emerald-800 dark:text-emerald-300'
+                        : 'border-amber-200 dark:border-amber-900 bg-amber-50 dark:bg-amber-950/30 text-amber-900 dark:text-amber-300'
+                    }`}
+                  >
+                    {mpStatus.liveCheck.ok
+                      ? `Conexão confirmada com a conta Mercado Pago: ${mpStatus.liveCheck.accountName} (${mpStatus.liveCheck.siteId}). Pix e Cartão prontos!`
+                      : mpStatus.liveCheck.error}
+                  </div>
+                )}
               </div>
             </div>
           </div>

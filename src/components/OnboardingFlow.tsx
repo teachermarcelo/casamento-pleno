@@ -37,6 +37,7 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
     mode: string;
     referenceId: string;
     pixCopyPaste?: string;
+    pixQrBase64?: string;
     initPoint?: string;
     message?: string;
   } | null>(null);
@@ -192,9 +193,9 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
         </div>
       </header>
 
-      <main className="mx-auto max-w-5xl px-6 py-10">
+      <main className="mx-auto max-w-5xl px-4 sm:px-6 py-6 sm:py-10">
         {/* Progress Steps */}
-        <div className="flex items-center gap-4 text-xs font-medium text-stone-500 dark:text-stone-400 mb-8">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-xs font-medium text-stone-500 dark:text-stone-400 mb-6 sm:mb-8">
           <span className={step === 'checkout' ? 'text-stone-900 dark:text-stone-100 font-semibold' : ''}>
             01. Assinatura Mercado Pago ({formatBRL(SUBSCRIPTION_PRICE)}/mês)
           </span>
@@ -205,16 +206,16 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
         </div>
 
         {step === 'checkout' ? (
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-            <div className="lg:col-span-7 rounded-2xl border border-stone-200 dark:border-stone-800 bg-white dark:bg-[#171A21] p-7">
-              <h1 className="font-editorial text-3xl font-semibold">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8">
+            <div className="lg:col-span-7 rounded-2xl border border-stone-200 dark:border-stone-800 bg-white dark:bg-[#171A21] p-5 sm:p-7">
+              <h1 className="font-editorial text-2xl sm:text-3xl font-semibold">
                 Ative sua assinatura Casamento Pleno
               </h1>
               <p className="mt-2 text-sm text-stone-600 dark:text-stone-400">
                 Escolha como deseja pagar via Mercado Pago. A estrutura já está preparada para produção com recorrência mensal e Pix instantâneo.
               </p>
 
-              <div className="mt-6 grid grid-cols-2 gap-3">
+              <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <button
                   type="button"
                   onClick={() => {
@@ -301,12 +302,25 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
                     </p>
                   )}
 
+                  {checkoutResult.pixQrBase64 && (
+                    <div className="flex flex-col items-center gap-2 rounded-xl bg-white p-4 border border-stone-200">
+                      <img
+                        src={`data:image/png;base64,${checkoutResult.pixQrBase64}`}
+                        alt="QR Code Pix Mercado Pago"
+                        className="h-44 w-44 object-contain"
+                      />
+                      <p className="text-[11px] text-stone-600">
+                        Escaneie com o app do seu banco para pagar via Pix
+                      </p>
+                    </div>
+                  )}
+
                   {checkoutResult.pixCopyPaste && (
                     <div>
                       <label className="block text-xs font-medium text-stone-600 dark:text-stone-400 mb-1.5">
                         Pix Copia e Cola ({formatBRL(SUBSCRIPTION_PRICE)})
                       </label>
-                      <div className="flex gap-2">
+                      <div className="flex flex-col sm:flex-row gap-2">
                         <input
                           type="text"
                           readOnly
@@ -320,7 +334,7 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
                             setCopiedPix(true);
                             setTimeout(() => setCopiedPix(false), 2000);
                           }}
-                          className="inline-flex items-center gap-1.5 rounded-lg border border-stone-300 dark:border-stone-700 bg-white dark:bg-[#171A21] px-3 py-2 text-xs font-medium cursor-pointer"
+                          className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-stone-300 dark:border-stone-700 bg-white dark:bg-[#171A21] px-3 py-2 text-xs font-medium cursor-pointer"
                         >
                           {copiedPix ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
                           <span>{copiedPix ? 'Copiado' : 'Copiar'}</span>

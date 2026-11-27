@@ -1053,9 +1053,9 @@ export async function deleteVendor(weddingId: string, vendorId: string, linkedEx
 export async function addScheduleItem(
   weddingId: string,
   ownerId: string,
-  data: { time: string; title: string; description?: string; location?: string; order: number }
-): Promise<void> {
-  const id = newId('sch');
+  data: { id?: string; time: string; title: string; description?: string; location?: string; order: number }
+): Promise<string> {
+  const id = data.id ? sanitizeString(data.id, 128) : newId('sch');
   const path = `weddings/${weddingId}/schedule/${id}`;
   try {
     await setDoc(doc(db, `weddings/${weddingId}/schedule`, id), {
@@ -1069,9 +1069,35 @@ export async function addScheduleItem(
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
     });
+    return id;
   } catch (error) {
     handleFirestoreError(error, OperationType.CREATE, path);
   }
+}
+
+export async function updateScheduleItem(
+  weddingId: string,
+  itemId: string,
+  updates: Partial<Pick<ScheduleItem, 'time' | 'title' | 'description' | 'location' | 'order'>>
+): Promise<void> {
+  const path = `weddings/${weddingId}/schedule/${itemId}`;
+  try {
+    const clean: Record<string, unknown> = { updatedAt: serverTimestamp() };
+    if (updates.time !== undefined) clean.time = sanitizeString(updates.time, 10);
+    if (updates.title !== undefined) clean.title = sanitizeString(updates.title, 120);
+    if (updates.description !== undefined) clean.description = sanitizeString(updates.description, 300);
+    if (updates.location !== undefined) clean.location = sanitizeString(updates.location, 120);
+    if (updates.order !== undefined) clean.order = Math.min(200, Math.max(0, Number(updates.order) || 0));
+    await updateDoc(doc(db, `weddings/${weddingId}/schedule`, itemId), clean);
+  } catch (error) {
+    handleFirestoreError(error, OperationType.UPDATE, path);
+  }
+}
+
+export async function reorderScheduleItems(weddingId: string, orderedIds: string[]): Promise<void> {
+  await Promise.all(
+    orderedIds.map((id, idx) => updateScheduleItem(weddingId, id, { order: idx + 1 }))
+  );
 }
 
 export async function deleteScheduleItem(weddingId: string, itemId: string): Promise<void> {
@@ -1086,9 +1112,9 @@ export async function deleteScheduleItem(weddingId: string, itemId: string): Pro
 export async function addPartyMember(
   weddingId: string,
   ownerId: string,
-  data: { name: string; role: PartyMember['role']; description?: string; photoUrl?: string; order: number }
-): Promise<void> {
-  const id = newId('prt');
+  data: { id?: string; name: string; role: PartyMember['role']; description?: string; photoUrl?: string; order: number }
+): Promise<string> {
+  const id = data.id ? sanitizeString(data.id, 128) : newId('prt');
   const path = `weddings/${weddingId}/party/${id}`;
   try {
     await setDoc(doc(db, `weddings/${weddingId}/party`, id), {
@@ -1105,9 +1131,35 @@ export async function addPartyMember(
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
     });
+    return id;
   } catch (error) {
     handleFirestoreError(error, OperationType.CREATE, path);
   }
+}
+
+export async function updatePartyMember(
+  weddingId: string,
+  memberId: string,
+  updates: Partial<Pick<PartyMember, 'name' | 'role' | 'description' | 'photoUrl' | 'order'>>
+): Promise<void> {
+  const path = `weddings/${weddingId}/party/${memberId}`;
+  try {
+    const clean: Record<string, unknown> = { updatedAt: serverTimestamp() };
+    if (updates.name !== undefined) clean.name = sanitizeString(updates.name, 100);
+    if (updates.role !== undefined) clean.role = updates.role;
+    if (updates.description !== undefined) clean.description = sanitizeString(updates.description, 300);
+    if (updates.photoUrl !== undefined) clean.photoUrl = sanitizeString(updates.photoUrl, 180000);
+    if (updates.order !== undefined) clean.order = Math.min(100, Math.max(0, Number(updates.order) || 0));
+    await updateDoc(doc(db, `weddings/${weddingId}/party`, memberId), clean);
+  } catch (error) {
+    handleFirestoreError(error, OperationType.UPDATE, path);
+  }
+}
+
+export async function reorderPartyMembers(weddingId: string, orderedIds: string[]): Promise<void> {
+  await Promise.all(
+    orderedIds.map((id, idx) => updatePartyMember(weddingId, id, { order: idx + 1 }))
+  );
 }
 
 export async function deletePartyMember(weddingId: string, memberId: string): Promise<void> {
@@ -1122,9 +1174,9 @@ export async function deletePartyMember(weddingId: string, memberId: string): Pr
 export async function addGiftItem(
   weddingId: string,
   ownerId: string,
-  data: { title: string; category: string; price: number; description?: string }
-): Promise<void> {
-  const id = newId('gft');
+  data: { id?: string; title: string; category: string; price: number; description?: string; active?: boolean }
+): Promise<string> {
+  const id = data.id ? sanitizeString(data.id, 128) : newId('gft');
   const path = `weddings/${weddingId}/gifts/${id}`;
   try {
     await setDoc(doc(db, `weddings/${weddingId}/gifts`, id), {
@@ -1135,12 +1187,32 @@ export async function addGiftItem(
       price: Math.min(500000, Math.max(1, Number(data.price) || 100)),
       description: sanitizeString(data.description || '', 300),
       purchasedCount: 0,
-      active: true,
+      active: data.active !== false,
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
     });
+    return id;
   } catch (error) {
     handleFirestoreError(error, OperationType.CREATE, path);
+  }
+}
+
+export async function updateGiftItem(
+  weddingId: string,
+  giftId: string,
+  updates: Partial<Pick<GiftItem, 'title' | 'category' | 'price' | 'description' | 'active'>>
+): Promise<void> {
+  const path = `weddings/${weddingId}/gifts/${giftId}`;
+  try {
+    const clean: Record<string, unknown> = { updatedAt: serverTimestamp() };
+    if (updates.title !== undefined) clean.title = sanitizeString(updates.title, 120);
+    if (updates.category !== undefined) clean.category = sanitizeString(updates.category, 60);
+    if (updates.price !== undefined) clean.price = Math.min(500000, Math.max(1, Number(updates.price) || 100));
+    if (updates.description !== undefined) clean.description = sanitizeString(updates.description, 300);
+    if (updates.active !== undefined) clean.active = Boolean(updates.active);
+    await updateDoc(doc(db, `weddings/${weddingId}/gifts`, giftId), clean);
+  } catch (error) {
+    handleFirestoreError(error, OperationType.UPDATE, path);
   }
 }
 

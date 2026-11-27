@@ -85,21 +85,63 @@ async function startServer() {
   });
 
   // Mercado Pago integration readiness status (never exposes secret values)
-  app.get('/api/payments/mercadopago/status', (_req, res) => {
-    const hasAccessToken = Boolean(process.env.MERCADO_PAGO_ACCESS_TOKEN?.trim());
+  app.get('/api/payments/mercadopago/status', async (req, res) => {
+    const accessToken = process.env.MERCADO_PAGO_ACCESS_TOKEN?.trim() || '';
+    const hasAccessToken = Boolean(accessToken);
     const hasPublicKey = Boolean(process.env.MERCADO_PAGO_PUBLIC_KEY?.trim());
     const hasWebhookSecret = Boolean(process.env.MERCADO_PAGO_WEBHOOK_SECRET?.trim());
+    const environment = !hasAccessToken
+      ? 'unconfigured'
+      : accessToken.startsWith('TEST-')
+      ? 'sandbox'
+      : 'production';
     const appUrl = process.env.APP_URL || '';
+
+    let liveCheck: { ok: boolean; accountName?: string; siteId?: string; error?: string } | undefined;
+    if (req.query.verify === '1') {
+      if (!hasAccessToken) {
+        liveCheck = {
+          ok: false,
+          error: 'Variável MERCADO_PAGO_ACCESS_TOKEN ainda não configurada no servidor.',
+        };
+      } else {
+        try {
+          const mpRes = await fetch('https://api.mercadopago.com/users/me', {
+            headers: { Authorization: `Bearer ${accessToken}` },
+          });
+          if (mpRes.ok) {
+            const data = (await mpRes.json()) as Record<string, unknown>;
+            liveCheck = {
+              ok: true,
+              accountName: String(data.nickname || data.first_name || 'Conta Mercado Pago'),
+              siteId: String(data.site_id || 'MLB'),
+            };
+          } else {
+            liveCheck = {
+              ok: false,
+              error: `Mercado Pago retornou status ${mpRes.status}. Verifique se o Access Token está válido.`,
+            };
+          }
+        } catch {
+          liveCheck = {
+            ok: false,
+            error: 'Falha ao conectar na API do Mercado Pago.',
+          };
+        }
+      }
+    }
 
     res.json({
       configured: hasAccessToken,
       hasPublicKey,
       hasWebhookSecret,
+      environment,
       planPrice: PLAN_PRICE_BRL,
       currency: 'BRL',
       billingCycle: 'monthly',
       webhookEndpoint: appUrl ? `${appUrl.replace(/\/$/, '')}/api/payments/mercadopago/webhook` : '/api/payments/mercadopago/webhook',
       checkoutEndpoint: '/api/payments/mercadopago/create-subscription',
+      liveCheck,
     });
   });
 
